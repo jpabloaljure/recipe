@@ -14,7 +14,7 @@ cooking videos (Shorts). Every video in the feed comes with an easy recipe
 |---|---|
 | **Name** | TBD (working title "Easy Recipes from YouTube"; PRD §12) |
 | **Author** | TBD |
-| **Repository** | Local git repository (branch `main`); GitHub remote TBD |
+| **Repository** | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe) (branch `main`) |
 | **Deployed URL** | TBD |
 | **PRD status** | Draft v0.1, 2026-11-14 |
 | **Platform** | Web app, mobile-first, desktop supported |
