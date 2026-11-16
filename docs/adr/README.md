@@ -12,6 +12,7 @@ folder. Diagrams live in [`../architecture/`](../architecture/README.md).
 | [0003](0003-postgres-neon-drizzle.md) | Postgres on Neon with Drizzle ORM | Accepted | 2026-11-15 |
 | [0004](0004-ingestion-on-github-actions.md) | Daily ingestion as a TypeScript script on GitHub Actions | Accepted | 2026-11-15 |
 | [0005](0005-single-package-repository-layout.md) | Single-package repository layout | Accepted | 2026-11-16 |
+| [0006](0006-playwright-end-to-end-tests.md) | Playwright for end-to-end tests | Accepted | 2026-11-16 |
 
 ## Pending decisions
 

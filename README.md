@@ -123,6 +123,8 @@ C4Container
 | [0002](docs/adr/0002-nextjs-on-vercel.md) | Next.js (App Router) on Vercel for the web app and API |
 | [0003](docs/adr/0003-postgres-neon-drizzle.md) | Postgres on Neon with Drizzle ORM |
 | [0004](docs/adr/0004-ingestion-on-github-actions.md) | Daily ingestion as a TypeScript script on GitHub Actions |
+| [0005](docs/adr/0005-single-package-repository-layout.md) | Single-package repository layout |
+| [0006](docs/adr/0006-playwright-end-to-end-tests.md) | Playwright for end-to-end tests (Chromium only) |
 
 Pending decisions (LLM provider, captions source, favorites recipe copy) are
 listed in [docs/adr/README.md](docs/adr/README.md#pending-decisions).
@@ -138,7 +140,7 @@ listed in [docs/adr/README.md](docs/adr/README.md#pending-decisions).
 | Data access + migrations | Drizzle ORM |
 | Daily ingestion | Node TypeScript script on a GitHub Actions schedule |
 | Hosting + CDN | Vercel |
-| Package manager / tests | pnpm, Vitest |
+| Package manager / tests | pnpm, Vitest (unit), Playwright (end-to-end, Chromium) |
 | LLM provider | TBD |
 
 Constraints from the PRD:
@@ -264,6 +266,17 @@ pnpm test         # unit tests (Vitest)
 pnpm typecheck    # TypeScript strict check
 pnpm build        # production build
 ```
+
+End-to-end tests (Playwright, Chromium only; rules in `AGENTS.md`):
+
+```bash
+pnpm exec playwright install chromium   # once: download the test browser
+pnpm test:e2e                           # build, start and test on 3 screen sizes
+pnpm test:e2e --grep @smoke             # smoke test only
+```
+
+`pnpm test:e2e` reuses a server already running on port 3000; stop
+`pnpm dev` first so the tests run against the production build.
 
 The app is a placeholder page for now. No database or environment variables
 are needed yet.

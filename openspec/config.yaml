@@ -15,6 +15,7 @@ rules:
     - Check existing ADRs in docs/adr/ and do not contradict an Accepted ADR without proposing a new ADR that supersedes it
   tasks:
     - When the design names ADRs or C4 updates, include a task to write each ADR with the write-adr skill and a task to update each affected C4 diagram, in the same group as the work they document
+    - For each spec scenario, include an E2E test task in the same group as the work it tests, or list the scenario as a manual check with the reason (AGENTS.md "End-to-end (E2E) test rules")
 
 # Project context (optional)
 # Add only constraints that should guide OpenSpec artifacts and workflows.
