@@ -1,0 +1,48 @@
+schema: spec-driven
+
+context: |
+  Product backlog lives in backlog/E*.md (see AGENTS.md). A backlog story
+  (## REC-<NNN>) whose Flags contain needs-human-validation is not approved:
+  never create or update a change, proposal, spec, design or tasks from it.
+  Stop and tell the user the story needs human validation and an Estimate
+  first.
+
+rules:
+  proposal:
+    - Name the backlog story IDs (REC-<NNN>) the change implements, and confirm none of them is flagged needs-human-validation before writing
+  design:
+    - If the design makes an architecture decision (framework, service, database, hosting, external API, or a structural pattern), name the ADR(s) to write in docs/adr/ and the C4 levels to update in docs/architecture/c4/
+    - Check existing ADRs in docs/adr/ and do not contradict an Accepted ADR without proposing a new ADR that supersedes it
+  tasks:
+    - When the design names ADRs or C4 updates, include a task to write each ADR with the write-adr skill and a task to update each affected C4 diagram, in the same group as the work they document
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

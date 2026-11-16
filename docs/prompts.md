@@ -1,0 +1,456 @@
+# Prompts
+
+Prompts used in this session to align the agent setup with `docs/PRD.md`, in
+order. They are copied exactly as typed. Answers given through question dialogs
+or buttons are marked as such.
+
+## 0. Setup before prompting
+
+Done by hand before the first prompt:
+
+1. **PRD:** wrote the product requirements in `docs/PRD.md` (Easy Recipes from
+   YouTube, MVP draft).
+2. **OpenSpec:** installed OpenSpec in the repo, which created `openspec/` and
+   the `openspec-*` skills.
+3. **AGENTS.md:** copied in from an earlier project (FlowSync).
+4. **Hook:** copied in `validate-ac.sh`, a guard that blocks closing a story
+   without Given/When/Then acceptance criteria.
+5. **Two skills**, copied in from the same earlier project:
+   - `SKILL.md`: `decompose-prd`, which breaks a PRD into epics and user
+     stories.
+   - `SKILL 2.md`: `estimate-story`, which estimates a user story.
+
+The copied files still described the earlier project (FlowSync, Linear,
+Spanish), so the prompts below adapt them to this PRD.
+
+## 1. Review the decompose-prd skill against the PRD
+
+```
+/openspec-explore Lets check this @SKILL.md and review every asumption is there that does not align with PRD
+```
+
+## 2. Direction for the fixes (button answer)
+
+```
+Recipe-specific
+```
+
+## 3. Start with AGENTS.md
+
+```
+lets go by steps, lets focus on AGENTS.md aske the questions you need to fixit for this project
+```
+
+Answers in the question dialog:
+
+- Modules: `7 modules (Recommended)`
+- Linear: `im not using linear. i need you to sugest a file sistem to hold the backlog here for now.`
+- Stack: `Remove, mark TBD (Recommended)`
+- Hook and symlink: `Keep both, add later`
+
+## 4. Language
+
+```
+language is english
+```
+
+Answers in the question dialog:
+
+- Backlog layout: `on file per epic`
+- Type label for launch work: `Use type:spike`
+
+## 5. Write AGENTS.md
+
+```
+write agent.
+```
+
+## 6. Create the CLAUDE.md symlink
+
+```
+create the symlink CLAUDE.md
+```
+
+## 7. Review the validate-ac hook
+
+```
+@validate-ac.sh this is the validate, pleace review if the hooke mace sence for this proyect.
+```
+
+## 8. Rewrite the hook (button answer)
+
+```
+Yes, rewrite it
+```
+
+## 9. Update the decompose-prd skill (button answer)
+
+```
+Yes, SKILL.md next
+```
+
+## 10. Fix the estimation skill and install both skills
+
+```
+fix Skil 2 and call it estimate-srory. move both to be able to work.
+```
+
+## 11. Run decompose-prd on the PRD (button answer)
+
+```
+Yes, run it
+```
+
+## 12. Add a general rule for acceptance criteria (BDD)
+
+````
+Add this as a general rule for AC and BDD "
+
+One behavior per scenario, kept short. Each acceptance-criteria scenario has exactly one `Given`, one `When` and one `Then`.
+
+* `Given`: at most two `And`/`But` steps after it (three preconditions at most).
+* `When`: no `And`/`But` after it. It’s one action, written as what the user achieves (`When I save the recipe`), not each click.
+* `Then`: at most two `And`/`But` steps after it (three results at most), all coming from the same action.
+* Preconditions go under `Given`, even if they’re actions the user took earlier.
+* If a scenario needs a second action or more steps than this allows, split it into separate scenarios.
+* If a story’s acceptance criteria keep breaking these limits, flag the story `needs-splitting`.
+
+Quick test: if you can’t name the scenario as one behavior without using “and,” split it.
+
+"
+````
+
+## 13. Split the scenarios that break the rule (button answer)
+
+```
+Yes, split them
+```
+
+## 14. Move the comment scenarios to a new story
+
+```
+"comment scenario is now three" move to a new story
+```
+
+### Summary (prompts 12–14)
+
+- **Goal:** make every acceptance-criteria scenario describe one short behavior, and bring the saved backlog in line with that rule.
+- **Changes:**
+  - `AGENTS.md`: new "Acceptance criteria (BDD) rules" section.
+  - `.agents/skills/decompose-prd/SKILL.md` and `backlog/README.md`: point to the rule.
+  - `backlog/E02-recipe-every-video.md`: REC-006 layout scenario split in two; REC-008's comment scenarios moved to a new story, REC-017.
+  - `backlog/E04-launch-readiness.md`: REC-016 also blocked by REC-017.
+  - `backlog/README.md`: next free ID is REC-018.
+- **Result:** every story has 3–5 single-behavior scenarios, and no story is flagged `needs-splitting`. E02 now has 6 stories, one over the skill's cap of 5, by choice.
+
+## 15. Require human validation and an estimate before a story can start
+
+```
+Now add a restriction for user story validation, if the flag needs-human-validation is present it can not be started or used on open spec and can not be moved to in progres. to be validated by human also have to be estimated.
+```
+
+Answers in the question dialog:
+
+- Flag scope: `All AI-generated (Recommended)`
+- What counts as estimated: `New Estimate line (Recommended)`
+- Enforcement: `Enforce in hook (Recommended)`
+
+### Summary (prompt 15)
+
+- **Goal:** no AI-generated story can be started or turned into an OpenSpec change until a human validates it, and validation requires an agreed estimate.
+- **Changes:**
+  - `AGENTS.md`, `backlog/README.md`: new `needs-human-validation` flag and `**Estimate:**` field, with the rule.
+  - `.agents/skills/decompose-prd/SKILL.md`: new stories get the flag and `Estimate: —`.
+  - `.agents/skills/estimate-story/SKILL.md`: sets `Estimate` only to the team-agreed size; never removes the flag on its own.
+  - `openspec/config.yaml`: context and proposal rule forbidding changes from flagged stories.
+  - `.claude/hooks/validate-ac.sh`: blocks flagged stories from `in-progress`/`done`, and blocks removing the flag without a valid `Estimate`.
+  - `backlog/E01`–`E04`: all 17 stories flagged, with `Estimate: —`.
+- **Result:** the hook passed 8 test cases, and all 17 stories are locked until a human validates and estimates each one. Who removes the flag, and OpenSpec use, rely on the written rules, not the hook.
+
+## 16. Write the project README
+
+```
+Evaluate and remake the readme to cover what is in this project any thing that is not defined but is missing leav it as TBD.
+```
+
+### Summary (prompt 16)
+
+- **Goal:** a root README that covers everything the project defines, with undefined parts marked TBD.
+- **Changes:**
+  - `README.md` (new): project info, overview, features, scope, performance targets, backlog, repo structure, AI workflow, open questions.
+  - `docs/checklist.md`: overview ✅; README and project info sheet 🟡.
+- **Result:** the README is the delivery's entry point. Name, author, URLs, architecture, stack, data model, API spec, work tickets and setup are TBD.
+
+## 17. Explore tech stack options
+
+```
+/openspec-explore Teck stack selection. Evaluate the teck stach modern and best aproch to pick as teck stack. Limit to the MVP do nod add nothin unnecesary. Kep it simple a possible
+```
+
+## 18. Compare how each option scales
+
+```
+Lets evaluate now the excalability fo the A,B,C  options? Its important to escalate in the future.
+```
+
+## 19. Choose option B and propose the change
+
+```
+/openspec-propose B option is my choise
+```
+
+## 20. Add C4 diagrams and ADRs to the change
+
+```
+Make sure you are covering the C4 Arquitecture documentation on mermaid. and a proper ADRs files and diagrams. some of them dont exist yet but we should be able to storthem and generatethem and mantaine them along the way.
+```
+
+## 21. Approve the revised artifacts (button answer)
+
+```
+Yes, write all three
+```
+
+## 22. Apply the change (button answer)
+
+```
+Yes, apply it
+```
+
+## 23. Review before archiving (button answer)
+
+```
+Review first
+```
+
+## 24. Archive the change
+
+```
+archive
+```
+
+### Summary (prompts 17–24)
+
+- **Goal:** pick a simple MVP stack that can grow into the PRD roadmap, and document the architecture (C4 + ADRs) in a way that stays current.
+- **Changes:**
+  - OpenSpec change `choose-tech-stack`: proposed, revised, applied and archived (`openspec/changes/archive/2026-11-15-choose-tech-stack/`).
+  - `AGENTS.md`: stack table (Next.js + React 19 on Vercel, Postgres on Neon + Drizzle, ingestion on GitHub Actions, pnpm, Vitest; LLM provider TBD) and ADR/C4 rules.
+  - `docs/architecture/`: C4 levels 1–3 in Mermaid (context and containers Current; web app and ingestion components Proposed).
+  - `docs/adr/`: template, index with pending decisions, ADRs 0001–0004.
+  - `.agents/skills/write-adr/` (+ symlink): creates ADRs and updates C4 diagrams.
+  - `openspec/config.yaml`: design/tasks rules requiring ADR and C4 updates.
+  - `README.md`, `docs/checklist.md`: architecture and tech stack filled in, both ✅.
+- **Result:** option B chosen after comparing simplicity and scaling; all 5 diagrams render and all links resolve. Data model, API spec, work tickets and the LLM provider are next.
+
+## 25. Check whether the architecture is defined
+
+```
+/openspec-explore  do we have an arquitecture defined?
+```
+
+## 26. Turn a validation prompt into a skill
+
+```
+Out of this make a skill to use for a single user story that helps to validate it. "
+
+Tu tarea: identifica edge cases, supuestos implícitos,
+escenarios faltantes, y dependencias o riesgos no
+mencionados. No reescribas la story, solo lista lo
+que falta o lo que asumiste.
+
+"
+```
+
+## 27. Design an agent that validates the backlog story by story
+
+```
+Now lets make an agent that runs the validations of the user storys on the backlog one by one. let me make changes and at the end validate the story. If i want i can sop the validation wher im att and continue later. The agent first have to run the skill and then let me review.
+```
+
+## 28. Ask for an example of using it
+
+```
+show me an example of what will be my use of this ?
+```
+
+## 29. Create the skills and the agent
+
+```
+Write it
+```
+
+### Summary (prompts 25–29)
+
+- **Goal:** know where the architecture stands, then give the human an interactive, resumable way to validate backlog stories one by one.
+- **Changes:**
+  - `.agents/skills/validate-story/` (+ symlink): lists edge cases, assumptions, missing scenarios, dependencies/risks and rule breaks for one story, without rewriting it.
+  - `.claude/agents/story-validator.md`: read-only agent that runs `validate-story` on one story and tracks resolved/open findings.
+  - `.agents/skills/validate-backlog/` (+ symlink): the loop (check → review → `done` → estimate → `validated`, plus `skip`/`stop`), resumable.
+  - `backlog/validation-log.md` (new), `AGENTS.md`, `backlog/README.md`: progress log and pointers to the new workflow.
+- **Result:** the architecture's shape (C4 levels 1–2, ADRs) is defined, but data model, API contract and operations are not. Story validation is ready to run with `/validate-backlog`; no story has been validated yet.
+
+## 30. Start validating the backlog
+
+```
+/validate-backlog
+```
+
+## 31. Answer the REC-001 findings
+
+```
+1. Yes 2.Add blocked-by:REC-002, REC-003 3. REC-015’ 4. empty feed: just an empty feed message, for the other 2 cases show an Ops something went wrong message. 5. loop back 6. An error with a removed video just load next one. 7 keep layout and remove load to verified in REC-15, 8. don't split keep it as a single navigation test. 9 For MVP keep it as 1 video per gesture and keyboard are not part of the MVP but document those behaviors on a draft-backlog-list.md file to come back on those in the future. 10. scroll the recipe this belong to REC-006. 11. when the user gets to a video and do nothing, nothing happens no time limit for MVP in the feature after some time we could rice a message to tap the screen to start playback (document on draft-backlog-list.md), when the video finished playing back keep infinite playback on itself, when the panel auto opens the vide keeps playing. 12. yes. 13. Landscape same layout as pc browser. for MVP just chrome support. 14. REC-006. Everything regarding the recipe container and layout should be moved to E02. 15. explain the finding better before I decide.
+```
+
+## 32. Ask what an ADR is
+
+```
+what is ADR? do not write anything yet.
+```
+
+## 33. Change the dependency decision and ask about a swipe library
+
+```
+for the question 2. I changed my mind and now build REC-001 with stub data and leave PERF-2 to other stories. For 15 if we could use library what Technical context aere you sugesting?
+```
+
+## 34. Settle the remaining REC-001 decisions
+
+```
+#1: the technical check as a note in Technical context, #15: (a). 10-senario problem do as you recomended.
+```
+
+## 35. Re-check REC-001
+
+```
+Re-check REC-001 with the validator now?
+```
+
+## 36. Answer the re-check findings
+
+```
+20 “Does nothing” the rest do as you sugest.
+```
+
+## 37. Ask about Fibonacci story points
+
+```
+are we using fibonacii story points some were?
+```
+
+## 38. Pause validation and plan Fibonacci estimates
+
+```
+lets stop here the validation and. MI need to keep the size label: S/M/L/XL, but Estimate wich if i dont understud wrong is the AI estimation should be Fibonacci points (1, 2, 3, 5, 8, 13), and the estimate-story: should give a Fibonacci points (1, 2, 3, 5, 8, 13) as the final team agreement.  Explore this to keep consistency on the skils and documentation. The AI estimation should be made after the AC aproval and before I input the teams estimation so I can ised as part of the team. Do not wrigt yet.
+```
+
+## 39. Confirm the estimation choices
+
+```
+1 as the recommendation, 2 as the recommendation 3 directly, do not use open specs for this. One more thing follow for the fibonacci estimations the fibonacci use that was on the SKILL 2.md  file deleted. do not wright yet but the validation log pendant.
+```
+
+## 40. Apply the Fibonacci change
+
+```
+Yes, write it
+```
+
+### Summary (prompts 30–40)
+
+- **Goal:** validate the first story with the new workflow, and switch estimation to Fibonacci points with an AI estimate before the team's.
+- **Changes:**
+  - `backlog/E01-browse-feed.md`: REC-001 refined (5 scenarios, stub data, CSS scroll-snap with no library, technical check note); new REC-018 for empty/error/unavailable states; REC-002 notes the end-of-catalog signal.
+  - `backlog/E02`, `E03`: REC-006, REC-007 and REC-014 took the scenarios moved out of REC-001.
+  - `backlog/draft-backlog-list.md` (new): post-MVP ideas D-1 to D-4.
+  - Estimation: new `AI estimate` field; `AI estimate` and team `Estimate` in Fibonacci points (spikes in hours), made only after criteria approval; `size:*` stays t-shirt. Updated in `AGENTS.md`, both READMEs, `estimate-story` (rewritten from the original SKILL 2.md rules), `decompose-prd`, `validate-backlog`, the hook, all 18 stories and the validation log.
+- **Result:** REC-001's 20 findings are resolved and it is paused `in review` before criteria approval. The hook passes 11 test cases for the new estimates. The context is large, so the next step is to resume validation in a new session.
+
+
+## 41. Run the REC-001 technical check
+
+```
+i have for REC-001 a pendent technical check. Help me to make it
+```
+
+## 42. Report the Android results
+
+```
+Slow swipes and watch on youtube work for both, Hard fast fail some go more than one video for show but work well for overlay. the sound and swipe auto play after sond works fine on both.
+```
+
+Answers in the question dialog:
+
+- Flick fail: `Red overlay page skipped`
+
+## 43. Drop the overlay (button answer)
+
+```
+Drop the overlay
+```
+
+### Summary (prompts 41–43)
+
+- **Goal:** run REC-001's pending technical check (swipes over the YouTube player, taps to unmute and the YouTube link, one video per flick) before estimating.
+- **Changes:**
+  - Throwaway prototype (scroll-snap feed, YouTube IFrame players, optional overlay, on-screen log) in the session scratchpad, not in the repo; checked in desktop Chrome by the agent and in Android Chrome by the human.
+  - `backlog/E01-browse-feed.md`: REC-001 Technical context now uses plain scroll-snap with no overlay, own unmute button and "Watch on YouTube" link, and records the check results; Estimation notes get a dated update.
+  - `backlog/validation-log.md`: REC-001 row records the results and the decision.
+- **Result:** all checks pass without the overlay; with it, hard flicks on Android skipped videos, so it was dropped. REC-001 is ready to resume validation at acceptance-criteria approval.
+
+
+## 44. Resume backlog validation
+
+```
+/validate-backlog
+```
+
+## 45. Ask for recommendations on REC-001's new findings
+
+```
+give me your recomendations
+```
+
+## 46. Apply the recommendations
+
+```
+keep going
+```
+
+## 47. Apply the follow-up fixes (button answer)
+
+```
+Yes, apply them
+```
+
+## 48. Approve REC-001's acceptance criteria (button answer)
+
+```
+AC approved
+```
+
+## 49. Team estimate for REC-001 (button answer)
+
+```
+3
+```
+
+## 50. Validate REC-001 (button answer)
+
+```
+validated
+```
+
+## 51. Stop the session
+
+```
+stop
+```
+
+### Summary (prompts 44–51)
+
+- **Goal:** finish validating REC-001 after its technical check, then start REC-002.
+- **Changes:**
+  - `backlog/E01-browse-feed.md`: REC-001 Technical context aligned with the no-overlay decision (no app-owned YouTube button; tap behavior owned by REC-003; Chrome on Android and desktop only; three-player re-check handed to REC-004/REC-015; check wording fixed); size reasoning rewritten (`size:M` kept); AI estimate 3, team Estimate 3, `needs-human-validation` removed.
+  - `backlog/README.md`: new "Decided" section with the supported-browser decision (iOS out of scope).
+  - `backlog/validation-log.md`: REC-001 `validated`; REC-002 `in review` with 13 open findings.
+- **Result:** REC-001 is validated (1 of 18). REC-002's first check returned "needs refinement" (shuffle vs CDN cache, stable paged order, end-of-catalog AC, split the availability check); the session stopped before reviewing them. Findings #27 and #29 are carried to REC-003, REC-004 and REC-015.
