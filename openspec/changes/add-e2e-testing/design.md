@@ -111,10 +111,13 @@ Tests import `test` and `expect` from `e2e/support/test.ts`, never from
 `e2e/support/gestures.ts` exports `swipeNext(page)` and
 `swipePrevious(page)` (and a `strength` option for a hard flick):
 
-on every project, a touch scroll through the Chrome DevTools Protocol
-(`Input.synthesizeScrollGesture` with `gestureSourceType: 'touch'`), which
-goes through Chromium's real scroll and snap path. It works on the
-`desktop` project too, even without touch emulation.
+on every project, a finger stroke built from raw touch events sent through
+the Chrome DevTools Protocol (`Input.dispatchTouchEvent`: touchStart, timed
+touchMoves, touchEnd), which goes through Chromium's real scroll, fling and
+snap path. It works on the `desktop` project too, even without touch
+emulation. Event timestamps set the speed: a normal swipe is a slow drag over
+70% of the screen; a hard flick covers the same distance at about
+12,000 px/s, the top of a real finger flick.
 
 The helpers resolve when the scroll has settled: on a `scrollend` event, or,
 when nothing scrolled, after 10 animation frames with no `scroll` event once
@@ -128,6 +131,13 @@ the gesture was sent. Never on a fixed delay.
   `scroll-snap-stop: always` after a long one; a CDP gesture with
   `gestureSourceType: 'mouse'` snaps to the nearest item instead of the
   scroll direction and also skips stops. Neither behaves like a real wheel.
+- **Why not `Input.synthesizeScrollGesture` (changed after the first CI run,
+  2026-11-16):** it worked on macOS, but on Linux (GitHub Actions and the
+  official Playwright Docker image) it sends touchstart and touchend with no
+  touchmove, so nothing scrolls. Raw touch events behave the same on both.
+- **Flick speed:** synthesized flicks far faster than a finger (about
+  20,000 px/s) were seen to skip past `scroll-snap-stop: always`; the hard
+  flick stays at a realistic speed so a pass or fail reflects the page.
 - **Limit:** this proves the page's wiring, not real input physics. Hard
   flicks on a real Android phone and real mouse-wheel and trackpad scrolling
   on desktop stay manual checks (rule 13).

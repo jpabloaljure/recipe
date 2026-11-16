@@ -1,13 +1,18 @@
-import type { Locator, Page } from "@playwright/test";
+import type { CDPSession, Locator, Page } from "@playwright/test";
 
 /**
  * Swipe helpers (add-e2e-testing design Decision 5).
  *
- * Every project, desktop included, gets a touch scroll synthesized through
- * the Chrome DevTools Protocol (`Input.synthesizeScrollGesture`), which runs
- * through Chromium's real scroll and snap path. Synthesized mouse-wheel
- * scrolls are not used: in headless Chromium they jump instantly and do not
- * follow scroll-snap like a real wheel.
+ * Every project, desktop included, gets a finger swipe built from raw touch
+ * events sent through the Chrome DevTools Protocol (`Input.dispatchTouchEvent`:
+ * touchStart, timed touchMoves, touchEnd). They run through Chromium's real
+ * scroll, fling and snap path, on macOS and Linux alike.
+ *
+ * Not used:
+ * - `Input.synthesizeScrollGesture`: on Linux (CI) it sends touchstart and
+ *   touchend with no touchmove, so nothing scrolls.
+ * - Synthesized mouse-wheel scrolls: in headless Chromium they jump instantly
+ *   and do not follow scroll-snap like a real wheel.
  *
  * Each helper resolves once scrolling has settled: on the `scrollend` event,
  * or, if nothing scrolled, after 10 animation frames with no `scroll` event
@@ -18,9 +23,9 @@ import type { Locator, Page } from "@playwright/test";
  */
 
 export type GestureOptions = {
-  /** Where the gesture starts. Defaults to the centre of the viewport. */
+  /** Element the finger starts on. Defaults to the whole viewport. */
   target?: Locator;
-  /** `hard` is a fast, long flick. */
+  /** `normal` is a slow drag; `hard` is a fast flick. */
   strength?: "normal" | "hard";
 };
 
@@ -34,13 +39,30 @@ export function swipePrevious(page: Page, options: GestureOptions = {}): Promise
   return swipe(page, -1, options);
 }
 
+// Both gestures cover 70% of the screen height, so a slow drag (which snaps to
+// the nearest item) ends clearly past halfway. The hard flick moves at about
+// 12,000 px/s on a Pixel 7, the top of a real finger flick; far faster
+// synthesized flicks (~20,000 px/s) were seen to skip past
+// `scroll-snap-stop: always`, which a real flick does not.
+const DISTANCE = 0.7;
+const STROKES = {
+  normal: { moves: 12, msPerMove: 16 },
+  hard: { moves: 5, msPerMove: 10 },
+} as const;
+
 type GestureState = { started: boolean; ended: boolean };
 type GestureWindow = Window & { __e2eGesture?: GestureState };
 
 async function swipe(page: Page, direction: 1 | -1, options: GestureOptions): Promise<void> {
-  const strength = options.strength ?? "normal";
-  const { x, y } = await startPoint(page, options.target);
-  const height = page.viewportSize()?.height ?? 800;
+  const viewport = page.viewportSize() ?? { width: 1280, height: 800 };
+  const area = options.target ? await options.target.boundingBox() : null;
+  if (options.target && !area) throw new Error("Gesture target is not visible");
+  const box = area ?? { x: 0, y: 0, width: viewport.width, height: viewport.height };
+
+  // The finger starts near the far edge of the target and stays on screen.
+  const x = Math.round(box.x + box.width / 2);
+  const startY = box.y + box.height * (direction === 1 ? 0.85 : 0.15);
+  const deltaY = -direction * DISTANCE * viewport.height;
 
   await page.evaluate(
     () =>
@@ -65,17 +87,7 @@ async function swipe(page: Page, direction: 1 | -1, options: GestureOptions): Pr
 
   const cdp = await page.context().newCDPSession(page);
   try {
-    await cdp.send("Input.synthesizeScrollGesture", {
-      x,
-      y,
-      // Positive yDistance scrolls up, so moving forward needs a negative one.
-      // A slow drag snaps to the nearest item, so a normal swipe goes clearly
-      // past halfway (at exactly half, touch slop or a busy CI machine can
-      // leave it just short and it snaps back).
-      yDistance: -direction * Math.round(height * (strength === "hard" ? 0.9 : 0.7)),
-      speed: strength === "hard" ? 6000 : 1200,
-      gestureSourceType: "touch",
-    });
+    await stroke(cdp, x, startY, deltaY, STROKES[options.strength ?? "normal"]);
   } finally {
     await cdp.detach();
   }
@@ -95,12 +107,29 @@ async function swipe(page: Page, direction: 1 | -1, options: GestureOptions): Pr
   );
 }
 
-async function startPoint(page: Page, target?: Locator): Promise<{ x: number; y: number }> {
-  if (target) {
-    const box = await target.boundingBox();
-    if (!box) throw new Error("Gesture target is not visible");
-    return { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+/**
+ * One finger stroke. Event timestamps (not wall-clock pauses) set the speed,
+ * so the fling velocity Chromium computes is the same on a fast or busy machine.
+ */
+async function stroke(
+  cdp: CDPSession,
+  x: number,
+  startY: number,
+  deltaY: number,
+  { moves, msPerMove }: { moves: number; msPerMove: number },
+): Promise<void> {
+  let timestamp = Date.now() / 1000;
+  const at = (y: number) => [{ x, y: Math.round(y), id: 1 }];
+
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: at(startY), timestamp });
+  for (let i = 1; i <= moves; i++) {
+    timestamp += msPerMove / 1000;
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: at(startY + (deltaY * i) / moves),
+      timestamp,
+    });
   }
-  const size = page.viewportSize() ?? { width: 1280, height: 800 };
-  return { x: Math.round(size.width / 2), y: Math.round(size.height / 2) };
+  timestamp += msPerMove / 1000;
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [], timestamp });
 }

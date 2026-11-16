@@ -15,7 +15,7 @@
 
 - [x] 3.1 Add `e2e/support/test.ts` with the automatic network-guard fixture (design Decision 4): own origin passes, YouTube embed hosts get a local stub page with `data-testid="youtube-stub"`, any other outside request is aborted and fails the test at teardown listing its URLs; export `test` and `expect`
 - [x] 3.2 Add `e2e/support/support.spec.ts` self-tests for 3.1, using `page.setContent`: an iframe to `youtube-nocookie.com/embed/x` shows the stub; a request to another outside host makes the test fail (assert it with `test.fail()`); verify `pnpm test:e2e` passes on all three projects
-- [x] 3.3 Add `e2e/support/gestures.ts` (design Decision 5): `swipeNext`, `swipePrevious` with a `strength` option, CDP `Input.synthesizeScrollGesture` (touch) on every project (no mouse wheel: see design Decision 5), resolving on `scrollend` or on gesture completion with no movement, never on a timer; plus a helper to limit a test to given projects
+- [x] 3.3 Add `e2e/support/gestures.ts` (design Decision 5): `swipeNext`, `swipePrevious` with a `strength` option, raw CDP touch events (`Input.dispatchTouchEvent`) on every project (no mouse wheel or `synthesizeScrollGesture`: see design Decision 5), resolving on `scrollend` or on gesture completion with no movement, never on a timer; plus a helper to limit a test to given projects
 - [x] 3.4 Add self-tests for 3.3 on a `page.setContent` page with a full-height scroll-snap list of five items (`scroll-snap-stop: always`): `swipeNext` moves from item 1 to item 2; `swipePrevious` on item 1 stays on item 1; verify `pnpm test:e2e` passes on all three projects, with no `waitForTimeout` in `e2e/`
 
 ## 4. Smoke test
