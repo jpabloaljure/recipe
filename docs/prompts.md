@@ -454,3 +454,101 @@ stop
   - `backlog/README.md`: new "Decided" section with the supported-browser decision (iOS out of scope).
   - `backlog/validation-log.md`: REC-001 `validated`; REC-002 `in review` with 13 open findings.
 - **Result:** REC-001 is validated (1 of 18). REC-002's first check returned "needs refinement" (shuffle vs CDN cache, stable paged order, end-of-catalog AC, split the availability check); the session stopped before reviewing them. Findings #27 and #29 are carried to REC-003, REC-004 and REC-015.
+
+
+## 52. Explore REC-001 before proposing a change
+
+```
+/openspec-explore REC-001
+```
+
+## 53. Propose the change
+
+```
+/openspec-propose
+```
+
+Question dialog answer: `Scaffold only, first (Recommended)`.
+
+## 54. Check that git init is planned
+
+```
+did you add the git init to initialite git for this proyect?
+```
+
+## 55. Apply the scaffold change
+
+```
+/openspec-apply-change
+```
+
+## 56. Install pnpm from the terminal
+
+```
+can you use a terminal and instalit?
+```
+
+## 57. First commit (button answer)
+
+```
+Commit the working tree changes with a sensible message.
+```
+
+## 58. Repository description
+
+```
+generate Repo description.
+```
+
+## 59. Push to the GitHub repository
+
+```
+this is te repo "https://github.com/jpabloaljure/recipe.git" use terminal an go ahead.
+```
+
+## 60. Guide for the Vercel project (task 6.2)
+
+```
+guide me step by step on 6.2
+```
+
+## 61. Ask for the local Node version
+
+```
+what is my actual node version?
+```
+
+## 62. Move to Node 26
+
+```
+lets update to node 26 that is the latest on vercel
+```
+
+## 63. Vercel engines warning
+
+```
+step 7 ive got this warning. "Warning: Detected "engines": { "node": ">=26" } in your `package.json` that will automatically upgrade when a new major Node.js Version is released. Learn More: https://vercel.link/node-version"
+```
+
+## 64. Production URL
+
+```
+recipe-henna-pi.vercel.app
+```
+
+## 65. Confirm the device check (button answer)
+
+```
+Yes, both OK
+```
+
+### Summary (prompts 52–65)
+
+- **Goal:** scaffold the app as its own OpenSpec change before REC-001, put it on GitHub with CI, deploy it to Vercel, and archive the change.
+- **Changes:**
+  - `openspec/changes/archive/2026-11-16-scaffold-web-app/`: proposal, design (7 decisions; Decision 5 moved from Node 24 to Node 26 during apply), tasks (18 of 18 done).
+  - `docs/adr/0005-single-package-repository-layout.md`: new ADR (one package at the repo root); indexed in `docs/adr/README.md` and listed in the C4 level 2 diagram's related ADRs.
+  - App scaffold: `package.json` (Next.js 16, React 19, TypeScript strict, Vitest; `engines.node` `26.x`), `pnpm-lock.yaml`, `tsconfig.json`, `next.config.ts`, `vitest.config.ts`, `.nvmrc` (`26`), `.gitignore`, `src/app/` (placeholder page), `src/lib/site.ts` with its test, `.claude/launch.json`.
+  - `.github/workflows/ci.yml`: typecheck, test and build; automatic setup-node cache turned off, pnpm installed with npm (Node 26 has no Corepack).
+  - `README.md` (getting started, repository and deployed URL rows) and `docs/checklist.md` (git repo row done, URLs filled in).
+- **Result:** the repo is on [GitHub](https://github.com/jpabloaljure/recipe) with green CI, and the placeholder is live at [recipe-henna-pi.vercel.app](https://recipe-henna-pi.vercel.app), checked on Android and desktop Chrome. The change is archived; next is an OpenSpec change for REC-001.
