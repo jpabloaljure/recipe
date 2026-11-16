@@ -24,7 +24,7 @@
 
 ## 5. CI
 
-- [ ] 5.1 Add the E2E step to `.github/workflows/ci.yml` after `Build` (design Decision 7): cache `~/.cache/ms-playwright` keyed on the Playwright version, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e`, upload `playwright-report/` and `test-results/` on failure; verify the YAML parses, then the first run on GitHub (pushed by the human) is green and a deliberately failing test (on a throwaway branch) blocks CI and uploads the report
+- [x] 5.1 Add the E2E step to `.github/workflows/ci.yml` after `Build` (design Decision 7): cache `~/.cache/ms-playwright` keyed on the Playwright version, `pnpm exec playwright install --with-deps chromium`, `pnpm test:e2e`, upload `playwright-report/` and `test-results/` on failure; verify the YAML parses, then the first run on GitHub (pushed by the human) is green and a deliberately failing test (on a throwaway branch) blocks CI and uploads the report
 
 ## 6. Rules and docs
 

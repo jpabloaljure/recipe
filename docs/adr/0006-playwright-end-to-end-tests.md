@@ -71,7 +71,7 @@ end-to-end (E2E) tests, run in Chromium only.
 
 ## Links
 
-- Change: [`add-e2e-testing`](../../openspec/changes/add-e2e-testing/design.md) (design Decision 1)
+- Change: [`add-e2e-testing`](../../openspec/changes/archive/2026-11-16-add-e2e-testing/design.md) (design Decision 1, archived)
 - C4: no diagram affected (test tooling is not a container or component).
 - PRD: §5.1, §8 (launch checks)
 - Related ADRs: [0002](0002-nextjs-on-vercel.md),
