@@ -11,7 +11,7 @@ _Last updated: 2026-11-16_
 |---|---|---|---|---|
 | 1 | README.md (root) | 🟡 | `README.md` | Written with every section. Architecture, tech stack and getting started are filled in (app scaffolded, change `scaffold-web-app`); data model, API spec and work tickets are still TBD. |
 | 2 | Prompts log | 🟡 | `docs/prompts.md` | Exists with setup (§0) and prompts 1–15, linked from the README. Still missing: the prompts used to write the PRD itself. |
-| 3 | Project info sheet | 🟡 | `README.md` | Table in place with description, platform and PRD status. Repo URL filled in; name, author and deployed URL are TBD. |
+| 3 | Project info sheet | 🟡 | `README.md` | Table in place with description, platform and PRD status. Repo and deployed URLs filled in; name and author are TBD. |
 | 4 | Overview (goal and features) | ✅ | `README.md` | Problem, target user, goals, features, out of scope and performance targets summarized from the PRD. |
 | 5 | Architecture (diagram and components) | ✅ | `docs/architecture/`, `docs/adr/` | C4 levels 1–3 in Mermaid (context and containers Current; web app and ingestion components Proposed) and ADRs 0001–0005. Kept current with the `write-adr` skill. |
 | 6 | Tech stack | ✅ | `AGENTS.md`, `README.md` | Next.js + React 19 on Vercel, Postgres on Neon + Drizzle, ingestion on GitHub Actions, pnpm, Vitest (change `choose-tech-stack`). LLM provider is a pending decision. |

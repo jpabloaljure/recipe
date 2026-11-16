@@ -31,12 +31,12 @@
 ## 6. Hosting (human-assisted)
 
 - [x] 6.1 Human creates the GitHub repository, adds it as `origin`, and approves the first commit and push; verify the repository shows the files and CI (5.1) passes
-- [ ] 6.2 Human creates the Vercel project from the GitHub repository (framework Next.js, Node 26.x, no environment variables); verify the production deployment succeeds
+- [x] 6.2 Human creates the Vercel project from the GitHub repository (framework Next.js, Node 26.x, no environment variables); verify the production deployment succeeds
 - [ ] 6.3 Open the production URL on Android Chrome and desktop Chrome; verify the placeholder fills the screen and loads without console errors
 
 ## 7. Docs
 
-- [ ] 7.1 Fill the README "Getting started" section (prerequisites: Node 26+, pnpm; `pnpm install`, `pnpm dev`, `pnpm test`, `pnpm typecheck`, `pnpm build`) and the Repository and Deployed URL rows; verify each documented command runs as written on the current checkout
+- [x] 7.1 Fill the README "Getting started" section (prerequisites: Node 26+, pnpm; `pnpm install`, `pnpm dev`, `pnpm test`, `pnpm typecheck`, `pnpm build`) and the Repository and Deployed URL rows; verify each documented command runs as written on the current checkout
 - [x] 7.2 Update `docs/checklist.md` (README row: Getting started done; add or update any scaffolding row); verify no row still says "no code exists"
 
 ## Workflow follow-up

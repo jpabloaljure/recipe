@@ -15,7 +15,7 @@ cooking videos (Shorts). Every video in the feed comes with an easy recipe
 | **Name** | TBD (working title "Easy Recipes from YouTube"; PRD §12) |
 | **Author** | TBD |
 | **Repository** | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe) (branch `main`) |
-| **Deployed URL** | TBD |
+| **Deployed URL** | [recipe-henna-pi.vercel.app](https://recipe-henna-pi.vercel.app) (Vercel, deploys from `main`) |
 | **PRD status** | Draft v0.1, 2026-11-14 |
 | **Platform** | Web app, mobile-first, desktop supported |
 
