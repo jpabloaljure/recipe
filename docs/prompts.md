@@ -552,3 +552,179 @@ Yes, both OK
   - `.github/workflows/ci.yml`: typecheck, test and build; automatic setup-node cache turned off, pnpm installed with npm (Node 26 has no Corepack).
   - `README.md` (getting started, repository and deployed URL rows) and `docs/checklist.md` (git repo row done, URLs filled in).
 - **Result:** the repo is on [GitHub](https://github.com/jpabloaljure/recipe) with green CI, and the placeholder is live at [recipe-henna-pi.vercel.app](https://recipe-henna-pi.vercel.app), checked on Android and desktop Chrome. The change is archived; next is an OpenSpec change for REC-001.
+
+## 66. Start a proposal with no input
+
+```
+/openspec-propose
+```
+
+## 67. Propose the change for REC-001
+
+```
+/openspec-propose REC-001
+```
+
+## 68. Testing and stub slides (dialog answers)
+
+```
+Testing: Pure logic + device checks (Recommended)
+Stub slides: Plain YouTube embed (Recommended)
+```
+
+## 69. Ask whether the plan has E2E tests
+
+```
+Is this plan using e2e test cases that diserve to cover the functionality? do not change plan yet
+```
+
+## 70. Ask for Playwright and E2E rules
+
+```
+I will need playwright and also some rules for E2E test cases.
+```
+
+## 71. Make E2E testing its own change
+
+```
+Create a new change proposal for this new precondition before we continue with REC-001.
+```
+
+## 72. Ask for the testing workflow
+
+```
+questions. With this plan implemented what will be the testing work flow. Mention Test dev and test QA, smoke test, sanity test and Regression. when and how on the workflow with open spec. Be concise.
+```
+
+## 73. Ask why CI runs on pull requests
+
+```
+why you say every push and pull? i understand every push but why also on every pull? Short explain
+```
+
+## 74. Apply the E2E change
+
+```
+Ok lets /openspec-apply-change
+```
+
+## 75. Who downloads Chromium (dialog answer)
+
+```
+You run it (Recommended)
+```
+
+## 76. Desktop gestures (dialog answer)
+
+```
+Touch swipe everywhere (Recommended)
+```
+
+## 77. Open the pull request (button answer)
+
+```
+Open a PR
+```
+
+## 78. Install the GitHub CLI
+
+```
+lets install gh
+```
+
+## 79. Ask where the sign-in tab is
+
+```
+where is that?
+```
+
+## 80. Answer the sign-in prompt
+
+```
+Y
+```
+
+## 81. Ask why the terminal tab takes no input
+
+```
+why i cant writ on it?
+```
+
+## 82. Docker image for Linux debugging (dialog answer)
+
+```
+[No preference]
+```
+
+## 83. Turn on Auto-fix for PR #1 (button answer)
+
+```
+Yes, turn it on
+```
+
+## 84. Ask whether to merge
+
+```
+shall i merge now?
+```
+
+## 85. Protect main before merging (button answer)
+
+```
+Protect main first
+```
+
+## 86. How strict the protection is (dialog answer)
+
+```
+Strict, admins too (Recommended)
+```
+
+## 87. Merge PR #1 (button answer)
+
+```
+Merge it
+```
+
+## 88. Run the failing-test check (button answer)
+
+```
+Run the check
+```
+
+## 89. Report the failed checks on PR #2
+
+```
+it says som checks where nor successful
+```
+
+## 90. Archive the E2E change (button answer)
+
+```
+Archive it
+```
+
+## 91. Turn on Auto-fix for PR #3 (button answer)
+
+```
+Yes, turn it on
+```
+
+## 92. Merge PR #3
+
+```
+merge
+```
+
+### Summary (prompts 66–92)
+
+- **Goal:** plan REC-001 (vertical swipe feed), then, before building it, add end-to-end testing with Playwright and project rules for E2E test cases as their own OpenSpec change; get it through CI on GitHub, protect `main`, and archive the change.
+- **Changes:**
+  - `openspec/changes/add-vertical-swipe-feed/`: REC-001 plan (proposal, `feed` spec with 8 requirements, design, tasks); not committed yet, waiting for its E2E tasks.
+  - `openspec/changes/archive/2026-11-16-add-e2e-testing/`: proposal, design (7 decisions; gestures changed twice during apply), tasks (15 of 15 done).
+  - `docs/adr/0006-playwright-end-to-end-tests.md`: new ADR (Playwright, Chromium only); indexed in `docs/adr/README.md`; README ADR table now also lists 0005.
+  - `playwright.config.ts` (3 projects, production build, no retries), `e2e/support/` (network guard, raw CDP touch-swipe helpers, `onlyOn`, self-tests), `e2e/app/smoke.spec.ts`; `@playwright/test` 1.65.1 and a `test:e2e` script in `package.json`; `.gitignore`.
+  - `.github/workflows/ci.yml`: cached Chromium install, E2E run, report upload on failure.
+  - `AGENTS.md` (13 E2E test rules, stack table), `openspec/config.yaml` (tasks rule: an E2E test or a manual check per spec scenario), `README.md` (stack, Getting started), `docs/checklist.md`.
+  - GitHub: `gh` installed and signed in; `main` protected (CI `check` required, up to date, PR required, admins included).
+- **Result:** PR #1 (E2E setup) and PR #3 (archive) are merged with green CI. Throwaway PR #2 showed that a failing E2E test blocks the merge and uploads the report. The swipe helpers needed two fixes found on the way: the mouse wheel doesn't follow scroll-snap in headless Chromium, and `synthesizeScrollGesture` doesn't scroll on Linux, so they now send raw touch events (360 of 360 runs on macOS and Linux). Next: add REC-001's E2E tasks to `add-vertical-swipe-feed`.
