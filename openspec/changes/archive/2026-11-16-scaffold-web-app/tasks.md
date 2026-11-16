@@ -32,7 +32,7 @@
 
 - [x] 6.1 Human creates the GitHub repository, adds it as `origin`, and approves the first commit and push; verify the repository shows the files and CI (5.1) passes
 - [x] 6.2 Human creates the Vercel project from the GitHub repository (framework Next.js, Node 26.x, no environment variables); verify the production deployment succeeds
-- [ ] 6.3 Open the production URL on Android Chrome and desktop Chrome; verify the placeholder fills the screen and loads without console errors
+- [x] 6.3 Open the production URL on Android Chrome and desktop Chrome; verify the placeholder fills the screen and loads without console errors
 
 ## 7. Docs
 

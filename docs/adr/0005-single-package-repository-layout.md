@@ -50,7 +50,7 @@ lockfile shared by the web app and the ingestion job:
 
 ## Links
 
-- Change: [`scaffold-web-app`](../../openspec/changes/scaffold-web-app/design.md) (design Decision 1)
+- Change: [`scaffold-web-app`](../../openspec/changes/archive/2026-11-16-scaffold-web-app/design.md) (design Decision 1)
 - C4: [Level 2: containers](../architecture/c4/02-containers.md)
 - Related ADRs: [0002](0002-nextjs-on-vercel.md),
   [0003](0003-postgres-neon-drizzle.md),
