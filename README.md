@@ -254,7 +254,7 @@ This project is planned with AI agents. The pieces:
 
 ## Getting started
 
-Prerequisites: Node 24 or later (see `.nvmrc`) and pnpm
+Prerequisites: Node 26 or later (see `.nvmrc`) and pnpm
 (`npm install -g pnpm`; Node 25+ no longer ships Corepack).
 
 ```bash

@@ -99,14 +99,18 @@ There is no ESLint or Biome.
   declined by the no-new-library rule. It can be proposed later through an
   ADR.
 
-### 5. Runtime: Node 24 LTS on Vercel and in CI
+### 5. Runtime: Node 26 LTS on Vercel and in CI
 
-Set `.nvmrc` to `24`, `engines.node` to `>=24`, the Vercel project's Node
-version to 24.x, and use the same version in CI.
+Set `.nvmrc` to `26`, `engines.node` to `>=26`, `@types/node` to 26.x, the
+Vercel project's Node version to 26.x, and use the same version in CI.
+Node 26 ships no Corepack, so CI installs the pnpm version from
+`packageManager` with `npm install -g`.
 
-- **Why:** Vercel and GitHub Actions run LTS versions. Local Node 26 still
-  satisfies `>=24`.
-- **Alternative: pin 26.** Production hosts may not offer it yet.
+- **Why:** Node 26 is LTS, it is Vercel's default and newest version, and it
+  matches the local Node, so local, CI and production run the same major.
+- **Alternative: Node 24 LTS.** The first plan, chosen when it was unclear
+  whether hosts offered 26. Changed on 2026-11-16 during apply, before the
+  Vercel project existed, once Vercel's docs confirmed 26.x.
 
 ### 6. Placeholder page tuned for mobile
 

@@ -15,13 +15,13 @@ jobs:
         with:
           node-version-file: .nvmrc
           # v5 caches automatically when package.json has "packageManager",
-          # which needs pnpm before Corepack has enabled it below.
+          # which needs pnpm before it is installed below.
           package-manager-cache: false
 
-      # Node 24 still ships Corepack; it installs the pnpm version pinned in
-      # package.json ("packageManager").
-      - name: Enable pnpm
-        run: corepack enable
+      # Node 25+ ships no Corepack: install the pnpm version pinned in
+      # package.json ("packageManager") with npm.
+      - name: Install pnpm
+        run: npm install -g "$(node -p "require('./package.json').packageManager")"
 
       - name: Install
         run: pnpm install --frozen-lockfile
