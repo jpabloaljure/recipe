@@ -13,7 +13,7 @@
 ## 3. Next.js app
 
 - [x] 3.1 Generate the app at the repo root with `pnpm create next-app` (TypeScript, App Router, `src/` directory, import alias `@/*`, no Tailwind, no linter) without overwriting `README.md` or other existing files; verify `src/app/`, `package.json`, `tsconfig.json` and `next.config.ts` exist and `README.md` is unchanged
-- [x] 3.2 Review the generated `package.json` and files against design Decisions 2–4: keep only `next`, `react`, `react-dom`, `typescript` and `@types/*`; remove sample assets, sample fonts and any lint configuration; pin exact versions and set `packageManager` and `engines.node` (`>=26`); verify `pnpm install` succeeds and `package.json` lists no other dependency
+- [x] 3.2 Review the generated `package.json` and files against design Decisions 2–4: keep only `next`, `react`, `react-dom`, `typescript` and `@types/*`; remove sample assets, sample fonts and any lint configuration; pin exact versions and set `packageManager` and `engines.node` (`26.x`); verify `pnpm install` succeeds and `package.json` lists no other dependency
 - [x] 3.3 Add `.nvmrc` (`26`) and a `.gitignore` covering `node_modules`, `.next`, `.env*` (except `.env.example`), `.vercel` and `*.tsbuildinfo`; verify `git status` does not list `node_modules` or `.next` after a build
 - [x] 3.4 Set `strict: true` in `tsconfig.json` and add a `typecheck` script (`tsc --noEmit`); verify `pnpm typecheck` passes
 - [x] 3.5 Replace the sample page with the placeholder: `layout.tsx` (lang, title, phone viewport with `viewport-fit=cover`), `globals.css` (full-height dark body, no margins), `page.tsx` (working title only); verify `pnpm dev` serves it at localhost and, at 375×812 in the browser, the page fills the screen with no scrollbars

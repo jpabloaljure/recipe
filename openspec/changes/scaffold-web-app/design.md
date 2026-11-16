@@ -101,7 +101,7 @@ There is no ESLint or Biome.
 
 ### 5. Runtime: Node 26 LTS on Vercel and in CI
 
-Set `.nvmrc` to `26`, `engines.node` to `>=26`, `@types/node` to 26.x, the
+Set `.nvmrc` to `26`, `engines.node` to `26.x`, `@types/node` to 26.x, the
 Vercel project's Node version to 26.x, and use the same version in CI.
 Node 26 ships no Corepack, so CI installs the pnpm version from
 `packageManager` with `npm install -g`.
