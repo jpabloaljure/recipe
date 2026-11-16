@@ -16,7 +16,7 @@ product source of truth.
 ### Stack
 
 Decided in the OpenSpec change `choose-tech-stack` (ADRs 0002–0004 in
-`docs/adr/`):
+`docs/adr/`), plus Playwright in `add-e2e-testing` (ADR 0006):
 
 | Layer | Choice |
 |---|---|
@@ -27,7 +27,7 @@ Decided in the OpenSpec change `choose-tech-stack` (ADRs 0002–0004 in
 | Data access + migrations | Drizzle ORM |
 | Daily ingestion | Node TypeScript script on a GitHub Actions schedule |
 | Hosting + CDN | Vercel |
-| Package manager / tests | pnpm, Vitest |
+| Package manager / tests | pnpm, Vitest (unit), Playwright (end-to-end, Chromium) |
 | LLM provider | TBD (pending decision in `docs/adr/README.md`) |
 
 - Do not add any other library, framework or service without human approval
@@ -128,6 +128,50 @@ exactly one `Given`, one `When` and one `Then`.
 
 Quick test: if you can't name the scenario as one behavior without using
 "and", split it.
+
+### End-to-end (E2E) test rules
+
+E2E tests use Playwright in Chromium (ADR 0006). Run them with
+`pnpm test:e2e`. Shared code is in `e2e/support/`.
+
+1. **Purpose:** E2E tests cover spec scenarios that only a real browser can
+   show (layout, scrolling, navigation, wiring between components). Logic
+   rules stay in Vitest unit tests; E2E tests do not repeat them.
+2. **Traceability:** each E2E test checks one spec scenario and is named
+   `<capability> › <Requirement> › <Scenario>` with the exact names from
+   `openspec/specs/` (or the change's delta spec). A scenario that cannot be
+   automated is marked manual in the change's tasks, with the reason.
+3. **Shape:** one Given, one When, one Then, with the same limits as the
+   acceptance-criteria rules above. The test sets up its starting state
+   directly (URL, stub data) instead of clicking through earlier steps.
+4. **Location:** `e2e/<capability>/<requirement-kebab>.spec.ts`; shared code
+   in `e2e/support/`.
+5. **No outside network:** import `test` and `expect` from
+   `e2e/support/test.ts`, never from `@playwright/test`. Outside hosts are
+   stubbed there or fail the test. Data comes from stub sources, never a
+   shared database.
+6. **No fixed waits:** `page.waitForTimeout` and sleeps are not allowed. Use
+   Playwright's auto-waiting assertions, `expect.poll`, or a helper that
+   waits for a named event (for swipes: `e2e/support/gestures.ts`).
+7. **Selectors:** by role, label or `data-testid`; never by CSS class (CSS
+   module class names are generated) or by DOM structure.
+8. **Browsers and screens:** Chromium only, on the `phone-portrait`,
+   `phone-landscape` and `desktop` projects. A test runs on every project
+   its scenario applies to (limit it with `onlyOn` from
+   `e2e/support/projects.ts`).
+9. **Independence:** each test opens a fresh page, does not depend on another
+   test or on test order, and can run in parallel.
+10. **Flaky tests:** retries are off. A test that sometimes fails is a bug:
+    fix it, or skip it with `test.fixme` and a link to a backlog story.
+11. **CI:** E2E tests run against the production build on every pull request
+    and push to `main`; a failure blocks the merge; traces are kept on
+    failure.
+12. **Done:** a story that changes what the user sees is not `done` until
+    every automatable scenario in its spec has a passing E2E test.
+13. **Manual checks:** real touch-flick physics on a phone, real mouse-wheel
+    and trackpad scrolling on desktop, the YouTube player's own behavior, and
+    the performance targets (REC-015) stay manual or spikes; list them in the
+    change's tasks.
 
 ## Backlog quality rules
 
