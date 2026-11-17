@@ -19,7 +19,7 @@ _Last updated: 2026-11-16_
 | 8 | API specification | ❌ | — | API-1 to API-3 only describe behavior. Write OpenAPI or endpoint tables for at least `GET /feed` (paginated, cacheable) and `GET /videos/{id}`, with request and response schemas. |
 | 9 | User stories | 🟡 | `backlog/E01`–`E04` | 18 stories (REC-001 to REC-018) generated with `decompose-prd` and refined during validation. All are flagged `needs-human-validation` with `Estimate: —`; validation in progress with `validate-backlog`. |
 | 10 | Work tickets (backend, frontend, DB) | ❌ | — | Stories don't cover this. Labels are by module, not by layer: either add a `layer:` label or write at least one detailed ticket per layer (backend, frontend, DB). |
-| 11 | Git repo | ✅ | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe), `.github/workflows/ci.yml` | Pushed to `main`; CI (typecheck, unit tests, build, E2E tests) runs on pull requests and pushes to `main`. |
+| 11 | Git repo | ✅ | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe), `.github/workflows/ci.yml` | Pushed to `main`; CI (typecheck, unit tests, build, E2E tests) runs on pull requests and pushes to `main`. `main` is protected (PR and green `check` required); the PR flow, DoR and DoD are in `CONTRIBUTING.md` and `docs/process/`, and a smoke check runs after each production deploy. |
 
 ## Suggested order
 

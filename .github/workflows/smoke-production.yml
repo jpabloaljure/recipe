@@ -1,0 +1,82 @@
+name: Production smoke
+
+# Runs the @smoke E2E tests against production after each production deploy
+# (CONTRIBUTING.md, "Production smoke check"). Vercel creates no GitHub
+# deployments for this repo; it posts a commit status named "Vercel". When
+# that status turns success on a commit on main, production is that commit.
+# Workflows on `status` run from the default branch's copy of this file.
+#
+# `status` cannot be filtered in `on:`, so every commit status in the repo
+# (each Vercel pending/success on PR pushes too) starts a run whose job is
+# then skipped. Such runs attach to main's latest commit (GITHUB_SHA), so the
+# run name carries the deployed commit.
+run-name: Production smoke for ${{ github.event.sha }}
+
+on:
+  status:
+
+permissions:
+  contents: read
+
+env:
+  PRODUCTION_URL: https://recipe-henna-pi.vercel.app
+
+jobs:
+  smoke:
+    # `branches` lists branches that contain the commit (at most 10), not
+    # only branches whose head it is: a preview of a new branch cut from main
+    # with no new commits also matches, which only re-tests production.
+    if: >-
+      github.event.context == 'Vercel' &&
+      github.event.state == 'success' &&
+      contains(github.event.branches.*.name, 'main')
+    # Job-level, so skipped runs never join the group, and a running smoke is
+    # never cancelled by a later status on the same commit.
+    concurrency:
+      group: smoke-production-${{ github.event.sha }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.sha }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install -g "$(node -p "require('./package.json').packageManager")"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('./package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # BASE_URL makes Playwright test the deployed site and start no server.
+      - name: Smoke tests against production
+        env:
+          BASE_URL: ${{ env.PRODUCTION_URL }}
+        run: pnpm test:e2e --grep @smoke --project=desktop --project=phone-portrait
+
+      - name: Upload E2E report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-production
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
