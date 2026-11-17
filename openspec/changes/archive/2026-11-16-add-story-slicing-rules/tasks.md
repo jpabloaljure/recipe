@@ -28,4 +28,4 @@
 ## 5. Checklist and close-out
 
 - [x] 5.1 `docs/checklist.md` item 10: the rule and the stories per layer; set its status; update `README.md` if it lists the labels
-- [ ] 5.2 Ship through the contribution flow: a `docs/story-slicing-rules` branch, a PR using the template, CI green (docs-only, AI review optional), merge
+- [x] 5.2 Ship through the contribution flow: a `docs/story-slicing-rules` branch, a PR using the template, CI green (docs-only, AI review optional), merge
