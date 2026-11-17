@@ -728,3 +728,118 @@ merge
   - `AGENTS.md` (13 E2E test rules, stack table), `openspec/config.yaml` (tasks rule: an E2E test or a manual check per spec scenario), `README.md` (stack, Getting started), `docs/checklist.md`.
   - GitHub: `gh` installed and signed in; `main` protected (CI `check` required, up to date, PR required, admins included).
 - **Result:** PR #1 (E2E setup) and PR #3 (archive) are merged with green CI. Throwaway PR #2 showed that a failing E2E test blocks the merge and uploads the report. The swipe helpers needed two fixes found on the way: the mouse wheel doesn't follow scroll-snap in headless Chromium, and `synthesizeScrollGesture` doesn't scroll on Linux, so they now send raw touch events (360 of 360 runs on macOS and Linux). Next: add REC-001's E2E tasks to `add-vertical-swipe-feed`.
+
+## 93. Log the whole session (dialog answer)
+
+```
+Whole session (Recommended)
+```
+
+## 94. Open the prompt-log PR (button answer)
+
+```
+Yes, open a PR
+```
+
+## 95. Fix the pend- flow and merge
+
+```
+When "pend-"  is called, i will review and after review PR an merge. withowt asking. fix the flow. and merge now
+```
+
+## 96. Explore DoR, DoD and a contribution guide
+
+```
+Explore: I want to have My DoR, DoD, and Contribution Document ready. And on this cover a flow for PR review with a template aditional reviewer will be optional for now. if we dont have that mechanism on github we have to addit.
+```
+
+## 97. Ask where the AI review runs
+
+```
+AI review how is made? on a tool on gh or localy?
+```
+
+## 98. Choose the local AI review
+
+```
+lets do local.
+```
+
+## 99. Choose separate DoR and DoD files
+
+```
+Option B
+```
+
+## 100. Accept the production @smoke check
+
+```
+production check with @smoke its ok
+```
+
+## 101. Run the production check automatically
+
+```
+B
+```
+
+## 102. Create the change
+
+```
+yes, create the change
+```
+
+## 103. Apply the change (button answer)
+
+```
+Apply it
+```
+
+## 104. Trigger for the production smoke (dialog answer)
+
+```
+Vercel status on main (Recommended)
+```
+
+## 105. Approve the GitHub settings (dialog answer)
+
+```
+Apply them (Recommended)
+```
+
+## 106. Ask what is left
+
+```
+what is missing and whay is nor done?
+```
+
+## 107. Merge PR #5
+
+```
+merge it
+```
+
+## 108. Archive the change (button answer)
+
+```
+Archive it
+```
+
+## 109. Merge PR #7 (button answer)
+
+```
+Yes, merge it
+```
+
+### Summary (prompts 93–109)
+
+- **Goal:** fix the `pend-` flow so prompt logs merge without asking, then set up a Definition of Ready, a Definition of Done and a contribution flow (PR template, local AI review, optional human review, production smoke check) as an OpenSpec change, and ship it through that same flow.
+- **Changes:**
+  - `docs/prompts.md`: prompts 66–92 logged (PR #4); the `pend-` memory now commits, opens the PR and merges without asking.
+  - `CONTRIBUTING.md`, `docs/process/definition-of-ready.md`, `docs/process/definition-of-done.md`: the flow and the two checklists, linking the rules in `AGENTS.md`.
+  - `.github/pull_request_template.md`, `.github/CODEOWNERS` (`* @jpabloaljure`).
+  - `.github/workflows/smoke-production.yml`: `@smoke` against production when the `Vercel` commit status turns green on `main` (Vercel sends no deployment events here); `playwright.config.ts` gains `BASE_URL`.
+  - `AGENTS.md` ("Contributing" section), `README.md`, `docs/checklist.md`.
+  - `openspec/changes/archive/2026-11-16-add-contribution-workflow/`: proposal, design (8 decisions), tasks (12 of 12).
+  - GitHub: conversation resolution required, merge commits only, head branches deleted after merge; `gh` token gained the `workflow` scope.
+- **Result:** PR #5 went through the new flow: CI green, AI review posted 6 comments (4 fixed, 2 answered), all resolved, merged; the production smoke passed on merge commit `4a923e2` and the branch was deleted automatically. PR #7 archived the change, and its new-PR page showed the template filling the body. Next: add E2E tasks and a DoD close-out to REC-001 (`add-vertical-swipe-feed`).
