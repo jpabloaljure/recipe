@@ -10,8 +10,11 @@ Project context for AI agents (Claude Code, Cursor, etc.).
 
 A mobile-first web app with a vertical feed of YouTube cooking Shorts. Each
 video comes with an easy recipe (servings, ingredients, numbered steps),
-extracted ahead of time by an LLM. The PRD lives in `docs/PRD.md` and is the
-product source of truth.
+extracted ahead of time by an LLM. The PRD lives in `docs/PRD.md`: it is the
+high-level product description for stakeholders, not the source of truth.
+When a decision changes the product, update the PRD in the same change so it
+stays aligned with the backlog, code and documentation; detail stays in the
+backlog and docs.
 
 ### Stack
 

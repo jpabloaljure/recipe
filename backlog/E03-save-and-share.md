@@ -87,7 +87,7 @@ As a home cook, I want a shared link to open straight on that recipe, so that I 
 - Given a deep link for an ID that is unknown or not `ready`, when I open it, then I land on the regular feed without an error (assumed).
 
 ### Technical context
-—
+Owns how a deep-linked video joins the visit's feed (from REC-002 validation, #24, 2026-11-16): the linked video plays first, then the regular feed (REC-002) starts at page 1, and the client skips the linked video if it comes up again in the feed.
 
 ### Estimation notes
 M: a new entry point into the feed plus a single-video request.

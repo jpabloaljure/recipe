@@ -1,7 +1,7 @@
 # Backlog
 
-File-based backlog for Easy Recipes from YouTube. The source of truth for
-product scope is `docs/PRD.md`; full conventions live in `AGENTS.md`.
+File-based backlog for Easy Recipes from YouTube. `docs/PRD.md` describes
+the product at a high level; full conventions live in `AGENTS.md`.
 
 ## Files
 
@@ -12,7 +12,7 @@ product scope is `docs/PRD.md`; full conventions live in `AGENTS.md`.
 | E03 Save and share without an account | `E03-save-and-share.md` | G3 |
 | E04 Launch readiness | `E04-launch-readiness.md` | §8 |
 
-Next free story ID: **REC-019**.
+Next free story ID: **REC-022**.
 
 Ideas found during validation that are outside the MVP are parked in
 [draft-backlog-list.md](draft-backlog-list.md) (not stories yet).
@@ -74,14 +74,22 @@ a timebox in hours (`spike <N>h`), never in points.
    (WebKit, including Chrome on iPhone) is out of scope. Decided 2026-11-16
    while validating REC-001; stories that assume other browsers are aligned
    as they are validated (REC-003, REC-015).
+2. "Light shuffling" (REC-002): pages come newest first; the client shuffles
+   videos within each page once per visit. The periodic availability check
+   is out of the MVP (`draft-backlog-list.md` D-5). Decided 2026-11-16.
+3. The PRD is not the source of truth: it is the high-level product
+   description for stakeholders. When a decision changes the product (for
+   example a behavior moved out of the MVP), the PRD is updated in the same
+   change so it stays aligned with the backlog, code and documentation.
+   Detail stays in the backlog; out-of-MVP items are tracked in
+   `draft-backlog-list.md`. Decided 2026-11-16 (REC-002 validation, #22).
 
 ## Open decisions
 
 1. Seed channels and search queries (REC-005).
 2. Whether favorites save a copy of the recipe (REC-012).
-3. Meaning of "light shuffling" and availability-check frequency (REC-002).
-4. What counts as one "view" for auto-opening the panel (REC-007).
-5. Whether the unmute "session" means the tab or the visit (REC-003).
-6. Deep link behavior for unknown or non-ready videos (REC-014).
-7. Whether to add a `type:docs` story for maintainers rescuing `needs_recipe`
+3. What counts as one "view" for auto-opening the panel (REC-007).
+4. Whether the unmute "session" means the tab or the visit (REC-003).
+5. Deep link behavior for unknown or non-ready videos (REC-014).
+6. Whether to add a `type:docs` story for maintainers rescuing `needs_recipe`
    videos by editing the database (§6.4).

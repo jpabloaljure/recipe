@@ -64,6 +64,9 @@ Then a short **Verdict**:
 ## Constraints
 
 - Only list; never rewrite the story, its criteria, or any file.
+- Do not propose fixes or alternatives; the "Question for the team" column
+  names the decision, not its answer. Options are built afterwards, as a
+  separate step (the `validate-backlog` skill does this).
 - Every finding cites its source (PRD section, story ID, ADR, rule) or is
   marked `(inferred)`.
 - Do not propose features outside the PRD; if a gap points to one, say it
