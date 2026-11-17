@@ -1029,3 +1029,29 @@ Yes, merge it
   - `docs/checklist.md`: items 7–10 point at their stories.
   - `openspec/changes/archive/2026-11-16-add-story-slicing-rules/`: proposal, design (7 decisions), tasks (12 of 12).
 - **Result:** stories are full-stack slices by default and split by layer only when over 13 points, when a layer is shared, or when a layer carries its own risk; the parent keeps the user-facing slice. PRs #10, #11 and #12 merged with green CI. Checklist item 10 is partial until a DB and a backend story are validated; items 7 and 8 wait on REC-020 and REC-021.
+
+## 137. Which changes go through OpenSpec
+
+```
+question. In good practice What changes should go throwgh open spec and what changes not? I mean User sorys, refactors or what kind of changes?
+```
+
+## 138. Make the agent suggest a path for every change
+
+```
+fix the documentation to every time i ask for a change or explore a change it suggest tome the one of the 2 paths with a short justification.
+```
+
+## 139. Rebase, open the PR and merge
+
+```
+rebase on master and pr and merge
+```
+
+### Summary (prompts 137–139)
+
+- **Goal:** settle which changes go through OpenSpec and which go straight to a PR, and have the agent recommend one path, with a short reason, whenever a change is requested or explored.
+- **Changes:**
+  - `CONTRIBUTING.md`: new section "Choosing a path: OpenSpec or direct PR" (two-question test plus a table of typical cases).
+  - `AGENTS.md`: new rule "Suggest a path for every change" under Contributing. The generated OpenSpec skills were left unedited because `openspec update` overwrites them.
+- **Result:** PR #13 merged with green CI (`main` is the base; there is no `master`). OpenSpec when a spec scenario changes or a design decision needs review first; otherwise a direct PR.
