@@ -951,3 +951,81 @@ lets rebse with master nad do pend again here
   - `backlog/README.md`, `AGENTS.md`: the PRD is the high-level description for stakeholders, not the source of truth, and is updated whenever a decision changes the product (Decided 2, 3). `docs/PRD.md` v0.2 aligned (API-2, PERF-6, §9, §10).
   - `backlog/validation-log.md`: REC-002 validated (findings #1–#39); REC-003 in review.
 - **Result:** REC-002 is validated (AI estimate 5, team estimate 5) and stays blocked by REC-019; #28 (E2E data and a predictable shuffle) is to be re-checked. REC-003's first check found 16 findings, with options waiting for a choice. The first prompt-log PR (#6) clashed with prompts 93–109 logged from another session, so this log replaces it. The backlog and skill changes are not committed yet.
+
+## 110. Which stories hold the data model and API spec; full stack or layers
+
+```
+in the backlog what US holds  the Data model(No implementation), the Api Specification (No implementation). Also ansuwer wether are we separating tickets for DB, Backend, Forntend or our metodology is fullstack?
+```
+
+## 111. Add the data model and API spec stories (button answer)
+
+```
+Yes, add both
+```
+
+## 112. Explore full stack by default, layers when splitting
+
+```
+Item 10 (work tickets per layer) for this specify on agent our full stack aproch when it fit in a story but when the storys needs to be divided use the layer aproch. Explore this
+```
+
+## 113. Keep the maintainer role
+
+```
+for #2 keep mantainer to keept it simple agree? or you found value in adding developer? .
+```
+
+## 114. Agree on decisions 1, 2 and 4
+
+```
+1, 2  and 4 i agree the recommendation.  3 explain little more
+```
+
+## 115. Choose option C and propose the change
+
+```
+C I acree and lets do the propouse
+```
+
+## 116. Apply the change (button answer)
+
+```
+Apply it
+```
+
+## 117. Ship the uncommitted validation work first (dialog answer)
+
+```
+Ship them in a PR first (Recommended)
+```
+
+## 118. Confirm the layer table (dialog answer)
+
+```
+Apply as proposed (Recommended)
+```
+
+## 119. Archive the change (button answer)
+
+```
+Archive it
+```
+
+## 120. Merge PR #12 (button answer)
+
+```
+Yes, merge it
+```
+
+### Summary (prompts 110–120)
+
+- **Goal:** find which stories own the data model and API specification, decide how stories are sliced (full stack or by layer) for Entrega 1 checklist item 10, and record that as a project rule.
+- **Changes:**
+  - `backlog/E01-browse-feed.md`: REC-020 (data model document) and REC-021 (API spec document), docs only; `backlog/README.md` next free ID REC-022.
+  - PR #10: the earlier backlog validation work (REC-001 and REC-002 validated, REC-019), PRD, `AGENTS.md` and skill edits, committed before the new change.
+  - `AGENTS.md` ("Story slicing", `layer:*` label, `split-from:` flag, wider maintainer role), `backlog/README.md`, `README.md`, DoR and DoD, skills `decompose-prd`, `validate-story`, `estimate-story`.
+  - `backlog/E01`–`E04`: a `layer:` label on all 21 stories; `split-from:` on REC-018 and REC-019.
+  - `docs/checklist.md`: items 7–10 point at their stories.
+  - `openspec/changes/archive/2026-11-16-add-story-slicing-rules/`: proposal, design (7 decisions), tasks (12 of 12).
+- **Result:** stories are full-stack slices by default and split by layer only when over 13 points, when a layer is shared, or when a layer carries its own risk; the parent keeps the user-facing slice. PRs #10, #11 and #12 merged with green CI. Checklist item 10 is partial until a DB and a backend story are validated; items 7 and 8 wait on REC-020 and REC-021.
