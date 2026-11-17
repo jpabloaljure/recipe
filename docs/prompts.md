@@ -728,3 +728,93 @@ merge
   - `AGENTS.md` (13 E2E test rules, stack table), `openspec/config.yaml` (tasks rule: an E2E test or a manual check per spec scenario), `README.md` (stack, Getting started), `docs/checklist.md`.
   - GitHub: `gh` installed and signed in; `main` protected (CI `check` required, up to date, PR required, admins included).
 - **Result:** PR #1 (E2E setup) and PR #3 (archive) are merged with green CI. Throwaway PR #2 showed that a failing E2E test blocks the merge and uploads the report. The swipe helpers needed two fixes found on the way: the mouse wheel doesn't follow scroll-snap in headless Chromium, and `synthesizeScrollGesture` doesn't scroll on Linux, so they now send raw touch events (360 of 360 runs on macOS and Linux). Next: add REC-001's E2E tasks to `add-vertical-swipe-feed`.
+
+## 93. Resume backlog validation
+
+```
+/validate-backlog
+```
+
+## 94. Ask for suggestions on the key findings
+
+```
+what are your sugestions for 1,2,7,4
+```
+
+## 95. Move the availability check out of the MVP
+
+```
+4# move this out of MVP keep on the draft back backlog List. 1, 2 ,7 stick with your sugestion.
+```
+
+## 96. Options as a separate step after findings
+
+```
+Fix this agent flow so you gave me the suggestions and alternatives. for me to deside. Always build the suggestions/alternatives choice after building the findings. not at the same time.
+```
+
+## 97. Build the options (button answer)
+
+```
+Yes, build options
+```
+
+## 98. Next-page failure and cache choices
+
+```
+#18 REC-018 owns we will handle there. #15 + #5 Go with C for MVP and draft backloaded for future improvement.
+```
+
+## 99. PRD role, first take
+
+```
+#22. PRD its an initial document that does not need to be updated. with those missing behaviours that are not on the Epics, we can add them to the draft.backlog.list.  Or correct if im wrong with this rezoning. All the rest do as recomended.
+```
+
+## 100. Schema story, deferred E2E check, PRD role revised
+
+```
+#27 B. separate story. #28 Revalidate after the E2E pr is done. #22 PRD.md is not the source of truth. but is the document that describe the product at high level. so updated each time is needed in consequence so it does have the main context of the project to be readable to the stakeholders but keep it aligned with the project's reality, code and documentation. For all the rest # do as recommended.
+```
+
+## 101. Accept the recommended options
+
+```
+all A
+```
+
+## 102. Tied ready times
+
+```
+#38 A
+```
+
+## 103. Paging skips nothing
+
+```
+#39 A
+```
+
+## 104. Approve REC-002's acceptance criteria (button answer)
+
+```
+AC approved
+```
+
+## 105. Team estimate for REC-002 (button answer)
+
+```
+5
+```
+
+### Summary (prompts 93–105)
+
+- **Goal:** validate REC-002 (feed shows only ready videos, newest first with variety) with the `validate-backlog` flow, and change that flow so options come after the findings, as their own step.
+- **Changes:**
+  - `.agents/skills/validate-backlog/SKILL.md`: new Options step (a recommended option A plus alternatives for each finding, built after the findings) and an `#N A` choice command. `validate-story` and the `story-validator` agent now list findings only.
+  - `backlog/E01-browse-feed.md`: REC-002 rewritten (10 ACs; client shuffles within each page; cursor on ready time and id; page size 10; 1-hour cache, `no-store` for empty and error responses; AI estimate 5). New story REC-019 (database schema and migration; the database sets the ready time). REC-018 now owns next-page failures and reaching the end while a page is loading.
+  - `backlog/E03-save-and-share.md`: REC-014 owns how a deep-linked video joins the feed.
+  - `backlog/draft-backlog-list.md`: D-5 (periodic availability check) and D-6 (refresh the cache after ingestion).
+  - `backlog/README.md`, `AGENTS.md`: the PRD is the high-level description for stakeholders, not the source of truth, and is updated whenever a decision changes the product (Decided 2, 3). `docs/PRD.md` v0.2 aligned (API-2, PERF-6, §9, §10).
+  - `backlog/validation-log.md`: every finding (#1–#39) and decision recorded.
+- **Result:** REC-002's findings #1–#39 are resolved and its criteria approved; AI estimate 5, team estimate 5. Still to do: say "validated" to record the estimate and remove its flag. #28 (E2E data and a predictable shuffle) is to be re-checked after the E2E PR. The backlog and skill changes are not committed yet.
