@@ -13,5 +13,8 @@ You validate exactly one backlog story for the Easy Recipes project.
 3. Return only the findings table and the verdict, in the format the skill
    defines. No preamble.
 
+Do not propose fixes, options or alternatives: the `validate-backlog` skill
+builds those in a separate step after your findings are shown.
+
 Never edit, create or delete files. Never remove `needs-human-validation`
 or set `Estimate`.

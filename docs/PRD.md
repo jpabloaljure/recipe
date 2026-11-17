@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
-| **Date** | 2026-11-14 |
+| **Status** | Draft v0.2 |
+| **Date** | 2026-11-14 (updated 2026-11-16) |
 | **Scope** | MVP |
 | **Platform** | Web app (mobile-first, desktop supported) |
 
@@ -112,7 +112,7 @@ For the MVP, a maintainer can add a recipe by editing the database directly and 
 | ID | Requirement |
 |---|---|
 | API-1 | Returns a paginated feed of `ready` videos with their recipe included, so the panel opens with no extra request. |
-| API-2 | Feed order for the MVP: newest first, with light shuffling so returning users see variety. |
+| API-2 | Feed order for the MVP: newest first, with light shuffling so returning users see variety (videos are shuffled within each page of the feed, differently on each visit). |
 | API-3 | Returns a single video and its recipe by ID (for deep links). |
 
 ## 7. Performance requirements
@@ -126,7 +126,7 @@ Speed is a core requirement: users should never wait on videos.
 | PERF-3 | The next video starts in **< 500 ms** after a swipe. The client preloads the next 1–2 videos and their recipes. |
 | PERF-4 | The recipe panel opens instantly (its data arrives with the feed). |
 | PERF-5 | Only a few video players are kept alive at once (current, previous, next) to keep memory and CPU low. |
-| PERF-6 | Feed responses are cacheable (CDN/edge). |
+| PERF-6 | Feed responses are cacheable (CDN/edge). In the MVP they are cached for up to an hour, so new videos can take up to an hour to appear. |
 
 ## 8. Success criteria (MVP)
 
@@ -149,7 +149,7 @@ Speed is a core requirement: users should never wait on videos.
 | **Pinned comment not identifiable** through the API. | "First comment" may not be the creator's recipe. | Prefer comments by the channel owner. The LLM checks that the text is actually a recipe. |
 | **LLM extraction errors.** | Wrong quantities or missing steps. | Completeness rules (EXT-5), pre-launch accuracy review, `needs_recipe` fallback. |
 | **LLM cost.** | Running cost. | Extraction runs once per video. Small daily volume. |
-| **Videos removed after ingestion.** | Broken items in the feed. | Periodic availability check; mark them `unavailable`. |
+| **Videos removed after ingestion.** | Broken items in the feed. | MVP: the feed skips a video that fails to load, and a maintainer can mark it `unavailable`. A periodic availability check comes after the MVP (§10). |
 | **Autoplay rules.** | Sound can't start without a user action. | Muted autoplay plus a tap to unmute (§5.2). |
 
 ## 10. Future roadmap (post-MVP)
@@ -161,6 +161,7 @@ Speed is a core requirement: users should never wait on videos.
 6. Engagement analytics.
 7. More languages and translated recipes.
 8. Users can paste their own YouTube URL.
+9. Periodic availability check that marks removed videos `unavailable`.
 
 ## 11. Out of scope for this document
 Tech stack, hosting, and architecture belong in a separate technical design document.
