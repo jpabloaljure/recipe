@@ -13,7 +13,7 @@
 ## 3. GitHub templates
 
 - [ ] 3.1 Add `.github/pull_request_template.md` (design Decision 5) with What, Why, Story and OpenSpec change, How it was tested, Manual checks, Notes for reviewers, the DoD checklist for the PR (linking the DoD file) and Reviewer (optional); verify it renders as a new PR's body (checked on this change's own PR in 5.1)
-- [ ] 3.2 Add `.github/CODEOWNERS` with `* @jpabloaljure`; verify GitHub shows no CODEOWNERS errors on the file's page and requests the owner's review on this change's PR
+- [x] 3.2 Add `.github/CODEOWNERS` with `* @jpabloaljure`; verify GitHub shows no CODEOWNERS errors on the file's page and requests the owner's review on this change's PR. Result: no errors (`codeowners/errors` on the branch is empty); no review was requested on PR #5 because GitHub never requests a review from the PR's author, so the docs now say the request applies to PRs opened by others
 
 ## 4. Production smoke check
 

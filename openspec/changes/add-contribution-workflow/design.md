@@ -107,7 +107,8 @@ Steps before merge, in order:
    the thread. **Required**, except for docs-only PRs (only Markdown or
    other non-code files changed), where it is optional.
 4. **Human review:** optional. CODEOWNERS (`* @jpabloaljure`) requests a
-   review automatically; it is not required.
+   review automatically on PRs opened by someone else (GitHub never requests
+   the author's own review, so the owner's PRs get none); it is not required.
 5. Merge when CI is green and every conversation is resolved.
 
 Settings that make this hold: required approvals stay **0**; **conversation

@@ -78,7 +78,8 @@ Before merge, in order:
    one, then resolve the thread. **Required**, except for docs-only PRs
    (only Markdown or other non-code files changed), where it is optional.
 4. **Human review.** Optional for now. CODEOWNERS requests a review from the
-   owner automatically, but it is not required.
+   owner automatically on PRs opened by anyone else (GitHub never asks a PR's
+   author to review it), but it is not required.
 5. **Merge** when CI is green and every conversation is resolved. Branch
    protection blocks the merge while any review thread is open.
 
