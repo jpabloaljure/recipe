@@ -35,6 +35,36 @@ archive the OpenSpec change (docs PR)  -->  story `done` (meets the DoD)
 Work that implements no story (tooling, docs, process) skips the backlog
 steps but follows the same branch, PR and review steps.
 
+## Choosing a path: OpenSpec or direct PR
+
+Every change takes one of two paths. Both end in a pull request with green
+CI and the review steps below; they differ in whether an OpenSpec change
+(proposal, delta specs, design, tasks) comes first.
+
+Decide with two questions, in order:
+
+1. **Does a requirement or scenario in `openspec/specs/` change** (added,
+   removed or reworded)? Yes → **OpenSpec**.
+2. **If not, is there a design decision a reviewer should see before code
+   is written** (new module boundaries, a schema migration, swapping a
+   library, a cross-cutting rule)? Yes → **OpenSpec** (proposal and design;
+   the delta spec may be minimal).
+
+Otherwise → **direct PR**: a `<type>/<short-name>` branch and a pull
+request, linking the story when there is one.
+
+| OpenSpec | Direct PR |
+|---|---|
+| A `type:feature` story that changes behavior | A bug where code breaks a scenario the spec already states correctly |
+| A bug where the intended behavior is missing from the spec, or wrong in it | A small refactor with no behavior change (renames, extractions, cleanup) |
+| An architecture decision (also gets an ADR) | Dependency bumps, CI, lint and tooling (`chore`) |
+| A large refactor with real design choices | Docs-only changes, typos, prompt logs (`docs`) |
+| A process change that touches several files and needs debate | A spike (its result goes to the story or an ADR; any change it leads to is decided again) |
+|  | Copy or styling tweaks no scenario mentions |
+
+When in doubt, prefer OpenSpec: a short proposal costs little, while a
+behavior change that skipped the specs leaves them out of date.
+
 ## Branches
 
 `main` is protected: every change goes through a pull request and needs the
