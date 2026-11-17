@@ -205,3 +205,12 @@ E2E tests use Playwright in Chromium (ADR 0006). Run them with
   `1|2|3|5|8|13` or `spike <N>h`.
 - Launch checks (PRD §8: real-device performance, extraction accuracy review)
   are typed `type:spike` with a timebox.
+
+## Contributing
+
+How work flows from story to production (branches, pull requests, the
+required AI review, merge, the production smoke check and close-out) is in
+[CONTRIBUTING.md](CONTRIBUTING.md). A story becomes an OpenSpec change only
+when it meets the [Definition of Ready](docs/process/definition-of-ready.md),
+and is set to `Status: done` only when it meets the
+[Definition of Done](docs/process/definition-of-done.md).

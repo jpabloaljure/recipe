@@ -3,6 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 // End-to-end tests (ADR 0006). Rules: AGENTS.md "End-to-end (E2E) test rules".
 const isCI = !!process.env.CI;
 const port = 3000;
+// Set BASE_URL to test a deployed site (e.g. the production smoke check);
+// then no local server is started.
+const baseURL = process.env.BASE_URL || `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "e2e",
@@ -12,7 +15,7 @@ export default defineConfig({
   retries: 0,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : [["list"], ["html", { open: "on-failure" }]],
   use: {
-    baseURL: `http://localhost:${port}`,
+    baseURL,
     trace: "retain-on-failure",
   },
   projects: [
@@ -30,10 +33,12 @@ export default defineConfig({
     },
   ],
   // Always the production build: CI builds in an earlier step, so it only starts.
-  webServer: {
-    command: isCI ? "pnpm start" : "pnpm build && pnpm start",
-    url: `http://localhost:${port}`,
-    reuseExistingServer: !isCI,
-    timeout: 180_000,
-  },
+  webServer: process.env.BASE_URL
+    ? undefined
+    : {
+        command: isCI ? "pnpm start" : "pnpm build && pnpm start",
+        url: `http://localhost:${port}`,
+        reuseExistingServer: !isCI,
+        timeout: 180_000,
+      },
 });

@@ -252,6 +252,10 @@ This project is planned with AI agents. The pieces:
   validated. The first change, `choose-tech-stack`, picked the stack and set
   up the architecture docs. Designs that make an architecture decision must
   name their ADRs and C4 updates (`openspec/config.yaml`).
+- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md) (branches, pull
+  requests, AI review, merge, production smoke check), with the
+  [Definition of Ready](docs/process/definition-of-ready.md) and the
+  [Definition of Done](docs/process/definition-of-done.md).
 - **Prompt log:** [docs/prompts.md](docs/prompts.md).
 
 ## Getting started
@@ -277,6 +281,14 @@ pnpm test:e2e --grep @smoke             # smoke test only
 
 `pnpm test:e2e` reuses a server already running on port 3000; stop
 `pnpm dev` first so the tests run against the production build.
+
+To test a deployed site instead, set `BASE_URL`; Playwright then starts no
+local server. The production smoke check (run automatically after each
+production deploy, see [CONTRIBUTING.md](CONTRIBUTING.md#production-smoke-check)):
+
+```bash
+BASE_URL=https://recipe-henna-pi.vercel.app pnpm test:e2e --grep @smoke --project=desktop --project=phone-portrait
+```
 
 The app is a placeholder page for now. No database or environment variables
 are needed yet.
