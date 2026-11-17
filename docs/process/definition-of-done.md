@@ -32,7 +32,7 @@ in [AGENTS.md](../../AGENTS.md).
 ## Production
 
 - [ ] The [production smoke check](../../.github/workflows/smoke-production.yml)
-  is green on the merge commit.
+  is green for the merge commit (its run is named after the commit).
 - [ ] The changed feature was looked at on the production URL.
 
 ## Close-out

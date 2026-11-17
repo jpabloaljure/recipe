@@ -5,25 +5,36 @@ name: Production smoke
 # deployments for this repo; it posts a commit status named "Vercel". When
 # that status turns success on a commit on main, production is that commit.
 # Workflows on `status` run from the default branch's copy of this file.
+#
+# `status` cannot be filtered in `on:`, so every commit status in the repo
+# (each Vercel pending/success on PR pushes too) starts a run whose job is
+# then skipped. Such runs attach to main's latest commit (GITHUB_SHA), so the
+# run name carries the deployed commit.
+run-name: Production smoke for ${{ github.event.sha }}
+
 on:
   status:
 
 permissions:
   contents: read
 
-concurrency:
-  group: smoke-production-${{ github.event.sha }}
-  cancel-in-progress: true
-
 env:
   PRODUCTION_URL: https://recipe-henna-pi.vercel.app
 
 jobs:
   smoke:
+    # `branches` lists branches that contain the commit (at most 10), not
+    # only branches whose head it is: a preview of a new branch cut from main
+    # with no new commits also matches, which only re-tests production.
     if: >-
       github.event.context == 'Vercel' &&
       github.event.state == 'success' &&
       contains(github.event.branches.*.name, 'main')
+    # Job-level, so skipped runs never join the group, and a running smoke is
+    # never cancelled by a later status on the same commit.
+    concurrency:
+      group: smoke-production-${{ github.event.sha }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

@@ -145,7 +145,9 @@ rather than copying every item.
   `ci.yml`); runs
   `pnpm test:e2e --grep @smoke --project=desktop --project=phone-portrait`
   with `BASE_URL` set to the production domain; uploads the report on
-  failure. Its result shows on the merge commit.
+  failure. The run is named after the deployed commit; GitHub attaches it to
+  `main`'s latest commit (GITHUB_SHA for `status` events). Concurrency is
+  per commit at job level, so a later status never cancels a running smoke.
 - **Why `status`, not `deployment_status`:** checked at apply time
   (2026-11-16), Vercel creates no GitHub deployments or environments for this
   repo; it only posts a commit status named `Vercel`. The human chose the

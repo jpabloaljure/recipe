@@ -91,8 +91,10 @@ After each merge, Vercel deploys `main` to production
 (<https://recipe-henna-pi.vercel.app>). When Vercel reports that deploy as
 successful (its `Vercel` commit status on the merge commit), the
 [production smoke workflow](.github/workflows/smoke-production.yml) runs the
-`@smoke` E2E tests against the production URL, and its result shows on the
-merge commit.
+`@smoke` E2E tests against the production URL. Find its result in the
+Actions tab as "Production smoke for <commit sha>"; GitHub attaches the run
+to `main`'s latest commit, which is the merge commit unless another merge
+followed quickly.
 
 Run the same check by hand:
 
