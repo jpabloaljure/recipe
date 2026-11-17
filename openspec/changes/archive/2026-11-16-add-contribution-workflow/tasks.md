@@ -12,7 +12,7 @@
 
 ## 3. GitHub templates
 
-- [ ] 3.1 Add `.github/pull_request_template.md` (design Decision 5) with What, Why, Story and OpenSpec change, How it was tested, Manual checks, Notes for reviewers, the DoD checklist for the PR (linking the DoD file) and Reviewer (optional); verify it renders as a new PR's body (checked on this change's own PR in 5.1)
+- [x] 3.1 Add `.github/pull_request_template.md` (design Decision 5) with What, Why, Story and OpenSpec change, How it was tested, Manual checks, Notes for reviewers, the DoD checklist for the PR (linking the DoD file) and Reviewer (optional); verify it renders as a new PR's body (checked on this change's own PR in 5.1). Result: the template only applies from `main`, so it was checked on the archive branch's new-PR page, which filled the body from the template
 - [x] 3.2 Add `.github/CODEOWNERS` with `* @jpabloaljure`; verify GitHub shows no CODEOWNERS errors on the file's page and requests the owner's review on this change's PR. Result: no errors (`codeowners/errors` on the branch is empty); no review was requested on PR #5 because GitHub never requests a review from the PR's author, so the docs now say the request applies to PRs opened by others
 
 ## 4. Production smoke check
@@ -25,7 +25,7 @@
 ## 5. GitHub settings and first use (human-approved)
 
 - [x] 5.1 With the human's approval, turn on "require conversation resolution" in `main`'s branch protection, set the merge method to merge commits only, and turn on automatic deletion of head branches (`gh api`); verify by reading the settings back (approvals still 0, `check` still required, admins still enforced)
-- [ ] 5.2 Ship this change through the new flow: a `chore/contribution-workflow` branch, a PR using the template, CI green, `/code-review --comment` run and every comment resolved, merge; then verify the production smoke workflow ran on the merge commit and is green, and the branch was deleted automatically
+- [x] 5.2 Ship this change through the new flow: a `chore/contribution-workflow` branch, a PR using the template, CI green, `/code-review --comment` run and every comment resolved, merge; then verify the production smoke workflow ran on the merge commit and is green, and the branch was deleted automatically
 
 ## Workflow follow-up
 
