@@ -13,6 +13,9 @@ in [AGENTS.md](../../AGENTS.md).
 - [ ] Every automatable spec scenario has a passing E2E test; the rest are
   listed as manual checks in the change's tasks and were done
   ([E2E rules](../../AGENTS.md#end-to-end-e2e-test-rules) 12 and 13).
+  A `layer:db` or `layer:backend` story that changes nothing the user sees
+  needs unit or contract tests instead; the user-facing slice carries the
+  E2E tests ([Story slicing](../../AGENTS.md#story-slicing)).
 - [ ] CI `check` is green.
 
 ## Docs and architecture

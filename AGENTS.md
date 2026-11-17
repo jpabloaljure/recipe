@@ -62,10 +62,10 @@ The backlog lives in files under `backlog/`. No external tracker is used yet.
   IDs are global and never reused or renumbered.
 - Each story starts with a metadata list:
   - **Status:** `todo` | `in-progress` | `blocked` | `done`
-  - **Labels:** one each of module, type, size (see below)
+  - **Labels:** one each of module, type, size, layer (see below)
   - **PRD:** the PRD sections/IDs the story comes from (e.g. `5.2, PERF-3`)
   - **Flags:** e.g. `needs-human-validation`, `needs-splitting`,
-    `blocked-by:REC-014`, or `—`
+    `blocked-by:REC-014`, `split-from:REC-002`, or `—`
   - **AI estimate:** the `estimate-story` opinion in Fibonacci story points
     (`1` | `2` | `3` | `5` | `8` | `13`) or, for a spike, a timebox (e.g.
     `spike 8h`); `—` until estimated. One voice in the team's estimate.
@@ -107,9 +107,43 @@ account), E04 = launch readiness (PRD §8).
 - Type: `type:feature`, `type:bug`, `type:refactor`, `type:docs`, `type:spike`
 - Module: `module:feed`, `module:playback`, `module:recipe-panel`,
   `module:extraction`, `module:ingestion`, `module:favorites`, `module:sharing`
+- Layer: `layer:fullstack`, `layer:db`, `layer:backend`, `layer:frontend`
+  (spikes and docs stories take the layer they investigate or document; see
+  "Story slicing")
 
 User stories use the format "As a [role], I want [action], so that [benefit]".
-Roles from the PRD: **home cook** (§3) and **maintainer** (§6.4, operations only).
+Roles from the PRD: **home cook** (§3) and **maintainer** (§6.4): the
+maintainer operates and builds the app (operations, plus technical and layer
+stories whose value is internal, such as a schema or a contract). A layer
+story keeps the home cook role when its value reaches the user. There is no
+"developer" role.
+
+### Story slicing
+
+A story is a full-stack slice (`layer:fullstack`): database, API and UI
+together, as far as it needs them. A story that lives in one layer gets that
+layer's label without being split. Split a story by layer only when:
+
+1. it is over 13 points or flagged `needs-splitting`;
+2. one layer is shared by several stories (e.g. a schema); or
+3. one layer carries its own risk or open decision that should be settled or
+   estimated on its own.
+
+Touching several layers is not a reason to split. How to split:
+
+- **The parent** keeps its ID, its role, its user-facing acceptance criteria
+  and the slice the user sees (usually `layer:frontend`). It gets
+  `blocked-by:` for each child, and is re-sized, re-checked with
+  `validate-story` and re-estimated for what it keeps.
+- **Each child** is a new story (next free ID) flagged
+  `split-from:REC-<NNN>` (the parent) and `needs-human-validation`, with its
+  own layer label, criteria and estimate.
+- A split by behavior instead of by layer (e.g. REC-018, the error states
+  taken out of REC-001) also flags the child `split-from:`, but the parent is
+  `blocked-by` it only if the parent needs it.
+- A `layer:db` or `layer:backend` story that changes nothing the user sees is
+  done with unit or contract tests (E2E rule 12); the user-facing slice
+  carries the E2E tests.
 Acceptance criteria use the Given/When/Then format, following the rules below.
 
 ### Acceptance criteria (BDD) rules

@@ -41,6 +41,12 @@ or still open, and mark each previous finding as `resolved` or `open`.
 5. **Rule checks:** criteria that break the BDD rules in `AGENTS.md` (more
    than one `When`, too many `And`s, more than one behavior), or content
    that conflicts with PRD non-goals or an Accepted ADR.
+6. **Slicing checks** ("Story slicing" in `AGENTS.md`): the story has
+   exactly one `layer:` label and it matches the work; a trigger for a layer
+   split holds (over 13 points, a layer shared by several stories, or a layer
+   with its own risk or open decision); for a layer split, each child is
+   flagged `split-from:` the parent, the parent is `blocked-by` each child,
+   and the parent kept the user-facing criteria.
 
 ## Output
 
@@ -52,14 +58,14 @@ In chat:
 |---|---|---|---|---|
 
 Types: `edge-case`, `assumption`, `missing-scenario`, `dependency`, `risk`,
-`rule`. Order by impact: findings that would change scope or the estimate
+`rule`, `slicing`. Order by impact: findings that would change scope or the estimate
 first.
 
 Then a short **Verdict**:
 - **Ready to validate:** no finding changes scope; list what to confirm.
 - **Needs refinement:** name the findings that must be resolved first.
-- **Consider splitting:** findings show more than one behavior or an XL
-  scope.
+- **Consider splitting:** findings show more than one behavior, an XL
+  scope, or a trigger for a layer split.
 
 ## Constraints
 

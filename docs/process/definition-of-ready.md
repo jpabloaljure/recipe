@@ -18,6 +18,9 @@ live in [AGENTS.md](../../AGENTS.md), not here.
   `.claude/hooks/validate-ac.sh` enforces it.
 - [ ] **Small enough.** Not flagged `needs-splitting`; estimate within the
   scale in [Estimation](../../AGENTS.md#estimation).
+- [ ] **Sliced.** A full-stack story, or a layer story flagged `split-from:`
+  whose parent is `blocked-by` it. See
+  [Story slicing](../../AGENTS.md#story-slicing).
 - [ ] **Not blocked.** Every `blocked-by:REC-NNN` story is `done`.
 - [ ] **Context known.** Dependencies, risks and open decisions are written
   in the story's Technical context, and any spike that de-risks the story is
@@ -27,7 +30,7 @@ live in [AGENTS.md](../../AGENTS.md), not here.
 
 ## Spikes
 
-A `type:spike` story needs only the first five items. Its estimate is a
+A `type:spike` story needs only the first six items. Its estimate is a
 timebox (`spike <N>h`).
 
 ## Next

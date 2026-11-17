@@ -6,7 +6,7 @@ prd-goal: "§8"
 
 ## REC-015 · Spike: performance check on a real mid-range phone
 - **Status:** todo
-- **Labels:** module:playback, type:spike, size:M
+- **Labels:** module:playback, type:spike, size:M, layer:frontend
 - **PRD:** 8, PERF-2, PERF-3
 - **Flags:** needs-human-validation; blocked-by:REC-001, blocked-by:REC-004
 - **AI estimate:** —
@@ -28,7 +28,7 @@ Required for launch; a failure reopens REC-001/REC-004.
 
 ## REC-016 · Spike: extraction accuracy review
 - **Status:** todo
-- **Labels:** module:extraction, type:spike, size:M
+- **Labels:** module:extraction, type:spike, size:M, layer:backend
 - **PRD:** 8, 9 (LLM extraction errors)
 - **Flags:** needs-human-validation; blocked-by:REC-008, blocked-by:REC-010, blocked-by:REC-017
 - **AI estimate:** —

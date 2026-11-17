@@ -22,10 +22,11 @@ Ideas found during validation that are outside the MVP are parked in
 Each story is a `## REC-<NNN> · <title>` section with:
 
 - **Status:** `todo` | `in-progress` | `blocked` | `done`
-- **Labels:** one each of `module:*`, `type:*`, `size:*`
+- **Labels:** one each of `module:*`, `type:*`, `size:*`, `layer:*`
+  (`fullstack` | `db` | `backend` | `frontend`)
 - **PRD:** the PRD sections/IDs it comes from
 - **Flags:** `needs-human-validation`, `needs-splitting`,
-  `blocked-by:REC-<NNN>`, `(assumed) ...`, or `—`
+  `blocked-by:REC-<NNN>`, `split-from:REC-<NNN>`, `(assumed) ...`, or `—`
 - **AI estimate:** `estimate-story`'s Fibonacci points (`1` | `2` | `3` | `5`
   | `8` | `13`), or `spike <N>h`; `—` until estimated
 - **Estimate:** the team-agreed points, same scale; `—` until estimated
@@ -49,6 +50,14 @@ then the team's.
 
 More than 13 points means the story needs splitting. Spikes are estimated as
 a timebox in hours (`spike <N>h`), never in points.
+
+## Splitting
+
+Stories are full-stack slices (`layer:fullstack`) by default. A story is
+split by layer only when it is over 13 points, when one layer is shared by
+several stories, or when one layer carries its own risk. The parent keeps the
+user-facing slice and is `blocked-by` each child; each child is flagged
+`split-from:` the parent. Full rule: "Story slicing" in `AGENTS.md`.
 
 ## Rules
 
