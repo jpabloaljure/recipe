@@ -6,7 +6,7 @@ prd-goal: G1
 
 ## REC-001 · Vertical full-screen feed with manual swipe
 - **Status:** todo
-- **Labels:** module:feed, type:feature, size:M
+- **Labels:** module:feed, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.2
 - **Flags:** —
 - **AI estimate:** 3
@@ -35,7 +35,7 @@ AI estimate (2026-11-16): 3. Calibration: no stories have a team estimate yet (g
 
 ## REC-002 · Feed shows only ready videos, newest first with variety
 - **Status:** todo
-- **Labels:** module:feed, type:feature, size:M
+- **Labels:** module:feed, type:feature, size:M, layer:fullstack
 - **PRD:** 6.4, 6.5, API-1, API-2, PERF-6
 - **Flags:** blocked-by:REC-019
 - **AI estimate:** 5
@@ -71,7 +71,7 @@ AI estimate (2026-11-16): 5. Calibration: REC-001 (team estimate 3) is the only 
 
 ## REC-003 · Autoplay muted, tap to unmute, loop
 - **Status:** todo
-- **Labels:** module:playback, type:feature, size:M
+- **Labels:** module:playback, type:feature, size:M, layer:frontend
 - **PRD:** 5.2, 9 (YouTube ToS, autoplay rules)
 - **Flags:** needs-human-validation; (assumed) "session" means the current browser tab/visit
 - **AI estimate:** —
@@ -95,7 +95,7 @@ Browser autoplay rules need testing across mobile browsers.
 
 ## REC-004 · Instant transition to the next video
 - **Status:** todo
-- **Labels:** module:playback, type:feature, size:L
+- **Labels:** module:playback, type:feature, size:L, layer:frontend
 - **PRD:** PERF-3, PERF-5
 - **Flags:** needs-human-validation
 - **AI estimate:** —
@@ -117,7 +117,7 @@ Highest technical risk in E01; validated on device by REC-015.
 
 ## REC-005 · Daily discovery of new candidate videos
 - **Status:** todo
-- **Labels:** module:ingestion, type:feature, size:L
+- **Labels:** module:ingestion, type:feature, size:L, layer:backend
 - **PRD:** 6.1, ING-1, ING-2, ING-3, ING-4, 9 (API quota), 12 (seed channels)
 - **Flags:** needs-human-validation; (assumed) seed channels and search queries will be provided before build (open decision)
 - **AI estimate:** —
@@ -140,9 +140,9 @@ Depends on the open decision about seed channels and queries.
 
 ## REC-018 · Feed handles empty, error and unavailable states
 - **Status:** todo
-- **Labels:** module:feed, type:feature, size:M
+- **Labels:** module:feed, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 6.4, 9 (videos removed after ingestion)
-- **Flags:** needs-human-validation
+- **Flags:** needs-human-validation; split-from:REC-001
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -163,9 +163,9 @@ The player error event's timing and reliability is the main unknown.
 
 ## REC-019 · Database schema and migration for the video catalog
 - **Status:** todo
-- **Labels:** module:ingestion, type:feature, size:S
+- **Labels:** module:ingestion, type:feature, size:S, layer:db
 - **PRD:** 6.4, 6.5
-- **Flags:** needs-human-validation; (assumed) the recipe is stored as one JSON value until E02 (REC-006, REC-008) defines its structure
+- **Flags:** needs-human-validation; split-from:REC-002; (assumed) the recipe is stored as one JSON value until E02 (REC-006, REC-008) defines its structure
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -184,7 +184,7 @@ S: one table, a status enum, one database rule for the ready time, and Drizzle m
 
 ## REC-020 · Data model document (no implementation)
 - **Status:** todo
-- **Labels:** module:ingestion, type:docs, size:S
+- **Labels:** module:ingestion, type:docs, size:S, layer:db
 - **PRD:** 5.3, 6.2, 6.4, 6.5
 - **Flags:** needs-human-validation; (assumed) the document lives in `docs/architecture/data-model.md` with a Mermaid `erDiagram`
 - **AI estimate:** —
@@ -205,7 +205,7 @@ S: one document with a diagram, drawn from the PRD and stories already validated
 
 ## REC-021 · API specification document (no implementation)
 - **Status:** todo
-- **Labels:** module:feed, type:docs, size:S
+- **Labels:** module:feed, type:docs, size:S, layer:backend
 - **PRD:** 6.5, API-1, API-2, API-3
 - **Flags:** needs-human-validation; blocked-by:REC-020; (assumed) the specification is an OpenAPI 3.1 file in `docs/api/openapi.yaml`, rendered from the README (no new library)
 - **AI estimate:** —

@@ -6,7 +6,7 @@ prd-goal: G3
 
 ## REC-011 · Save a recipe to favorites
 - **Status:** todo
-- **Labels:** module:favorites, type:feature, size:S
+- **Labels:** module:favorites, type:feature, size:S, layer:frontend
 - **PRD:** 5.4
 - **Flags:** needs-human-validation
 - **AI estimate:** —
@@ -29,7 +29,7 @@ Small UI surface on the video and on the panel.
 
 ## REC-012 · Favorites view
 - **Status:** todo
-- **Labels:** module:favorites, type:feature, size:S
+- **Labels:** module:favorites, type:feature, size:S, layer:frontend
 - **PRD:** 5.4, 12 (favorites recipe copy)
 - **Flags:** needs-human-validation; (assumed) selecting a favorite opens it the same way as a deep link (REC-014); (assumed) favorites store only the video reference, not a copy of the recipe (open decision)
 - **AI estimate:** —
@@ -51,7 +51,7 @@ Could grow if the open decision says favorites must store a recipe copy.
 
 ## REC-013 · Share a recipe
 - **Status:** todo
-- **Labels:** module:sharing, type:feature, size:S
+- **Labels:** module:sharing, type:feature, size:S, layer:frontend
 - **PRD:** 5.5
 - **Flags:** needs-human-validation
 - **AI estimate:** —
@@ -73,7 +73,7 @@ Depends on REC-014 for the link target.
 
 ## REC-014 · Deep link opens the feed on a recipe
 - **Status:** todo
-- **Labels:** module:sharing, type:feature, size:M
+- **Labels:** module:sharing, type:feature, size:M, layer:fullstack
 - **PRD:** 5.5, API-3
 - **Flags:** needs-human-validation; (assumed) an unknown or non-ready video ID falls back to the regular feed (open decision)
 - **AI estimate:** —

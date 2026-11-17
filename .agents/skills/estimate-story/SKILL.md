@@ -38,7 +38,10 @@ To calibrate, look in `backlog/` for stories that already have a team
    assumption** that moves the estimate.
 4. **More than 13 points:** do not give a number. Recommend splitting the
    story (`needs-splitting`) and propose a tentative split into 2–3
-   stories, each traceable to the story's PRD references.
+   stories by layer, each traceable to the story's PRD references: the
+   parent keeps the user-facing slice and is `blocked-by` each child, and
+   each child is flagged `split-from:` the parent ("Story slicing" in
+   `AGENTS.md`).
 5. **Size check:** compare your points with the story's `size:*` label using
    the mapping below. If they disagree, say so as a warning; do not change
    the label.

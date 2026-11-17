@@ -41,8 +41,10 @@ Format, exactly:
 Roles come only from the PRD:
 - **home cook** (§3): everything user-facing, and backend work whose value
   the cook feels (e.g. "every video in the feed already has its recipe").
-- **maintainer** (§6.4): operations only (e.g. `needs_recipe` handling, manual
-  database edits).
+- **maintainer** (§6.4): operates and builds the app: operations (e.g.
+  `needs_recipe` handling, manual database edits), plus technical and layer
+  stories whose value is internal (e.g. a schema or a contract). Work whose
+  value reaches the cook stays with the home cook.
 
 Never write "As a system" or "As a developer". If backend work has no honest
 user benefit, express it through the cook's outcome and put the backend
@@ -71,9 +73,9 @@ Every story is a section in its epic file, in exactly this shape (see
 ```markdown
 ## REC-<NNN> · <short title>
 - **Status:** todo
-- **Labels:** module:<module>, type:<type>, size:<size>
+- **Labels:** module:<module>, type:<type>, size:<size>, layer:<layer>
 - **PRD:** <sections/IDs this story comes from, e.g. 5.2, PERF-3>
-- **Flags:** needs-human-validation<; needs-splitting | blocked-by:REC-<NNN> | (assumed) ...>
+- **Flags:** needs-human-validation<; needs-splitting | blocked-by:REC-<NNN> | split-from:REC-<NNN> | (assumed) ...>
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -98,6 +100,10 @@ As a <role>, I want <action>, so that <benefit>.
 - Pick the `size:*` label so it matches the expected story points (S = 1–2,
   M = 3–5, L = 8, XL = 13); a story that looks bigger than 13 points is
   flagged `needs-splitting`.
+- Cut each story as a full-stack slice (`layer:fullstack`); a story that
+  lives in one layer gets that layer (`db`, `backend`, `frontend`). Spikes
+  and docs stories take the layer they investigate or document. Split by
+  layer only on a trigger from "Story slicing" in `AGENTS.md`.
 - `PRD:` is mandatory. A story you cannot trace to a PRD section does not
   belong in the backlog.
 - IDs are global across epics. Continue from the highest existing `REC-` ID in
@@ -143,7 +149,9 @@ with a timebox and the PRD's pass criteria as acceptance criteria.
 - If a story is too large for one iteration (bigger than 13 points, i.e.
   beyond `size:XL`, or more than 5 acceptance criteria needed), flag it
   `needs-splitting` and propose a tentative split
-  into 2-3 stories, stating it is tentative until validated with a spike.
+  into 2-3 stories by layer ("Story slicing" in `AGENTS.md`: the parent keeps
+  the user-facing slice, each child is flagged `split-from:`), stating it is
+  tentative until validated.
 - Write everything in English.
 
 ## Output and review

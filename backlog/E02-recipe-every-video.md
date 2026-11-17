@@ -6,7 +6,7 @@ prd-goal: G2
 
 ## REC-006 · Recipe panel with servings, ingredients and steps
 - **Status:** todo
-- **Labels:** module:recipe-panel, type:feature, size:M
+- **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4, API-1
 - **Flags:** needs-human-validation
 - **AI estimate:** —
@@ -31,7 +31,7 @@ Data already arrives with the feed, so no loading states are needed.
 
 ## REC-007 · Panel opens automatically after the first play-through
 - **Status:** todo
-- **Labels:** module:recipe-panel, type:feature, size:S
+- **Labels:** module:recipe-panel, type:feature, size:S, layer:frontend
 - **PRD:** 5.3
 - **Flags:** needs-human-validation; (assumed) a "view" ends when I swipe away; coming back to the same video counts as a new view
 - **AI estimate:** —
@@ -54,7 +54,7 @@ The only uncertainty is the meaning of "view", flagged as assumed.
 
 ## REC-008 · Recipe extracted ahead of time from description or comment
 - **Status:** todo
-- **Labels:** module:extraction, type:feature, size:L
+- **Labels:** module:extraction, type:feature, size:L, layer:backend
 - **PRD:** 6.2, EXT-1, EXT-3, EXT-5, EXT-6, 6.4, PERF-1, 9 (LLM errors)
 - **Flags:** needs-human-validation
 - **AI estimate:** —
@@ -77,7 +77,7 @@ Sets up the extraction pipeline that REC-017 and the captions source (REC-009) b
 
 ## REC-017 · Recipe extracted from the top comment as fallback
 - **Status:** todo
-- **Labels:** module:extraction, type:feature, size:M
+- **Labels:** module:extraction, type:feature, size:M, layer:backend
 - **PRD:** EXT-1, EXT-2, 9 (pinned comment not identifiable)
 - **Flags:** needs-human-validation; blocked-by:REC-008
 - **AI estimate:** —
@@ -99,7 +99,7 @@ The pinned comment can't be identified through the API (§9), so the creator-com
 
 ## REC-009 · Spike: can captions/transcripts be used for third-party videos?
 - **Status:** todo
-- **Labels:** module:extraction, type:spike, size:S
+- **Labels:** module:extraction, type:spike, size:S, layer:backend
 - **PRD:** EXT-1, 9 (captions access), 12 (captions legality)
 - **Flags:** needs-human-validation
 - **AI estimate:** —
@@ -121,7 +121,7 @@ If go, a captions-fallback story is written then (tentative until the spike ends
 
 ## REC-010 · Only easy recipes enter the feed
 - **Status:** todo
-- **Labels:** module:extraction, type:feature, size:M
+- **Labels:** module:extraction, type:feature, size:M, layer:backend
 - **PRD:** 6.3, EXT-4, 6.4
 - **Flags:** needs-human-validation
 - **AI estimate:** —

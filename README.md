@@ -241,6 +241,10 @@ This project is planned with AI agents. The pieces:
   - `write-adr`: records an architecture decision and updates the C4
     diagrams.
   - `openspec-*`: OpenSpec workflow (explore, propose, apply, archive, sync).
+- **Story slicing:** stories are full-stack slices by default and are split
+  by layer only when needed; every story has a `layer:` label
+  (`fullstack`, `db`, `backend`, `frontend`). See "Story slicing" in
+  [AGENTS.md](AGENTS.md).
 - **Estimation:** `size:*` labels are t-shirt sizes (S/M/L/XL); the AI
   estimate and the team `Estimate` are Fibonacci points. See
   [backlog/README.md](backlog/README.md#estimation).
