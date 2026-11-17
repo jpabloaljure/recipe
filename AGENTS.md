@@ -251,3 +251,22 @@ required AI review, merge, the production smoke check and close-out) is in
 when it meets the [Definition of Ready](docs/process/definition-of-ready.md),
 and is set to `Status: done` only when it meets the
 [Definition of Done](docs/process/definition-of-done.md).
+
+### Suggest a path for every change
+
+Whenever the human asks for a change, or to explore one (including
+`openspec-explore` and `openspec-propose`), the agent's first reply
+recommends one of the two paths in
+[CONTRIBUTING.md › Choosing a path](CONTRIBUTING.md#choosing-a-path-openspec-or-direct-pr),
+before writing any code or artifact:
+
+- **OpenSpec**: a spec requirement or scenario changes, or a design
+  decision should be reviewed before code.
+- **Direct PR**: the specs would read the same afterwards and there is no
+  design decision to review.
+
+Give the recommendation in one line with a one-sentence justification tied
+to those two questions, e.g. `Path: direct PR — the swipe scenario is
+already in the spec; the code just breaks it.` The human decides; if they
+pick the other path, follow it without arguing again. When the human has
+already named the path, confirm it in the same one line instead of asking.
