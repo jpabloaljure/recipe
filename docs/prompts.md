@@ -843,3 +843,111 @@ Yes, merge it
   - `openspec/changes/archive/2026-11-16-add-contribution-workflow/`: proposal, design (8 decisions), tasks (12 of 12).
   - GitHub: conversation resolution required, merge commits only, head branches deleted after merge; `gh` token gained the `workflow` scope.
 - **Result:** PR #5 went through the new flow: CI green, AI review posted 6 comments (4 fixed, 2 answered), all resolved, merged; the production smoke passed on merge commit `4a923e2` and the branch was deleted automatically. PR #7 archived the change, and its new-PR page showed the template filling the body. Next: add E2E tasks and a DoD close-out to REC-001 (`add-vertical-swipe-feed`).
+
+## 110. Resume backlog validation
+
+```
+/validate-backlog
+```
+
+## 111. Ask for suggestions on the key findings
+
+```
+what are your sugestions for 1,2,7,4
+```
+
+## 112. Move the availability check out of the MVP
+
+```
+4# move this out of MVP keep on the draft back backlog List. 1, 2 ,7 stick with your sugestion.
+```
+
+## 113. Options as a separate step after findings
+
+```
+Fix this agent flow so you gave me the suggestions and alternatives. for me to deside. Always build the suggestions/alternatives choice after building the findings. not at the same time.
+```
+
+## 114. Build the options (button answer)
+
+```
+Yes, build options
+```
+
+## 115. Next-page failure and cache choices
+
+```
+#18 REC-018 owns we will handle there. #15 + #5 Go with C for MVP and draft backloaded for future improvement.
+```
+
+## 116. PRD role, first take
+
+```
+#22. PRD its an initial document that does not need to be updated. with those missing behaviours that are not on the Epics, we can add them to the draft.backlog.list.  Or correct if im wrong with this rezoning. All the rest do as recomended.
+```
+
+## 117. Schema story, deferred E2E check, PRD role revised
+
+```
+#27 B. separate story. #28 Revalidate after the E2E pr is done. #22 PRD.md is not the source of truth. but is the document that describe the product at high level. so updated each time is needed in consequence so it does have the main context of the project to be readable to the stakeholders but keep it aligned with the project's reality, code and documentation. For all the rest # do as recommended.
+```
+
+## 118. Accept the recommended options
+
+```
+all A
+```
+
+## 119. Tied ready times
+
+```
+#38 A
+```
+
+## 120. Paging skips nothing
+
+```
+#39 A
+```
+
+## 121. Approve REC-002's acceptance criteria (button answer)
+
+```
+AC approved
+```
+
+## 122. Team estimate for REC-002 (button answer)
+
+```
+5
+```
+
+## 123. Which prompts to log (dialog answer)
+
+```
+From /validate-backlog
+```
+
+## 124. Validate REC-002
+
+```
+REC-002 validate
+```
+
+## 125. Redo the prompt log on the updated main
+
+```
+lets rebse with master nad do pend again here
+```
+
+### Summary (prompts 110–125)
+
+- **Goal:** validate REC-002 (feed shows only ready videos, newest first with variety) with the `validate-backlog` flow, change that flow so options come after the findings as their own step, then start REC-003.
+- **Changes:**
+  - `.agents/skills/validate-backlog/SKILL.md`: new Options step (a recommended option A plus alternatives for each finding, built after the findings) and an `#N A` choice command. `validate-story` and the `story-validator` agent now list findings only.
+  - `backlog/E01-browse-feed.md`: REC-002 rewritten (10 ACs; client shuffles within each page; cursor on ready time and id; page size 10; 1-hour cache, `no-store` for empty and error responses) and validated at 5 points. New story REC-019 (database schema and migration; the database sets the ready time). REC-018 now owns next-page failures and reaching the end while a page is loading.
+  - `backlog/E03-save-and-share.md`: REC-014 owns how a deep-linked video joins the feed.
+  - `backlog/draft-backlog-list.md`: D-5 (periodic availability check) and D-6 (refresh the cache after ingestion).
+  - `backlog/README.md`, `AGENTS.md`: the PRD is the high-level description for stakeholders, not the source of truth, and is updated whenever a decision changes the product (Decided 2, 3). `docs/PRD.md` v0.2 aligned (API-2, PERF-6, §9, §10).
+  - `backlog/validation-log.md`: REC-002 validated (findings #1–#39); REC-003 in review.
+- **Result:** REC-002 is validated (AI estimate 5, team estimate 5) and stays blocked by REC-019; #28 (E2E data and a predictable shuffle) is to be re-checked. REC-003's first check found 16 findings, with options waiting for a choice. The first prompt-log PR (#6) clashed with prompts 93–109 logged from another session, so this log replaces it. The backlog and skill changes are not committed yet.
