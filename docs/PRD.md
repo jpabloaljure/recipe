@@ -69,7 +69,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 
 ### 5.5 Sharing
 - A share button uses the native share sheet (Web Share API) when available. Otherwise it copies the link.
-- Each recipe has a **deep link** (e.g. `/r/{videoId}`) that opens the feed on that video, with its recipe available (or its title only, for a `needs_recipe` video).
+- Each recipe has a **deep link** (e.g. `/r/{videoId}`) that opens the feed on that video, with its recipe available (or its title only, for a `needs_recipe` video). A link to a video that is unknown or no longer in the feed opens the regular feed, with no error.
 
 ## 6. Functional requirements
 
