@@ -9,7 +9,7 @@ C4Context
   title Easy Recipes - System context
 
   Person(cook, "Home cook", "Swipes through recipe Shorts and cooks from the written recipe")
-  Person(maint, "Maintainer", "Adds recipes by hand for needs_recipe videos (PRD 6.4)")
+  Person(maint, "Maintainer", "Operates the app: marks broken videos unavailable (PRD 9)")
 
   System(easy, "Easy Recipes", "Mobile-first web app: feed of easy recipe Shorts with written recipes")
 
@@ -18,7 +18,7 @@ C4Context
   System_Ext(llm, "LLM provider", "Turns video text into structured recipes (provider TBD)")
 
   Rel(cook, easy, "Browses, saves, shares", "HTTPS")
-  Rel(maint, easy, "Edits recipes in the database")
+  Rel(maint, easy, "Fixes video statuses in the database")
   Rel(easy, ytp, "Embeds videos")
   Rel(easy, yapi, "Discovers and checks videos", "daily")
   Rel(easy, llm, "Extracts recipes", "daily")

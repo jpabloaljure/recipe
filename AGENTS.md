@@ -99,7 +99,7 @@ The backlog lives in files under `backlog/`. No external tracker is used yet.
   (`spike <N>h`).
 
 Epics map to PRD goals: E01 = G1 (browse with no waiting),
-E02 = G2 (recipe for every video), E03 = G3 (save and share without an
+E02 = G2 (a recipe for every video that has one), E03 = G3 (save and share without an
 account), E04 = launch readiness (PRD §8).
 
 ### Labels (every story, ALWAYS one of each)
@@ -112,7 +112,7 @@ account), E04 = launch readiness (PRD §8).
   "Story slicing")
 
 User stories use the format "As a [role], I want [action], so that [benefit]".
-Roles from the PRD: **home cook** (§3) and **maintainer** (§6.4): the
+Roles from the PRD: **home cook** (§3) and **maintainer** (§9): the
 maintainer operates and builds the app (operations, plus technical and layer
 stories whose value is internal, such as a schema or a contract). A layer
 story keeps the home cook role when its value reaches the user. There is no

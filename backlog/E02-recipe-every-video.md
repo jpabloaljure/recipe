@@ -1,6 +1,6 @@
 ---
 id: E02
-title: A written recipe for every video
+title: A written recipe for every video that has one
 prd-goal: G2
 ---
 
@@ -21,9 +21,10 @@ As a home cook, I want to open a written recipe next to the video, so that I can
 - Given I am on desktop, when I open the recipe panel, then it sits beside the centered video.
 - Given I am on mobile, when I open the recipe panel, then it slides up from the bottom as a sheet.
 - Given the recipe sheet is open on mobile, when I swipe vertically on it, then the recipe scrolls and the active video does not change.
+- Given a `needs_recipe` video is active, when I look at it, then only its title is shown, with no "Recipe" tab or button.
 
 ### Technical context
-—
+`needs_recipe` videos are in the feed with their title only (decided 2026-11-17, `backlog/README.md` Decided 4; PRD 5.3, PERF-4).
 
 ### Estimation notes
 M: one component with two layouts (desktop side panel, mobile sheet).
@@ -44,9 +45,10 @@ As a home cook, I want the recipe to appear by itself once I've watched the vide
 - Given the panel opened automatically and I closed it, when the video loops again, then the panel does not reopen.
 - Given I swiped away from a video and come back to it, when it reaches the end of its first loop, then the panel opens automatically again.
 - Given a video is playing, when the recipe panel opens automatically, then the video keeps playing.
+- Given a `needs_recipe` video is playing, when it reaches the end and starts its first repeat, then no recipe panel opens.
 
 ### Technical context
-—
+A `needs_recipe` video has no recipe panel (decided 2026-11-17, `backlog/README.md` Decided 4; PRD 5.3).
 
 ### Estimation notes
 S: small state machine on top of REC-003 and REC-006.
@@ -60,16 +62,16 @@ The only uncertainty is the meaning of "view", flagged as assumed.
 - **AI estimate:** —
 - **Estimate:** —
 
-As a home cook, I want every video in the feed to already have its recipe, so that I never wait for one to be generated.
+As a home cook, I want every recipe in the feed to be extracted before I see it, so that I never wait for one to be generated.
 
 ### Acceptance criteria
 - Given a candidate video whose description contains a full recipe, when extraction runs, then servings, ingredients (name, quantity, unit) and steps are stored, with source `description` (EXT-1, EXT-3, EXT-6).
 - Given an extraction result with fewer than 2 ingredients or fewer than 2 steps, when it is checked, then it does not count as complete and the next source is tried (EXT-5).
-- Given no source yields a complete recipe, when extraction finishes, then the video is marked `needs_recipe` and never enters the feed.
+- Given no source yields a complete recipe, when extraction finishes, then the video is marked `needs_recipe` and enters the feed with its title only.
 - Given a user is browsing the feed, when videos load, then no extraction runs (PERF-1).
 
 ### Technical context
-—
+`needs_recipe` videos are shown in the feed with their title only, and adding a recipe by hand is out of the MVP (decided 2026-11-17, `backlog/README.md` Decided 4; `draft-backlog-list.md` D-7). Re-running extraction later on `needs_recipe` videos is D-8. Recipe fields follow the data model document (REC-020).
 
 ### Estimation notes
 L: LLM prompt design for structured output, plus the completeness rules and status handling.

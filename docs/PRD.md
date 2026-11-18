@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.2 |
-| **Date** | 2026-11-14 (updated 2026-11-16) |
+| **Status** | Draft v0.3 |
+| **Date** | 2026-11-14 (updated 2026-11-17) |
 | **Scope** | MVP |
 | **Platform** | Web app (mobile-first, desktop supported) |
 
@@ -11,7 +11,7 @@
 
 ## 1. Summary
 
-A web app that shows a vertical, full-screen feed of short YouTube cooking videos (Shorts) with **easy recipes**. Each video has a recipe panel with ingredients, servings, and numbered steps. The recipe is extracted ahead of time by an LLM from the video's **description**, **first comment**, or **captions**. All processing happens in the background, so the feed never waits on extraction and every video in it already has a recipe.
+A web app that shows a vertical, full-screen feed of short YouTube cooking videos (Shorts) with **easy recipes**. Each video has a recipe panel with ingredients, servings, and numbered steps. The recipe is extracted ahead of time by an LLM from the video's **description**, **first comment**, or **captions**. All processing happens in the background, so the feed never waits on extraction. A video whose recipe could not be found still appears, showing its title only.
 
 ## 2. Problem
 
@@ -25,7 +25,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 
 ### Goals (MVP)
 1. Browse a curated feed of easy recipe Shorts with no waiting.
-2. See the written recipe (ingredients, servings, numbered steps) for every video in the feed.
+2. See the written recipe (ingredients, servings, numbered steps) for every video in the feed that has one; a video with no recipe found shows its title only.
 3. Save favorites and share recipes without creating an account.
 
 ### Non-goals (MVP)
@@ -60,6 +60,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
   - **Ingredients** (with quantities)
   - **Numbered steps**
 - A small label shows where the recipe came from (description, comment, or captions) and links to the original YouTube video.
+- A video whose recipe could not be found (`needs_recipe`, §6.4) shows its title only: it has no recipe panel and never opens one.
 
 ### 5.4 Favorites
 - A heart icon on each video or recipe saves it to favorites.
@@ -68,7 +69,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 
 ### 5.5 Sharing
 - A share button uses the native share sheet (Web Share API) when available. Otherwise it copies the link.
-- Each recipe has a **deep link** (e.g. `/r/{videoId}`) that opens the feed on that video, with its recipe available.
+- Each recipe has a **deep link** (e.g. `/r/{videoId}`) that opens the feed on that video, with its recipe available (or its title only, for a `needs_recipe` video).
 
 ## 6. Functional requirements
 
@@ -76,7 +77,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 | ID | Requirement |
 |---|---|
 | ING-1 | A scheduled job runs **daily** to discover new candidate videos from YouTube (search queries and/or a list of seed channels). |
-| ING-2 | Only **Shorts-length** videos (≤ 3 min) that are **embeddable** and in **English** are kept as candidates. |
+| ING-2 | Only **Shorts-length** videos (≤ 3 min) that are **embeddable** and in **English** are kept as candidates. The others are stored as `rejected` (§6.4), so they are skipped next time (ING-3). |
 | ING-3 | Videos already in the database are skipped (deduplicated by video ID). |
 | ING-4 | Launch catalog: **~50 ready recipes**. The daily job keeps adding new ones. |
 
@@ -102,16 +103,17 @@ The raw values are stored, so the thresholds can be changed later without reproc
 | Status | Meaning | In feed? |
 |---|---|---|
 | `ready` | Recipe extracted and judged easy | ✅ |
-| `needs_recipe` | No complete recipe found in any source | ❌ (flagged so a maintainer can add one by hand later) |
+| `needs_recipe` | No complete recipe found in any source | ✅ title only, no recipe |
 | `not_easy` | Recipe found but fails the easy check | ❌ |
 | `unavailable` | Video deleted, private, or no longer embeddable | ❌ |
+| `rejected` | Candidate that failed the ING-2 checks; kept so it is skipped next time (ING-3) | ❌ |
 
-For the MVP, a maintainer can add a recipe by editing the database directly and setting the status to `ready`.
+Adding a recipe by hand to a `needs_recipe` video is not part of the MVP (see §10).
 
 ### 6.5 Feed API
 | ID | Requirement |
 |---|---|
-| API-1 | Returns a paginated feed of `ready` videos with their recipe included, so the panel opens with no extra request. |
+| API-1 | Returns a paginated feed of `ready` videos with their recipe included, so the panel opens with no extra request, and `needs_recipe` videos with their title only. |
 | API-2 | Feed order for the MVP: newest first, with light shuffling so returning users see variety (videos are shuffled within each page of the feed, differently on each visit). |
 | API-3 | Returns a single video and its recipe by ID (for deep links). |
 
@@ -124,7 +126,7 @@ Speed is a core requirement: users should never wait on videos.
 | PERF-1 | **Recipe extraction never runs while a user is browsing.** Everything is processed ahead of time. |
 | PERF-2 | First video playable in **< 2 s** on a mid-range phone over 4G. |
 | PERF-3 | The next video starts in **< 500 ms** after a swipe. The client preloads the next 1–2 videos and their recipes. |
-| PERF-4 | The recipe panel opens instantly (its data arrives with the feed). |
+| PERF-4 | The recipe panel opens instantly (its data arrives with the feed). A `needs_recipe` video has no recipe panel. |
 | PERF-5 | Only a few video players are kept alive at once (current, previous, next) to keep memory and CPU low. |
 | PERF-6 | Feed responses are cacheable (CDN/edge). In the MVP they are cached for up to an hour, so new videos can take up to an hour to appear. |
 
@@ -155,7 +157,7 @@ Speed is a core requirement: users should never wait on videos.
 ## 10. Future roadmap (post-MVP)
 1. **Step timestamps:** tap a step to jump to that moment in the video.
 2. Total time and difficulty in the recipe panel.
-3. Admin UI to review `needs_recipe` videos and add recipes by hand.
+3. Review `needs_recipe` videos and add recipes by hand (first by editing the database, later through an admin UI).
 4. Search and category filters (once the catalog is around 500+ recipes).
 5. Optional accounts for syncing favorites across devices.
 6. Engagement analytics.

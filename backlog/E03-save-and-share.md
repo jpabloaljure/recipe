@@ -8,7 +8,7 @@ prd-goal: G3
 - **Status:** todo
 - **Labels:** module:favorites, type:feature, size:S, layer:frontend
 - **PRD:** 5.4
-- **Flags:** needs-human-validation
+- **Flags:** needs-human-validation; (assumed) a `needs_recipe` video (title only) can also be saved (Decided 4)
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -31,7 +31,7 @@ Small UI surface on the video and on the panel.
 - **Status:** todo
 - **Labels:** module:favorites, type:feature, size:S, layer:frontend
 - **PRD:** 5.4, 12 (favorites recipe copy)
-- **Flags:** needs-human-validation; (assumed) selecting a favorite opens it the same way as a deep link (REC-014); (assumed) favorites store only the video reference, not a copy of the recipe (open decision)
+- **Flags:** needs-human-validation; (assumed) selecting a favorite opens it the same way as a deep link (REC-014); (assumed) favorites store only the video reference, not a copy of the recipe (open decision); (assumed) the list shows each saved video's title, and a saved `needs_recipe` video opens with its title only (Decided 4)
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -53,7 +53,7 @@ Could grow if the open decision says favorites must store a recipe copy.
 - **Status:** todo
 - **Labels:** module:sharing, type:feature, size:S, layer:frontend
 - **PRD:** 5.5
-- **Flags:** needs-human-validation
+- **Flags:** needs-human-validation; (assumed) a `needs_recipe` video (title only) can also be shared (Decided 4)
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -75,7 +75,7 @@ Depends on REC-014 for the link target.
 - **Status:** todo
 - **Labels:** module:sharing, type:feature, size:M, layer:fullstack
 - **PRD:** 5.5, API-3
-- **Flags:** needs-human-validation; (assumed) an unknown or non-ready video ID falls back to the regular feed (open decision)
+- **Flags:** needs-human-validation; (assumed) an unknown video ID, or one not in the feed, falls back to the regular feed (open decision)
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -84,7 +84,8 @@ As a home cook, I want a shared link to open straight on that recipe, so that I 
 ### Acceptance criteria
 - Given a deep link `/r/{videoId}` for a ready video, when I open it, then the feed opens on that video with its recipe available (API-3).
 - Given I opened a deep link to a video in the middle of the feed, when I swipe up or down, then the next or previous video in the feed becomes active.
-- Given a deep link for an ID that is unknown or not `ready`, when I open it, then I land on the regular feed without an error (assumed).
+- Given a deep link `/r/{videoId}` for a `needs_recipe` video, when I open it, then the feed opens on that video showing its title only.
+- Given a deep link for an ID that is unknown or not in the feed (not `ready` or `needs_recipe`), when I open it, then I land on the regular feed without an error (assumed).
 
 ### Technical context
 Owns how a deep-linked video joins the visit's feed (from REC-002 validation, #24, 2026-11-16): the linked video plays first, then the regular feed (REC-002) starts at page 1, and the client skips the linked video if it comes up again in the feed.
