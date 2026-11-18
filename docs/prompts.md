@@ -1220,3 +1220,72 @@ Yes, merge it
   - `docs/architecture/data-model.md` (new, `Status: Proposed`): Mermaid ER diagram of video and recipe, field tables, five statuses, rules and notes.
   - `docs/architecture/README.md` ("Other diagrams"), `README.md` ("Data model"), `docs/adr/README.md` (pending decision on storing ingestion runs), `docs/checklist.md` item 7, REC-020 `done`.
 - **Result:** PRs #20, #21 and #22 merged with green CI (#21 after one re-run: the runner failed to install Chromium's font packages). The diagram renders on GitHub; checklist item 7 is done; REC-019 and REC-021 are unblocked.
+
+## 164. Validate REC-021
+
+```
+Validate REC-021
+```
+
+## 165. Ask how many endpoints and which ID the single-video endpoint takes
+
+```
+before toy continue question. how many endpoint are you considering? and what is your choise between this "GET /api/videos/{youtubeId}" and this "GET /api/videos/{Id}"
+```
+
+## 166. Ask how favorites work (#19)
+
+```
+#19 how that work ? can i store some favorits on database? that wont levaus with lots of storage that never used becouse the user stored in a session tha it does not use reculary?
+```
+
+## 167. Pick the options for the first re-check
+
+```
+#8, #9 B, All rest A (Recommended)
+```
+
+## 168. Pick the options for #4 and #21–#24 (button answer)
+
+```
+All recommended
+```
+
+## 169. Pick the options for #25–#27 (button answer)
+
+```
+All recommended
+```
+
+## 170. Ask whether the documents are aligned
+
+```
+ADR PRD C4 Specs and backlog are align? Are aligned
+```
+
+## 171. Ask which alignment checks to add to the flows
+
+```
+ADR, PRD, C4, data model, API specification document and Openspecs/specs  aligned what validations or verifications you sugest and when on the flows? we are following for the backlog user storys and for openSpec which cary our developmen flow?
+```
+
+## 172. Approve the acceptance criteria
+
+```
+approve rec-021
+```
+
+## 173. Team estimate and validation (button answer)
+
+```
+2, validated
+```
+
+### Summary (prompts 164–173)
+
+- **Goal:** validate REC-021 (API specification document) and check that the ADRs, PRD, C4, data model, API specification, specs and backlog agree.
+- **Changes:**
+  - REC-021: criteria split into 10 scenarios; REC-021 owns the API contract (`items` of `youtubeId`, `title`, `channelName`, `recipe`, with `recipe: null` for title-only videos); `GET /api/videos/{youtubeId}` returns 200 for feed videos and 404 otherwise; caching, errors, opaque cursor, public fields and a separate `docs/api/openapi.yaml`; AI estimate 2, team estimate 2, validated.
+  - Linked edits: REC-002 and REC-014 `blocked-by:REC-021`; `backlog/README.md` Decided 5 (open decision 5 closed); C4 02/03 and the README diagram use `{youtubeId}`; `add-vertical-swipe-feed` design §4 and task 2.1 drop the feed item `id`; validation log updated.
+  - Alignment check: three gaps left (PRD API-3 and §5.5, the README API section, one line in the swipe-feed proposal), plus suggested checks for each stage of the backlog and OpenSpec flows (top 3: a ripple check when a decision is made, an owner table in AGENTS.md, separate PR tickboxes).
+- **Result:** REC-021 validated (3 of 21 stories validated, 18 still flagged). The story and document edits are not committed yet; the three gaps and the flow checks are waiting for a decision.
