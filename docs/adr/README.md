@@ -24,6 +24,7 @@ Decisions known to be needed but not made yet. They get an ADR when decided
 | LLM provider and model for recipe extraction | Ingestion/extraction change | Ingestion job: recipe extractor |
 | Captions as the third extraction source | Spike REC-009 | Ingestion job: recipe extractor |
 | Whether favorites store a copy of the recipe | Product decision (PRD §12) | Web app: favorites store |
+| Whether an ingestion run is stored (for monitoring) | Ingestion change (REC-005, REC-008) | Ingestion job; [data model](../architecture/data-model.md) |
 
 ## Rules
 
