@@ -95,7 +95,7 @@ C4Container
 
   System_Boundary(sys, "Easy Recipes") {
     Container(web, "Web app", "Next.js, React 19", "Feed, recipe panel, favorites, sharing")
-    Container(api, "API routes", "Next.js route handlers", "GET /api/feed, GET /api/videos/{id}")
+    Container(api, "API routes", "Next.js route handlers", "GET /api/feed, GET /api/videos/{youtubeId}")
     ContainerDb(db, "Database", "Postgres on Neon", "Videos, recipes, statuses")
     Container(ing, "Ingestion job", "Node TypeScript on GitHub Actions", "Daily discovery, extraction, easy check, availability")
   }

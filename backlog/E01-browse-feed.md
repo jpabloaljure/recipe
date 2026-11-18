@@ -37,7 +37,7 @@ AI estimate (2026-11-16): 3. Calibration: no stories have a team estimate yet (g
 - **Status:** todo
 - **Labels:** module:feed, type:feature, size:M, layer:fullstack
 - **PRD:** 6.4, 6.5, API-1, API-2, PERF-6
-- **Flags:** needs-human-validation; blocked-by:REC-019
+- **Flags:** needs-human-validation; blocked-by:REC-019; blocked-by:REC-021
 - **AI estimate:** 5
 - **Estimate:** 5
 
@@ -60,7 +60,7 @@ As a home cook, I want the feed to contain easy recipe videos, plus videos whose
 ### Technical context
 "Light shuffling" (API-2), decided 2026-11-16 during validation: pages are returned in newest-first order, and the client shuffles the videos *within* each page once per visit. The server response is the same for everyone (no seed in the URL), so it stays fully cacheable at the CDN (PERF-6). The shuffle's random source is injectable, so tests can make the order deterministic. A returning user gets a different order by chance; the app does not remember the previous visit's order. That a shuffled page holds exactly the server page's videos is a unit test, not a scenario.
 Pagination uses a cursor on (time the video entered the feed, id), not an offset. The database sets that time automatically when a video is inserted as, or changes to, `ready` or `needs_recipe` from a status outside the feed, and keeps it when the status moves between those two (REC-019, rule from REC-020); so it only grows for videos newly entering the feed. A video in the feed without it is excluded and logged. So videos that enter or leave the feed mid-visit do not cause duplicates or skipped items. Reopened for validation 2026-11-17 (`backlog/README.md` Decided 4): `needs_recipe` videos are in the feed with their title only, and there are no manual edits to `ready` in the MVP. The client keeps the visit's shuffled list in memory and never reshuffles pages it has already loaded. When the last page reports no more pages, REC-001 wraps by replaying that in-memory list from the start.
-Page size is 10 videos. The response has `videos` (`ready` ones with their recipe, `needs_recipe` ones with their title only) and `nextCursor`, which is `null` when there are no more pages; the server reads one row beyond the page, so an exactly full last page already returns `null`. Newest-first order within a server page is covered by unit tests. A unit test also checks that walking all pages returns every `ready` and `needs_recipe` video exactly once, including ties on the feed-entry time at a page boundary (fixture data from this story's seed script). The full response contract is defined in the OpenSpec change. When to request the next page is already owned by REC-001's feed client (within two slides of the last loaded video; `add-vertical-swipe-feed` design §4). This story replaces REC-001's stub `FeedSource` with one that calls `GET /api/feed`, keeping at most one request per cursor in flight. Reaching the end of the loaded list while the next page is still loading is owned by REC-018.
+Page size is 10 videos. The response has `items` (`ready` videos with their recipe, `needs_recipe` videos with their title only and `recipe: null`) and `nextCursor`, which is `null` when there are no more pages; the server reads one row beyond the page, so an exactly full last page already returns `null`. Newest-first order within a server page is covered by unit tests. A unit test also checks that walking all pages returns every `ready` and `needs_recipe` video exactly once, including ties on the feed-entry time at a page boundary (fixture data from this story's seed script). The full response contract is owned by the API specification (REC-021, `docs/api/openapi.yaml`; `backlog/README.md` Decided 5); this story implements it. When to request the next page is already owned by REC-001's feed client (within two slides of the last loaded video; `add-vertical-swipe-feed` design §4). This story replaces REC-001's stub `FeedSource` with one that calls `GET /api/feed`, keeping at most one request per cursor in flight. Reaching the end of the loaded list while the next page is still loading is owned by REC-018.
 An invalid or stale cursor returns HTTP 400; the client treats it as a failed page (REC-018). Covered by unit tests, not a scenario.
 Built and tested on fixture data from a seed script in the repo, owned by this story; real `ready` videos come later from REC-005 and E02. The database schema and migration are owned by REC-019.
 The periodic availability check (PRD §9) is out of the MVP (decided 2026-11-16; `draft-backlog-list.md` D-5). This story filters by status only: a removed video that is still in the feed is skipped by the player error handling in REC-018, or a maintainer marks it `unavailable` (PRD §9); videos with status `unavailable`, `not_easy` or `rejected` are excluded by the status filter above.
@@ -232,20 +232,46 @@ AI estimate (2026-11-17): 2. Calibration: REC-001 (team 3) is the only comparabl
 ## REC-021 · API specification document (no implementation)
 - **Status:** todo
 - **Labels:** module:feed, type:docs, size:S, layer:backend
-- **PRD:** 6.5, API-1, API-2, API-3
-- **Flags:** needs-human-validation; blocked-by:REC-020; (assumed) the specification is an OpenAPI 3.1 file in `docs/api/openapi.yaml`, rendered from the README (no new library)
-- **AI estimate:** —
-- **Estimate:** —
+- **PRD:** 5.5, 6.4, 6.5, API-1, API-2, API-3, PERF-4, PERF-6
+- **Flags:** blocked-by:REC-020
+- **AI estimate:** 2
+- **Estimate:** 2
 
 As a maintainer, I want the feed API specified before it is built, so that the web app and its tests rely on one agreed request and response shape.
 
 ### Acceptance criteria
-- Given the API specification, when I read the feed endpoint, then it shows the request (optional cursor), the response (`videos`, each with its recipe, and `nextCursor`, which is `null` on the last page) and the page size of 10.
-- Given the API specification, when I read the feed endpoint's errors, then an invalid cursor returns 400 and the caching headers for normal, empty and error responses are listed.
-- Given the API specification, when I read the single-video endpoint, then it shows the request by video ID, the response with the video and its recipe, and the response for an unknown or non-ready ID.
+- Given the API specification in `docs/api/openapi.yaml`, when I read the feed endpoint's response, then it has `items` and `nextCursor`
+  And each item has `youtubeId`, `title`, `channelName` (may be `null`) and `recipe`, where `recipe` is `null` for a `needs_recipe` video
+  And no internal field is listed (internal id, status, feed-entry time, timestamps, raw easy facts, channel ID).
+- Given the API specification, when I read the feed endpoint's paging, then the cursor is an opaque string the client passes back unchanged
+  And a page holds up to 10 items, newest first by feed-entry time, with the shuffle left to the client (API-2)
+  And `nextCursor` is `null` on the last page, and an empty feed is `{ "items": [], "nextCursor": null }`.
+- Given the API specification, when I read the feed endpoint's errors, then a cursor that cannot be decoded returns 400 with the body `{ "error": { "code", "message" } }`.
+- Given the API specification, when I read the server error response, then any 5xx response the app produces, from either endpoint, has the same error body.
+- Given the API specification, when I read its caching rules, then responses with at least one video have `Cache-Control` with `s-maxage=3600` (PERF-6)
+  And empty, 404 and error responses have `Cache-Control: no-store`.
+- Given the API specification, when I read `GET /api/videos/{youtubeId}` for a `ready` or `needs_recipe` video, then it returns 200 with the same item shape as the feed.
+- Given the API specification, when I read `GET /api/videos/{youtubeId}` for any other ID, then an unknown, malformed or out-of-feed (`not_easy`, `unavailable`, `rejected`) ID returns 404 with the error body.
+- Given the API specification, when I read its field names, then the JSON names are camelCase
+  And a table maps each public field to its column in the data model document.
+- Given the API specification is written, when I read the README "API specification" section, then it has a table of the two endpoints and links to `docs/api/openapi.yaml`
+  And its API-1 row says the feed returns `ready` videos with their recipe and `needs_recipe` videos with their title only.
+- Given the API specification is written, when I check the Entrega 1 checklist, then row 8 links to the README "API specification" section.
 
 ### Technical context
-Documentation only: no route, no code. REC-002 implements the feed endpoint (its Technical context already fixes the cursor, page size, `nextCursor`, 400 and caching) and REC-014 the deep link; both must match this document, and it is updated in the same change when they differ. Response schemas reuse the entities in the data model document (REC-020). The answer for an unknown or non-ready ID is still an open decision in REC-014: the document records the decision when it is made, or marks it open. Linked from the README "API specification" section and the Entrega 1 checklist (item 8).
+Documentation only: no route, no code. Decided while validating this story (2026-11-18):
+- **Owner:** this document owns the API contract. REC-002 (feed) and REC-014 (deep link) implement it and are blocked by this story; when code and document differ, the document is updated in the same change. Names follow REC-001's feed client design (`items`, `youtubeId`, `title`); REC-002 uses `items` (aligned 2026-11-18).
+- **Format:** an OpenAPI 3.1 file at `docs/api/openapi.yaml` (no new library). GitHub does not render OpenAPI files, so README §4 has a table of the endpoints and links to the file. Two endpoints: `GET /api/feed?cursor=` and `GET /api/videos/{youtubeId}`.
+- **Public fields:** each item has `youtubeId`, `title`, `channelName` (`string | null`, optional in the data model; credits the creator of a third-party video) and `recipe`. There is no `id`: `youtubeId` is unique within a visit (REC-014 skips repeats) and serves as the client's list key; the recipe has `servings`, `ingredients[{name, quantity, unit}]`, `steps[]` and `source`. The internal id, `status`, feed-entry time, timestamps, raw easy facts (EXT-4) and channel ID stay internal. `recipe: null` marks a title-only (`needs_recipe`) item; the recipe panel uses it (REC-006). Schemas come from the data model document (REC-020) through this public list; JSON names are camelCase, mapped from its snake_case columns.
+- **Order and paging:** server pages are newest first by feed-entry time and the client shuffles each page (API-2, `backlog/README.md` Decided 2). The cursor is opaque; "invalid" means it cannot be decoded. Page size is "up to 10" and clients rely only on `nextCursor`, so REC-001's stub may use another size.
+- **Single video:** `{youtubeId}` is the YouTube ID (stable, used in deep links `/r/{videoId}`), not the internal id. ADR 0002's `GET /api/videos/{id}` names the same route; `{id}` there was a placeholder for this YouTube ID, so its decision is unchanged and no new ADR is needed. It returns 200 for `ready` and `needs_recipe`, and 404 for unknown, malformed or out-of-feed IDs; this settles open decision 5 on the API side (`backlog/README.md` Decided 5), and REC-014 lands on the regular feed on a 404.
+- **Caching:** responses with content `s-maxage=3600` (PERF-6, ADR 0002); empty, 404 and error responses `no-store`, so a video that enters the feed later is not hidden by a cached 404.
+- **Errors:** one body for 400, 404 and 5xx, `{ "error": { "code", "message" } }`. Platform errors the app does not produce (for example a Vercel function timeout, 504) may have another body and headers, so clients rely only on the status code and treat any non-2xx response as a failed request (REC-018).
+- **Consumers:** the feed client (REC-001, REC-002), the deep link (REC-014), and possibly the Favorites view (REC-012): if open decision 2 keeps favorites as references only, it calls the single-video endpoint once per saved video, and a 404 means the video is gone. No batch endpoint for now. Favorites themselves live in the browser (PRD 5.4); the server never stores them.
+- **Keeping it current:** a change to the recipe structure (E02: REC-006, REC-008) updates `docs/architecture/data-model.md` and this specification in the same change.
+- **Conformance:** the response types live in one TypeScript module, `src/lib/feed/types.ts` (planned by REC-001's `add-vertical-swipe-feed` change, whose feed item drops its `id` to match; REC-002 adds `channelName` and `recipe`), used by the REC-002 and REC-014 routes and by the E2E stub data; the specification and those types are kept in sync in review. No validator library.
+Also linked from the Entrega 1 checklist (item 8). The C4 level 3 Feed route description was aligned with Decided 4 outside this story (2026-11-18).
 
 ### Estimation notes
-S: two endpoints whose behavior is mostly decided in REC-002; no code.
+S (reasoning updated 2026-11-18 after validation): one OpenAPI file for two endpoints, a README table and two link updates; no code. Every decision the specification records (owner, item shape, public fields, statuses, paging, caching, errors) was settled while validating this story, so writing it is mostly transcription. AI estimate after the criteria are approved.
+AI estimate (2026-11-18): 2. Calibration: REC-020 (team estimate 2) is the closest match, a documentation-only story that turned decisions already made during validation into one document plus link updates; REC-021 has the same shape (one OpenAPI file for two endpoints, an error schema, cache headers, a field-to-column table, a README table and one checklist link) and is clearly smaller than REC-001 (team 3), which has code and E2E tests. Risks that move it: the OpenAPI 3.1 file is written by hand with no validator (no new library), so mistakes such as nullable fields (`type: [string, "null"]` in 3.1) or broken `$ref`s are only caught in review (assumed: careful review is enough); and REC-002 is still in review, so if its remaining findings change the response, this document changes with it. It would be a 3 if the team wants request and response examples for every case.

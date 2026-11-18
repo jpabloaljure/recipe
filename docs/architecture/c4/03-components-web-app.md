@@ -18,8 +18,8 @@ C4Component
     Component(panel, "Recipe panel", "React", "Servings, ingredients, steps, source, auto-open (5.3, PERF-4)")
     Component(favs, "Favorites store", "localStorage", "Save, list, remove favorites (5.4)")
     Component(share, "Share", "Web Share API", "Share sheet or copy deep link (5.5)")
-    Component(feedApi, "Feed route", "Route handler", "GET /api/feed: ready videos with recipes, cacheable (API-1, PERF-6)")
-    Component(videoApi, "Video route", "Route handler", "GET /api/videos/{id}: one video for deep links (API-3)")
+    Component(feedApi, "Feed route", "Route handler", "GET /api/feed: ready videos with recipes and title-only needs_recipe videos, cacheable (API-1, PERF-6)")
+    Component(videoApi, "Video route", "Route handler", "GET /api/videos/{youtubeId}: one feed video for deep links (API-3)")
   }
 
   Rel(cook, feed, "Swipes")
