@@ -36,7 +36,7 @@
 ## 4. Check and close-out
 
 - [x] 4.1 Walk REC-021's ten acceptance criteria against the file, README §4 and the checklist, one by one, and fix any gap; record the check in the PR description. This is docs only, so there are no E2E or unit tests (E2E rule 12)
-- [ ] 4.2 Open the PR. It is docs only, so the AI review is not required. The description lists the `add-vertical-swipe-feed` folder on its own line, as REC-001's planning committed for the first time. Merge once CI `check` passes, then set REC-021 to `Status: done` with the Edit tool (Definition of Done)
+- [x] 4.2 Open the PR. It is docs only, so the AI review is not required. The description lists the `add-vertical-swipe-feed` folder on its own line, as REC-001's planning committed for the first time. Merge once CI `check` passes, then set REC-021 to `Status: done` with the Edit tool (Definition of Done)
 
 ## Workflow follow-up
 
