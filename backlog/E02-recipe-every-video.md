@@ -71,7 +71,7 @@ As a home cook, I want every recipe in the feed to be extracted before I see it,
 - Given a user is browsing the feed, when videos load, then no extraction runs (PERF-1).
 
 ### Technical context
-`needs_recipe` videos are shown in the feed with their title only, and adding a recipe by hand is out of the MVP (decided 2026-11-17, `backlog/README.md` Decided 4; `draft-backlog-list.md` D-7). Re-running extraction later on `needs_recipe` videos is D-8. Recipe fields follow the data model document (REC-020).
+`needs_recipe` videos are shown in the feed with their title only, and adding a recipe by hand is out of the MVP (decided 2026-11-17, `backlog/README.md` Decided 4; `draft-backlog-list.md` D-7). Re-running extraction later on `needs_recipe` videos is D-8. Recipe fields follow the data model document (REC-020). The video and its recipe are written together in one step, with the final status, only after extraction and the easy check finish (from REC-020 exploration, 2026-11-17); an LLM error before that stores nothing, and the video is retried the next day.
 
 ### Estimation notes
 L: LLM prompt design for structured output, plus the completeness rules and status handling.
