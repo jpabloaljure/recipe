@@ -22,7 +22,7 @@
 ## 3. Check and close-out
 
 - [x] 3.1 Walk REC-020's ten acceptance criteria against the document and the links, one by one, and fix any gap; record the check in the PR description (docs only, so no E2E or unit tests: E2E rule 12)
-- [ ] 3.2 Open the PR (docs only, so the AI review is not required), check the Mermaid diagram on GitHub's rendered view of the PR, merge once CI `check` passes, and set REC-020 to `Status: done` with the Edit tool (Definition of Done)
+- [x] 3.2 Open the PR (docs only, so the AI review is not required), check the Mermaid diagram on GitHub's rendered view of the PR, merge once CI `check` passes, and set REC-020 to `Status: done` with the Edit tool (Definition of Done)
 
 ## Workflow follow-up
 
