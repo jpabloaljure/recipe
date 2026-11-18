@@ -190,9 +190,9 @@ S: one table, a status enum, one database rule for the feed-entry time, and Driz
 - **Status:** todo
 - **Labels:** module:ingestion, type:docs, size:S, layer:db
 - **PRD:** 5.3, 6.1, ING-2, ING-3, 6.2, EXT-2, EXT-3, EXT-4, EXT-5, EXT-6, 6.3, 6.4, 6.5, PERF-4
-- **Flags:** needs-human-validation
-- **AI estimate:** —
-- **Estimate:** —
+- **Flags:** —
+- **AI estimate:** 2
+- **Estimate:** 2
 
 As a maintainer, I want the data model written down before the schema is built, so that the feed, the recipe panel and the ingestion job agree on the same entities and fields.
 
@@ -226,6 +226,7 @@ Documentation only: no migration, no code. The document is the logical model (th
 
 ### Estimation notes
 S: one document with a diagram, drawn from the PRD and the current stories; no code.
+AI estimate (2026-11-17): 2. Calibration: REC-001 (team 3) is the only comparable estimate still in force (REC-002, team 5, is reopened); REC-020 is smaller than both, since it is documentation only with no code or tests, and every decision it records was already made during validation. Work: a Mermaid `erDiagram` for video and recipe with typed fields and keys, the status and feed-entry-time rules, required fields, the "Built now" and EXT-5 notes, two link updates and one pending-decision line. Risks that move it: a new architecture decision found while writing (for example how the database sets the feed-entry time) would need an ADR through `write-adr` and could make it a 3; GitHub's Mermaid rendering of `erDiagram` with typed lists inside the recipe may need a workaround (assumed: it renders).
 
 ## REC-021 · API specification document (no implementation)
 - **Status:** todo
