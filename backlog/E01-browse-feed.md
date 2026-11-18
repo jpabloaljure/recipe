@@ -230,7 +230,7 @@ S: one document with a diagram, drawn from the PRD and the current stories; no c
 AI estimate (2026-11-17): 2. Calibration: REC-001 (team 3) is the only comparable estimate still in force (REC-002, team 5, is reopened); REC-020 is smaller than both, since it is documentation only with no code or tests, and every decision it records was already made during validation. Work: a Mermaid `erDiagram` for video and recipe with typed fields and keys, the status and feed-entry-time rules, required fields, the "Built now" and EXT-5 notes, two link updates and one pending-decision line. Risks that move it: a new architecture decision found while writing (for example how the database sets the feed-entry time) would need an ADR through `write-adr` and could make it a 3; GitHub's Mermaid rendering of `erDiagram` with typed lists inside the recipe may need a workaround (assumed: it renders).
 
 ## REC-021 · API specification document (no implementation)
-- **Status:** in-progress
+- **Status:** done
 - **Labels:** module:feed, type:docs, size:S, layer:backend
 - **PRD:** 5.5, 6.4, 6.5, API-1, API-2, API-3, PERF-4, PERF-6
 - **Flags:** blocked-by:REC-020
