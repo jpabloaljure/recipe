@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Draft v0.3 |
-| **Date** | 2026-11-14 (updated 2026-11-17) |
+| **Date** | 2026-11-14 (updated 2026-11-18) |
 | **Scope** | MVP |
 | **Platform** | Web app (mobile-first, desktop supported) |
 
@@ -115,7 +115,7 @@ Adding a recipe by hand to a `needs_recipe` video is not part of the MVP (see §
 |---|---|
 | API-1 | Returns a paginated feed of `ready` videos with their recipe included, so the panel opens with no extra request, and `needs_recipe` videos with their title only. |
 | API-2 | Feed order for the MVP: newest first, with light shuffling so returning users see variety (videos are shuffled within each page of the feed, differently on each visit). |
-| API-3 | Returns a single video and its recipe by ID (for deep links). |
+| API-3 | Returns a single video in the feed (`ready` or `needs_recipe`) by its YouTube ID, for deep links; any other ID is not found. |
 
 ## 7. Performance requirements
 

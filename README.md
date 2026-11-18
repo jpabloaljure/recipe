@@ -172,15 +172,28 @@ The full model, with the ER diagram, field types, keys and rules, is in
 
 ## API specification
 
-**TBD** (follow-up change). The planned endpoints are `GET /api/feed` and
-`GET /api/videos/{id}` (ADR 0002); request and response schemas are not
-defined yet. Required behavior (PRD §6.5):
+The contract is [docs/api/openapi.yaml](docs/api/openapi.yaml) (OpenAPI
+3.1, owned by REC-021; REC-002 and REC-014 implement it). Two read-only route
+handlers, cached at the Vercel CDN (ADR 0002):
+
+| Endpoint | Returns | Errors | Caching |
+|---|---|---|---|
+| `GET /api/feed?cursor=` | `{ items, nextCursor }`: up to 10 items, newest first by feed-entry time; `nextCursor` is `null` on the last page. Leave `cursor` out for the first page. | 400 `invalid_cursor`, 5xx `internal_error` | `s-maxage=3600`; empty feed `no-store` |
+| `GET /api/videos/{youtubeId}` | One item, for `ready` and `needs_recipe` videos (deep links) | 404 `not_found` (unknown, malformed or out-of-feed ID), 5xx `internal_error` | `s-maxage=3600`; errors `no-store` |
+
+Each item is `{ youtubeId, title, channelName, recipe }`; `recipe` holds
+`servings`, `ingredients[{name, quantity, unit}]`, `steps[]` and `source`, and
+is `null` for a title-only video. Fields with no value are `null`. Errors use
+one body, `{ "error": { "code", "message" } }`. The file also maps each field
+to its data model column.
+
+Required behavior (PRD §6.5):
 
 | ID | Behavior |
 |---|---|
-| API-1 | Paginated feed of `ready` videos, each with its recipe included |
-| API-2 | Feed order: newest first, with light shuffling |
-| API-3 | A single video and its recipe by ID (for deep links) |
+| API-1 | Paginated feed of `ready` videos with their recipe and `needs_recipe` videos with their title only |
+| API-2 | Feed order: newest first, with light shuffling (done by the client, per page) |
+| API-3 | A single video in the feed by its YouTube ID (for deep links); any other ID is not found |
 
 ## Backlog
 
@@ -189,17 +202,23 @@ to the PRD goals:
 
 | Epic | Stories |
 |---|---|
-| [E01 Browse a curated feed with no waiting](backlog/E01-browse-feed.md) | REC-001 to REC-005, REC-018 |
+| [E01 Browse a curated feed with no waiting](backlog/E01-browse-feed.md) | REC-001 to REC-005, REC-018 to REC-021 |
 | [E02 A written recipe for every video that has one](backlog/E02-recipe-every-video.md) | REC-006 to REC-010, REC-017 |
 | [E03 Save and share without an account](backlog/E03-save-and-share.md) | REC-011 to REC-014 |
 | [E04 Launch readiness](backlog/E04-launch-readiness.md) | REC-015, REC-016 |
 
-All 18 stories are flagged `needs-human-validation` and are not estimated yet,
-so none can be started. Validation is in progress with the `validate-backlog`
-skill ([log](backlog/validation-log.md)).
+There are 21 stories. REC-001, REC-020 and REC-021 are validated and
+estimated; REC-002 and REC-003 are in review; the other 16 are still flagged
+`needs-human-validation`, so they cannot be started. Validation is in progress
+with the `validate-backlog` skill ([log](backlog/validation-log.md)).
 
-**Work tickets (backend, frontend, database): TBD.** The stories are labeled
-by module, not by layer; technical tickets have not been written.
+**Work tickets (backend, frontend, database).** Stories are full-stack slices
+by default and are split by layer only when needed (AGENTS.md, "Story
+slicing"). Every story has one `layer:` label: database (REC-019, REC-020),
+backend (REC-005, REC-008, REC-009, REC-010, REC-016, REC-017, REC-021),
+frontend (REC-001, REC-003, REC-004, REC-006, REC-007, REC-011 to REC-013,
+REC-015, REC-018) and full stack (REC-002, REC-014). The
+[Entrega 1 checklist](docs/checklist.md) (item 10) tracks them.
 
 ## Repository structure
 
