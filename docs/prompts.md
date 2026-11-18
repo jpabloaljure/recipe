@@ -1289,3 +1289,103 @@ approve rec-021
   - Linked edits: REC-002 and REC-014 `blocked-by:REC-021`; `backlog/README.md` Decided 5 (open decision 5 closed); C4 02/03 and the README diagram use `{youtubeId}`; `add-vertical-swipe-feed` design §4 and task 2.1 drop the feed item `id`; validation log updated.
   - Alignment check: three gaps left (PRD API-3 and §5.5, the README API section, one line in the swipe-feed proposal), plus suggested checks for each stage of the backlog and OpenSpec flows (top 3: a ripple check when a decision is made, an owner table in AGENTS.md, separate PR tickboxes).
 - **Result:** REC-021 validated (3 of 21 stories validated, 18 still flagged). The story and document edits are not committed yet; the three gaps and the flow checks are waiting for a decision.
+
+## 174. Explore the API specification story
+
+```
+/openspec-explore REC-021
+```
+
+## 175. Ask why the YouTube ID has no format pattern
+
+```
+on 3 Declare no pattern, and add a note that a malformed ID returns 404. why is this your choise?
+```
+
+## 176. Accept the five contract details
+
+```
+I will accept all 5
+```
+
+## 177. Include the three linked fixes (button answer)
+
+```
+Yes, all three
+```
+
+## 178. Propose the API specification change
+
+```
+/openspec-propose REC-021
+```
+
+## 179. Open a PR with the proposal (button answer)
+
+```
+Open the PR
+```
+
+## 180. Merge the proposal PR (button answer)
+
+```
+Yes, merge it
+```
+
+## 181. Apply the change (button answer)
+
+```
+Apply it
+```
+
+## 182. Ask whether the linter is only for documentation
+
+```
+is this also for documentation?
+```
+
+## 183. Approve the one-off linter run (button answer)
+
+```
+Yes, run it
+```
+
+## 184. Merge the apply PR (button answer)
+
+```
+Yes, merge it
+```
+
+## 185. Merge the REC-021 done PR (button answer)
+
+```
+Yes, merge it
+```
+
+## 186. Archive the change (button answer)
+
+```
+Archive it
+```
+
+## 187. Merge the archive PR (button answer)
+
+```
+Yes, merge it
+```
+
+### Summary (prompts 174–187)
+
+- **Goal:** write the feed API specification (REC-021) through OpenSpec: explore, propose, apply and archive.
+- **Changes:**
+  - Explore: five contract details settled (empty fields sent as `null`; error codes `invalid_cursor`, `not_found`, `internal_error`; no format pattern on `{youtubeId}`, so a malformed ID returns 404; optional `cursor`, with an empty string returning 400; one example per response), plus three linked fixes in scope.
+  - Change `add-api-specification` (`skip_specs`): proposal, design (8 decisions) and 16 tasks (PR #26).
+  - Apply (PR #27):
+    - new `docs/api/openapi.yaml` (OpenAPI 3.1, two endpoints, shared schemas, cache headers, examples, field-to-column table, `security: []`);
+    - README API specification and Backlog sections;
+    - PRD API-3;
+    - checklist rows 1, 8, 9 and 10;
+    - the `add-vertical-swipe-feed` change committed for the first time, with its proposal naming the API specification as the contract.
+  - One-off `npx @redocly/cli lint` (approved, not added to the project): valid, one warning (no license).
+  - REC-021 set to done (PR #28); change archived to `openspec/changes/archive/2026-11-18-add-api-specification/` (PR #29).
+- **Result:** REC-021 is done, and Entrega 1 items 8 (API specification) and 10 (work tickets) are ✅. REC-014 is unblocked; REC-002 waits only on its own validation.
