@@ -1055,3 +1055,92 @@ rebase on master and pr and merge
   - `CONTRIBUTING.md`: new section "Choosing a path: OpenSpec or direct PR" (two-question test plus a table of typical cases).
   - `AGENTS.md`: new rule "Suggest a path for every change" under Contributing. The generated OpenSpec skills were left unedited because `openspec update` overwrites them.
 - **Result:** PR #13 merged with green CI (`main` is the base; there is no `master`). OpenSpec when a spec scenario changes or a design decision needs review first; otherwise a direct PR.
+
+## 140. Validate the data model story
+
+```
+Validate REC-020
+```
+
+## 141. Apply every recommended option
+
+```
+all A
+```
+
+## 142. Title-only videos, no manual recipes
+
+```
+#16 Remove manual from the scope of MVP and if could not get the recepi just leave the name (title) on the card. #17 B. #20 the recipe can only have the title if the recipe was not found. and there is no manual adding for MVP add the ready behavior to the draft backlog list but keep the status on the data model model.  All rest # will be A (Recommended)
+```
+
+## 143. Show title-only videos in the feed (dialog answer)
+
+```
+Shown with title only
+```
+
+## 144. Ready and needs_recipe in the feed
+
+```
+#24 keep show ready and need recipe in feed for MVP. the extra validation of the recipe should be at the draft backlog list to consider later.   All rest Recommended
+```
+
+## 145. Apply every recommended option
+
+```
+All A
+```
+
+## 146. Check that the docs match the decisions
+
+```
+Is all the backlog, PRD Agent and readme align with the desitions made on this validation rounds?
+```
+
+## 147. Fix the docs and reopen validated stories
+
+```
+fix them and open for validation if they are validated already.
+```
+
+## 148. Open the PR (button answer)
+
+```
+Yes, open the PR
+```
+
+## 149. Merge PR #17 (button answer)
+
+```
+Yes, merge it
+```
+
+## 150. Approve the acceptance criteria (button answer)
+
+```
+AC approved
+```
+
+## 151. Team estimate (button answer)
+
+```
+2
+```
+
+## 152. Mark the story validated (button answer)
+
+```
+Validated
+```
+
+### Summary (prompts 140–152)
+
+- **Goal:** validate REC-020 (data model document), then bring the PRD, README, AGENTS.md and backlog in line with the product decisions made while validating it.
+- **Changes:**
+  - `backlog/E01-browse-feed.md`: REC-020 refined over four validator rounds (32 findings); `blocked-by:REC-020` on REC-019.
+  - `backlog/README.md` Decided 4; `backlog/draft-backlog-list.md` D-7 (manual recipe rescue) and D-8 (recover recipes later).
+  - `docs/PRD.md` v0.3 (§1, G2, §5.3, §5.5, ING-2, §6.4 with `rejected`, API-1, PERF-4, §10), `README.md`, `AGENTS.md`, C4 levels 1 and 2, `docs/checklist.md`.
+  - Stories aligned: REC-002 (reopened for validation), REC-005, REC-006, REC-007, REC-008, REC-014, REC-018, REC-019; `(assumed)` flags on REC-011 to REC-013; E02 renamed.
+  - `backlog/validation-log.md`.
+- **Result:** `needs_recipe` videos stay in the feed with their title only; adding recipes by hand is out of the MVP; a fifth status `rejected`; the feed sorts on the time a video entered the feed. PR #17 merged with green CI. REC-020 validated (AI estimate 2, team estimate 2); its validation edits are not committed yet.
