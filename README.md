@@ -154,19 +154,21 @@ Constraints from the PRD:
 
 ## Data model
 
-**TBD** (next change: Drizzle schema for Postgres). What the PRD defines:
+The full model, with the ER diagram, field types, keys and rules, is in
+[docs/architecture/data-model.md](docs/architecture/data-model.md)
+(`Status: Proposed` until the schema, REC-019, is built). In short:
 
+- **Video** (key `id`, unique `youtube_id`): title, channel, the candidate
+  facts (duration, embeddable, language), status, and the time it entered
+  the feed.
 - **Video status:** `ready` (in feed, with recipe), `needs_recipe` (in feed,
   title only), `not_easy`, `unavailable`, `rejected` (failed ING-2, kept so
   it is skipped) (PRD §6.4).
-- **Recipe fields:** `servings`, `ingredients[] {name, quantity, unit}`,
-  `steps[]`, the source used (`description` / `comment` / `captions`).
-  Adding recipes by hand is not in the MVP.
-- **"Easy" facts, stored raw:** `ingredient_count`,
-  `estimated_active_minutes`, `special_equipment[]`, so thresholds can change
-  without reprocessing.
-
-ER diagram, field types and keys: TBD.
+- **Recipe** (0 or 1 per video): `servings`, `ingredients[] {name, quantity,
+  unit}`, `steps[]`, the source used (`description` / `comment` /
+  `captions`), and the raw "easy" facts `ingredient_count`,
+  `estimated_active_minutes`, `special_equipment[]`, so thresholds can
+  change without reprocessing. Adding recipes by hand is not in the MVP.
 
 ## API specification
 

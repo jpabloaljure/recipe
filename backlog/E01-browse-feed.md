@@ -187,7 +187,7 @@ Split from REC-002 during its validation (#27, 2026-11-16); REC-002 is blocked b
 S: one table, a status enum, one database rule for the feed-entry time, and Drizzle migration setup.
 
 ## REC-020 · Data model document (no implementation)
-- **Status:** todo
+- **Status:** in-progress
 - **Labels:** module:ingestion, type:docs, size:S, layer:db
 - **PRD:** 5.3, 6.1, ING-2, ING-3, 6.2, EXT-2, EXT-3, EXT-4, EXT-5, EXT-6, 6.3, 6.4, 6.5, PERF-4
 - **Flags:** —
