@@ -1144,3 +1144,79 @@ Validated
   - Stories aligned: REC-002 (reopened for validation), REC-005, REC-006, REC-007, REC-008, REC-014, REC-018, REC-019; `(assumed)` flags on REC-011 to REC-013; E02 renamed.
   - `backlog/validation-log.md`.
 - **Result:** `needs_recipe` videos stay in the feed with their title only; adding recipes by hand is out of the MVP; a fifth status `rejected`; the feed sorts on the time a video entered the feed. PR #17 merged with green CI. REC-020 validated (AI estimate 2, team estimate 2); its validation edits are not committed yet.
+
+## 153. Explore the data model story
+
+```
+/openspec-explore REC-020
+```
+
+## 154. Save a video only after processing
+
+```
+A, write only after the video is processed
+```
+
+## 155. Internal key, and capture the decisions
+
+```
+A, and capture the lines in the stories
+```
+
+## 156. Leave the notes uncommitted (button answer)
+
+```
+Not now
+```
+
+## 157. Propose the data model change
+
+```
+/openspec-propose REC-020
+```
+
+## 158. Open a PR with the notes and the proposal
+
+```
+PR explore updates and proposal
+```
+
+## 159. Merge PR #20 (button answer)
+
+```
+Yes, merge it
+```
+
+## 160. Apply the change (button answer)
+
+```
+Apply it
+```
+
+## 161. Merge PR #21 (button answer)
+
+```
+Yes, merge it
+```
+
+## 162. Archive the change (button answer)
+
+```
+Archive it
+```
+
+## 163. Merge PR #22 (button answer)
+
+```
+Yes, merge it
+```
+
+### Summary (prompts 153–163)
+
+- **Goal:** turn the validated REC-020 into the data model document through OpenSpec (explore, propose, apply, archive).
+- **Changes:**
+  - Explore decisions in the backlog: a video is written only after it is fully processed (no pending status), and its primary key is an internal integer `id` with `youtube_id` unique (REC-020, REC-005, REC-008).
+  - `openspec/changes/archive/2026-11-17-add-data-model-document/`: proposal, design (7 decisions), tasks (12 of 12), docs only.
+  - `docs/architecture/data-model.md` (new, `Status: Proposed`): Mermaid ER diagram of video and recipe, field tables, five statuses, rules and notes.
+  - `docs/architecture/README.md` ("Other diagrams"), `README.md` ("Data model"), `docs/adr/README.md` (pending decision on storing ingestion runs), `docs/checklist.md` item 7, REC-020 `done`.
+- **Result:** PRs #20, #21 and #22 merged with green CI (#21 after one re-run: the runner failed to install Chromium's font packages). The diagram renders on GitHub; checklist item 7 is done; REC-019 and REC-021 are unblocked.
