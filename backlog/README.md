@@ -105,6 +105,13 @@ user-facing slice and is `blocked-by` each child; each child is flagged
    REC-005, REC-006, REC-007, REC-008, REC-014, REC-018, REC-019; REC-011,
    REC-012 and REC-013 carry `(assumed)` flags for title-only videos; E02's
    title. Decided 2026-11-17 (REC-020 validation, #16, #20, #23, #24).
+5. Deep links to unknown or out-of-feed videos: `GET /api/videos/{youtubeId}`
+   returns 200 only for `ready` and `needs_recipe` videos, and 404 for an
+   unknown, malformed or out-of-feed (`not_easy`, `unavailable`, `rejected`)
+   ID; on a 404 the deep link lands on the regular feed without an error
+   (REC-014). The API contract is owned by the API specification (REC-021);
+   REC-002 and REC-014 implement it. Decided 2026-11-18 (REC-021 validation,
+   #1–#4).
 
 ## Open decisions
 
@@ -112,7 +119,8 @@ user-facing slice and is `blocked-by` each child; each child is flagged
 2. Whether favorites save a copy of the recipe (REC-012).
 3. What counts as one "view" for auto-opening the panel (REC-007).
 4. Whether the unmute "session" means the tab or the visit (REC-003).
-5. Deep link behavior for unknown or non-ready videos (REC-014).
+5. ~~Deep link behavior for unknown or non-ready videos (REC-014).~~ Closed
+   by Decided 5.
 6. ~~Whether to add a `type:docs` story for maintainers rescuing
    `needs_recipe` videos by editing the database (§6.4).~~ Closed by Decided
    4: manual rescue is out of the MVP.

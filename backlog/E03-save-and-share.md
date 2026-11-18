@@ -75,7 +75,7 @@ Depends on REC-014 for the link target.
 - **Status:** todo
 - **Labels:** module:sharing, type:feature, size:M, layer:fullstack
 - **PRD:** 5.5, API-3
-- **Flags:** needs-human-validation; (assumed) an unknown video ID, or one not in the feed, falls back to the regular feed (open decision)
+- **Flags:** needs-human-validation; blocked-by:REC-021
 - **AI estimate:** —
 - **Estimate:** —
 
@@ -85,11 +85,12 @@ As a home cook, I want a shared link to open straight on that recipe, so that I 
 - Given a deep link `/r/{videoId}` for a ready video, when I open it, then the feed opens on that video with its recipe available (API-3).
 - Given I opened a deep link to a video in the middle of the feed, when I swipe up or down, then the next or previous video in the feed becomes active.
 - Given a deep link `/r/{videoId}` for a `needs_recipe` video, when I open it, then the feed opens on that video showing its title only.
-- Given a deep link for an ID that is unknown or not in the feed (not `ready` or `needs_recipe`), when I open it, then I land on the regular feed without an error (assumed).
+- Given a deep link for an ID that is unknown or not in the feed (not `ready` or `needs_recipe`), when I open it, then I land on the regular feed without an error.
 
 ### Technical context
 Owns how a deep-linked video joins the visit's feed (from REC-002 validation, #24, 2026-11-16): the linked video plays first, then the regular feed (REC-002) starts at page 1, and the client skips the linked video if it comes up again in the feed.
+The single-video request is `GET /api/videos/{youtubeId}` as specified by REC-021: 200 for a `ready` or `needs_recipe` video, 404 for an unknown, malformed or out-of-feed ID, which the client treats as "land on the regular feed" (`backlog/README.md` Decided 5, 2026-11-18, from REC-021 validation).
 
 ### Estimation notes
 M: a new entry point into the feed plus a single-video request.
-Edge-case behavior is not in the PRD and is assumed here.
+Edge-case behavior is not in the PRD; it was decided in `backlog/README.md` Decided 5.
