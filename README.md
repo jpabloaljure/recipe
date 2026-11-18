@@ -1,8 +1,9 @@
 # Easy Recipes from YouTube (working title)
 
 A mobile-first web app with a vertical, full-screen feed of short YouTube
-cooking videos (Shorts). Every video in the feed comes with an easy recipe
-(servings, ingredients, numbered steps), extracted ahead of time by an LLM.
+cooking videos (Shorts). Videos come with an easy recipe (servings,
+ingredients, numbered steps), extracted ahead of time by an LLM; a video whose
+recipe could not be found shows its title only.
 
 > Status: **MVP planning.** The PRD and backlog are written, and the app is
 > scaffolded (a placeholder page, no product features yet). Delivery progress
@@ -16,7 +17,7 @@ cooking videos (Shorts). Every video in the feed comes with an easy recipe
 | **Author** | TBD |
 | **Repository** | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe) (branch `main`) |
 | **Deployed URL** | [recipe-henna-pi.vercel.app](https://recipe-henna-pi.vercel.app) (Vercel, deploys from `main`) |
-| **PRD status** | Draft v0.1, 2026-11-14 |
+| **PRD status** | Draft v0.3, updated 2026-11-17 |
 | **Platform** | Web app, mobile-first, desktop supported |
 
 ## Overview
@@ -32,7 +33,8 @@ to cook today, watches on a phone.
 
 ### MVP goals
 1. Browse a curated feed of easy recipe Shorts with no waiting.
-2. See the written recipe for every video in the feed.
+2. See the written recipe for every video in the feed that has one (a video
+   with no recipe found shows its title only).
 3. Save favorites and share recipes without creating an account.
 
 ### Features (MVP)
@@ -85,7 +87,7 @@ C4Container
   title Easy Recipes - Containers
 
   Person(cook, "Home cook", "Watches Shorts and cooks from the recipe")
-  Person(maint, "Maintainer", "Edits recipes by hand (PRD 6.4)")
+  Person(maint, "Maintainer", "Operates the app: marks broken videos unavailable (PRD 9)")
 
   System_Ext(ytp, "YouTube IFrame Player", "Plays the videos")
   System_Ext(yapi, "YouTube Data API v3", "Search, video details, comments")
@@ -154,10 +156,12 @@ Constraints from the PRD:
 
 **TBD** (next change: Drizzle schema for Postgres). What the PRD defines:
 
-- **Video status:** `ready` (in feed), `needs_recipe`, `not_easy`,
-  `unavailable` (PRD §6.4).
+- **Video status:** `ready` (in feed, with recipe), `needs_recipe` (in feed,
+  title only), `not_easy`, `unavailable`, `rejected` (failed ING-2, kept so
+  it is skipped) (PRD §6.4).
 - **Recipe fields:** `servings`, `ingredients[] {name, quantity, unit}`,
   `steps[]`, the source used (`description` / `comment` / `captions`).
+  Adding recipes by hand is not in the MVP.
 - **"Easy" facts, stored raw:** `ingredient_count`,
   `estimated_active_minutes`, `special_equipment[]`, so thresholds can change
   without reprocessing.
@@ -184,7 +188,7 @@ to the PRD goals:
 | Epic | Stories |
 |---|---|
 | [E01 Browse a curated feed with no waiting](backlog/E01-browse-feed.md) | REC-001 to REC-005, REC-018 |
-| [E02 A written recipe for every video](backlog/E02-recipe-every-video.md) | REC-006 to REC-010, REC-017 |
+| [E02 A written recipe for every video that has one](backlog/E02-recipe-every-video.md) | REC-006 to REC-010, REC-017 |
 | [E03 Save and share without an account](backlog/E03-save-and-share.md) | REC-011 to REC-014 |
 | [E04 Launch readiness](backlog/E04-launch-readiness.md) | REC-015, REC-016 |
 

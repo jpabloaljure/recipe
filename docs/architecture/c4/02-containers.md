@@ -9,7 +9,7 @@ C4Container
   title Easy Recipes - Containers
 
   Person(cook, "Home cook", "Watches Shorts and cooks from the recipe")
-  Person(maint, "Maintainer", "Edits recipes by hand (PRD 6.4)")
+  Person(maint, "Maintainer", "Operates the app: marks broken videos unavailable (PRD 9)")
 
   System_Ext(ytp, "YouTube IFrame Player", "Plays the videos")
   System_Ext(yapi, "YouTube Data API v3", "Search, video details, comments")
@@ -29,7 +29,7 @@ C4Container
   Rel(ing, yapi, "Discovers and checks videos")
   Rel(ing, llm, "Extracts recipes")
   Rel(ing, db, "Writes", "SQL")
-  Rel(maint, db, "Edits", "Neon console")
+  Rel(maint, db, "Fixes video statuses", "Neon console")
 ```
 
 ## Paths

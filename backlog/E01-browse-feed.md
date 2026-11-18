@@ -33,35 +33,37 @@ M: CSS scroll-snap feed with one video per gesture, wrap-around to the first vid
 Update after the technical check (2026-11-16): the overlay was dropped; plain scroll-snap passed all checks on Android and desktop Chrome, which removes the main risk.
 AI estimate (2026-11-16): 3. Calibration: no stories have a team estimate yet (greenfield), so calibrated against a generic "single scrollable list view with layout rules and stub data" pattern. The technical check already proved the core mechanism (plain scroll-snap, one video per gesture, swipes over the iframe), and the player, real feed data, loop and taps are owned by REC-002/REC-003. Remaining work: the scroll-snap feed component, centered layout on desktop and in landscape, wrap-around from the last video to the first of this visit's order across API pages, and gesture checks on real devices. Risks that would move it to 5: wrap-around jumping from the last to the first video without a visible glitch or a double snap; and (assumed) the Next.js project scaffolding, CI and deploy are set up outside this story; if REC-001 must carry them as the first feature, it is a 5.
 
-## REC-002 · Feed shows only ready videos, newest first with variety
+## REC-002 · Feed shows ready and title-only videos, newest first with variety
 - **Status:** todo
 - **Labels:** module:feed, type:feature, size:M, layer:fullstack
 - **PRD:** 6.4, 6.5, API-1, API-2, PERF-6
-- **Flags:** blocked-by:REC-019
+- **Flags:** needs-human-validation; blocked-by:REC-019
 - **AI estimate:** 5
 - **Estimate:** 5
 
-As a home cook, I want the feed to contain only ready, easy recipe videos in a fresh order, so that every video I land on is worth watching.
+As a home cook, I want the feed to contain easy recipe videos, plus videos whose recipe could not be found shown by their title, in a fresh order, so that I always have something worth watching.
 
 ### Acceptance criteria
-- Given videos with statuses ready, needs_recipe, not_easy and unavailable, when the feed is requested, then only `ready` videos are returned, each with its recipe included (API-1).
-- Given page 1 of the feed has been returned, when page 2 is requested, then every video on it became ready at the same time as or earlier than those on page 1, and none of them appears on page 1 (API-2).
+- Given videos with statuses ready, needs_recipe, not_easy, unavailable and rejected, when the feed is requested, then only `ready` and `needs_recipe` videos are returned
+  And each `ready` video includes its recipe
+  And each `needs_recipe` video has its title and no recipe (API-1).
+- Given page 1 of the feed has been returned, when page 2 is requested, then every video on it entered the feed at the same time as or earlier than those on page 1, and none of them appears on page 1 (API-2).
 - Given a page of the feed is loaded, when the client shows it, then its videos appear in the order produced by this visit's shuffle (API-2).
 - Given a visit has loaded pages 1 and 2, when page 3 loads, then pages 1 and 2 keep their order.
-- Given the last page of ready videos is requested, when it is returned, then the response reports that there are no more pages.
-- Given the last ready videos exactly fill a page, when that page is requested, then it already reports that there are no more pages.
-- Given there are no ready videos, when the first page is requested, then it returns an empty list that reports no more pages.
+- Given the last page of the feed is requested, when it is returned, then the response reports that there are no more pages.
+- Given the last videos in the feed exactly fill a page, when that page is requested, then it already reports that there are no more pages.
+- Given there are no `ready` or `needs_recipe` videos, when the first page is requested, then it returns an empty list that reports no more pages.
 - Given a feed page with at least one video, when it is served, then it has a `Cache-Control` header with `s-maxage=3600` (PERF-6).
-- Given there are no ready videos, when the first page is served, then it has a `Cache-Control: no-store` header.
+- Given there are no `ready` or `needs_recipe` videos, when the first page is served, then it has a `Cache-Control: no-store` header.
 - Given a feed request fails with any 4xx or 5xx status, when the response is served, then it has a `Cache-Control: no-store` header.
 
 ### Technical context
 "Light shuffling" (API-2), decided 2026-11-16 during validation: pages are returned in newest-first order, and the client shuffles the videos *within* each page once per visit. The server response is the same for everyone (no seed in the URL), so it stays fully cacheable at the CDN (PERF-6). The shuffle's random source is injectable, so tests can make the order deterministic. A returning user gets a different order by chance; the app does not remember the previous visit's order. That a shuffled page holds exactly the server page's videos is a unit test, not a scenario.
-Pagination uses a cursor on (time the video became `ready`, id), not an offset. The database sets that time automatically whenever a video's status changes to `ready`, including manual edits (REC-019), so it only grows for newly ready videos; a `ready` video without it is excluded from the feed and logged. So videos that become ready or unavailable mid-visit do not cause duplicates or skipped items. The client keeps the visit's shuffled list in memory and never reshuffles pages it has already loaded. When the last page reports no more pages, REC-001 wraps by replaying that in-memory list from the start.
-Page size is 10 videos. The response has `videos` (each with its recipe) and `nextCursor`, which is `null` when there are no more pages; the server reads one row beyond the page, so an exactly full last page already returns `null`. Newest-first order within a server page is covered by unit tests. A unit test also checks that walking all pages returns every `ready` video exactly once, including ties on ready time at a page boundary (fixture data from this story's seed script). The full response contract is defined in the OpenSpec change. When to request the next page is already owned by REC-001's feed client (within two slides of the last loaded video; `add-vertical-swipe-feed` design §4). This story replaces REC-001's stub `FeedSource` with one that calls `GET /api/feed`, keeping at most one request per cursor in flight. Reaching the end of the loaded list while the next page is still loading is owned by REC-018.
+Pagination uses a cursor on (time the video entered the feed, id), not an offset. The database sets that time automatically when a video is inserted as, or changes to, `ready` or `needs_recipe` from a status outside the feed, and keeps it when the status moves between those two (REC-019, rule from REC-020); so it only grows for videos newly entering the feed. A video in the feed without it is excluded and logged. So videos that enter or leave the feed mid-visit do not cause duplicates or skipped items. Reopened for validation 2026-11-17 (`backlog/README.md` Decided 4): `needs_recipe` videos are in the feed with their title only, and there are no manual edits to `ready` in the MVP. The client keeps the visit's shuffled list in memory and never reshuffles pages it has already loaded. When the last page reports no more pages, REC-001 wraps by replaying that in-memory list from the start.
+Page size is 10 videos. The response has `videos` (`ready` ones with their recipe, `needs_recipe` ones with their title only) and `nextCursor`, which is `null` when there are no more pages; the server reads one row beyond the page, so an exactly full last page already returns `null`. Newest-first order within a server page is covered by unit tests. A unit test also checks that walking all pages returns every `ready` and `needs_recipe` video exactly once, including ties on the feed-entry time at a page boundary (fixture data from this story's seed script). The full response contract is defined in the OpenSpec change. When to request the next page is already owned by REC-001's feed client (within two slides of the last loaded video; `add-vertical-swipe-feed` design §4). This story replaces REC-001's stub `FeedSource` with one that calls `GET /api/feed`, keeping at most one request per cursor in flight. Reaching the end of the loaded list while the next page is still loading is owned by REC-018.
 An invalid or stale cursor returns HTTP 400; the client treats it as a failed page (REC-018). Covered by unit tests, not a scenario.
 Built and tested on fixture data from a seed script in the repo, owned by this story; real `ready` videos come later from REC-005 and E02. The database schema and migration are owned by REC-019.
-The periodic availability check (PRD §9) is out of the MVP (decided 2026-11-16; `draft-backlog-list.md` D-5). This story filters by status only: a removed video that is still `ready` is skipped by the player error handling in REC-018, or a maintainer marks it `unavailable` (PRD §9); videos with status `unavailable` are excluded by the status filter above.
+The periodic availability check (PRD §9) is out of the MVP (decided 2026-11-16; `draft-backlog-list.md` D-5). This story filters by status only: a removed video that is still in the feed is skipped by the player error handling in REC-018, or a maintainer marks it `unavailable` (PRD §9); videos with status `unavailable`, `not_easy` or `rejected` are excluded by the status filter above.
 CDN cache (PERF-6), decided 2026-11-16: feed pages with at least one video, cursor pages included, are cached for 1 hour (`s-maxage=3600`), with no other cache control; empty and error responses are `no-store`. New `ready` videos and status changes can take up to an hour to reach users. Refreshing the cache when ingestion finishes is a future improvement (`draft-backlog-list.md` D-6). The cache headers are checked on the route's response (Vitest) and in the local production build; after the first deploy, a one-time manual check confirms the Vercel CDN caches (a second request shows a cache `HIT`), since the CDN may remove `s-maxage` from what the browser receives. This story's change updates the C4 container diagram (`docs/architecture/c4/02-containers.md`, which says "`s-maxage` with revalidation") to match.
 A next-page request that fails mid-visit is owned by REC-018 (decided 2026-11-16); its behavior is decided there. A visit opened from a deep link is owned by REC-014: the linked video plays first, then the feed starts at page 1, and the client skips that video if it comes up again.
 
@@ -118,7 +120,7 @@ Highest technical risk in E01; validated on device by REC-015.
 ## REC-005 · Daily discovery of new candidate videos
 - **Status:** todo
 - **Labels:** module:ingestion, type:feature, size:L, layer:backend
-- **PRD:** 6.1, ING-1, ING-2, ING-3, ING-4, 9 (API quota), 12 (seed channels)
+- **PRD:** 6.1, ING-1, ING-2, ING-3, ING-4, 6.4, 9 (API quota), 12 (seed channels)
 - **Flags:** needs-human-validation; (assumed) seed channels and search queries will be provided before build (open decision)
 - **AI estimate:** —
 - **Estimate:** —
@@ -127,12 +129,12 @@ As a home cook, I want new easy recipes to show up in the feed regularly, so tha
 
 ### Acceptance criteria
 - Given the daily schedule, when the discovery job runs, then it finds new candidate videos from the configured search queries and/or seed channels (ING-1).
-- Given a discovered video longer than 3 minutes, not embeddable, or not in English, when it is evaluated, then it is not kept as a candidate (ING-2).
+- Given a discovered video longer than 3 minutes, not embeddable, or not in English, when it is evaluated, then it is stored as `rejected` instead of kept as a candidate (ING-2).
 - Given a video ID that is already in the database, when it is discovered again, then it is skipped (ING-3).
 - Given launch day, when the catalog is checked, then about 50 videos are in `ready` status (ING-4).
 
 ### Technical context
-—
+Rejected candidates are stored with status `rejected` (decided 2026-11-17, `backlog/README.md` Decided 4) so ING-3's "skip known IDs" also skips them and saves API quota. Fields and statuses follow the data model document (REC-020).
 
 ### Estimation notes
 L: YouTube API quota (search calls are expensive) shapes the whole job.
@@ -149,7 +151,7 @@ Depends on the open decision about seed channels and queries.
 As a home cook, I want the feed to tell me when there is nothing to show or something failed, and to skip broken videos, so that I am never stuck on a blank or broken screen.
 
 ### Acceptance criteria
-- Given there are no ready videos, when the feed loads, then an empty-feed message is shown.
+- Given there are no videos in the feed (`ready` or `needs_recipe`), when the feed loads, then an empty-feed message is shown.
 - Given the feed request fails, when the feed loads, then an "Oops, something went wrong" message is shown.
 - Given I am offline, when the feed loads, then an "Oops, something went wrong" message is shown.
 - Given the active video was removed or is no longer embeddable, when it fails to load in the player, then the next video loads automatically.
@@ -165,43 +167,65 @@ The player error event's timing and reliability is the main unknown.
 - **Status:** todo
 - **Labels:** module:ingestion, type:feature, size:S, layer:db
 - **PRD:** 6.4, 6.5
-- **Flags:** needs-human-validation; split-from:REC-002; (assumed) the recipe is stored as one JSON value until E02 (REC-006, REC-008) defines its structure
+- **Flags:** needs-human-validation; split-from:REC-002; blocked-by:REC-020; (assumed) the recipe is stored as one JSON value until E02 (REC-006, REC-008) is built
 - **AI estimate:** —
 - **Estimate:** —
 
 As a maintainer, I want one versioned database schema for videos, their status and their recipe, so that the feed and the ingestion job read and write the same data.
 
 ### Acceptance criteria
-- Given an empty database, when the migrations run, then a videos table exists with the YouTube video ID, a status limited to ready, needs_recipe, not_easy and unavailable, the recipe, and the time the video became ready.
-- Given a video with any other status, when its status changes to `ready`, then its ready time is set to the current time.
+- Given an empty database, when the migrations run, then a videos table exists with the fields of the data model document (REC-020), a status limited to ready, needs_recipe, not_easy, unavailable and rejected, and the time the video entered the feed.
+- Given a video is not in the database, when it is inserted as `ready` or `needs_recipe`, then the time it entered the feed is set to the current time.
+- Given a video with a status outside the feed, when its status changes to `ready` or `needs_recipe`, then the time it entered the feed is set to the current time.
+- Given a video in the feed, when its status changes between `ready` and `needs_recipe`, then the time it entered the feed is kept.
 - Given the migrations have already run, when they run again, then the schema is unchanged.
 
 ### Technical context
-Split from REC-002 during its validation (#27, 2026-11-16); REC-002 is blocked by this story. Drizzle ORM schema and migrations (ADR 0003), shared by the web app and the ingestion job (C4 container diagram). The ready time is set by the database itself (from REC-002 validation, #26), so a maintainer's manual edit to `ready` (PRD 6.4) also sets it; how (for example a trigger) may need an ADR (`write-adr`). REC-002 owns the fixture seed script; REC-005, REC-008 and REC-010 write to this schema.
+Split from REC-002 during its validation (#27, 2026-11-16); REC-002 is blocked by this story. Drizzle ORM schema and migrations (ADR 0003), shared by the web app and the ingestion job (C4 container diagram). The time the video entered the feed is set by the database itself (from REC-002 validation, #26; rule from REC-020, 2026-11-17); how (for example a trigger) may need an ADR (`write-adr`). Adding recipes by hand is out of the MVP (`backlog/README.md` Decided 4). When the schema matches the data model document, this story sets the document's `Status:` to `Current`. REC-002 owns the fixture seed script; REC-005, REC-008 and REC-010 write to this schema.
 
 ### Estimation notes
-S: one table, a status enum, one database rule for the ready time, and Drizzle migration setup.
+S: one table, a status enum, one database rule for the feed-entry time, and Drizzle migration setup.
 
 ## REC-020 · Data model document (no implementation)
 - **Status:** todo
 - **Labels:** module:ingestion, type:docs, size:S, layer:db
-- **PRD:** 5.3, 6.2, 6.4, 6.5
-- **Flags:** needs-human-validation; (assumed) the document lives in `docs/architecture/data-model.md` with a Mermaid `erDiagram`
+- **PRD:** 5.3, 6.1, ING-2, ING-3, 6.2, EXT-2, EXT-3, EXT-4, EXT-5, EXT-6, 6.3, 6.4, 6.5, PERF-4
+- **Flags:** needs-human-validation
 - **AI estimate:** —
 - **Estimate:** —
 
 As a maintainer, I want the data model written down before the schema is built, so that the feed, the recipe panel and the ingestion job agree on the same entities and fields.
 
 ### Acceptance criteria
-- Given the PRD and the validated stories, when I open the data model document, then it shows every entity (at least video and recipe) in an entity-relationship diagram with its fields, types, keys and relationships.
-- Given the data model document, when I read the video entity, then its status allows only ready, needs_recipe, not_easy and unavailable, and it has the time the video became ready.
-- Given the data model document, when I read the recipe entity, then it has servings, the ingredients, the numbered steps and where the recipe came from (description or top comment).
+- Given the data model document in `docs/architecture/data-model.md`, when I read its Mermaid entity-relationship diagram, then every entity (at least video and recipe) and every relationship between them is shown.
+- Given the data model document, when I read any entity, then each field has a type
+  And the primary and unique keys are marked.
+- Given the data model document, when I read the video entity, then it has the YouTube video ID as a unique key, the title, and the channel ID and name
+  And it has the candidate facts used to select videos: duration, embeddable and language
+  And it has a status limited to ready, needs_recipe, not_easy, unavailable and rejected, and the time the video entered the feed.
+- Given the data model document, when I read the video statuses, then `ready` and `needs_recipe` videos are in the feed, and `not_easy`, `unavailable` and `rejected` videos are not
+  And a `needs_recipe` video is shown with its title only, with no recipe
+  And a `rejected` video is a candidate that failed the selection checks (ING-2), kept so ingestion skips it (ING-3).
+- Given the data model document, when I read how the time a video entered the feed is set, then the database sets it when a video is inserted with, or changed to, `ready` or `needs_recipe` from a status outside the feed
+  But a change between `ready` and `needs_recipe` keeps the time.
+- Given the data model document, when I read the recipe entity, then it has servings, and the ingredients and numbered steps as typed lists inside the recipe
+  And its source is one of `description`, `comment` or `captions` (open until the REC-009 spike)
+  And it keeps the raw "easy" facts: ingredient count, estimated active minutes and special equipment (EXT-4).
+- Given the data model document, when I read which videos have a recipe, then `ready` and `not_easy` videos always have one, while `needs_recipe` and `rejected` videos have none
+  But an `unavailable` video keeps whatever it had before.
+- Given the data model document, when I read the recipe's required fields, then each ingredient is `{name, quantity, unit}` with only the name required (EXT-3)
+  And quantity and unit are text, so "1/2", "a pinch" and "to taste" are stored as written
+  And servings are optional.
+- Given the data model document, when I read the video's required fields, then the YouTube ID, title, channel ID and status are always required
+  But duration, embeddable and language may be empty only for a `rejected` video.
+- Given the data model document is written, when I check where it is linked, then the README "Data model" section and `docs/architecture/README.md` link to it.
+- Given the data model document is written, when I check the pending decisions, then "is an ingestion run stored?" is listed under "Pending decisions" in `docs/adr/README.md`.
 
 ### Technical context
-Documentation only: no migration, no code. REC-019 implements the schema and must match this document; when they differ, the document is updated in the same change. Covers the parts REC-019 leaves open (REC-019 stores the recipe as one JSON value until E02 decides its structure), so the recipe's shape follows PRD §5.3 and §6.2 and may be refined by REC-006 and REC-008. Whether an ingestion run is stored is an open decision to record, not to invent. Linked from the README "Data model" section and the Entrega 1 checklist (item 7). An architecture decision found while writing it goes through `write-adr`.
+Documentation only: no migration, no code. The document is the logical model (the target design), drawn from the PRD and the stories as they are now; it is updated when a later validation changes the model. It owns the recipe's logical structure: E02 (REC-006, REC-008) may refine it, and a refinement updates this document in the same change. It has a short "Built now" note: REC-019 stores the recipe as one JSON value until E02 is built. The document carries `Status: Proposed` (the convention in `docs/architecture/README.md`); REC-019 sets it to `Current` once the schema matches. REC-019 is blocked by this story and implements the schema from it; when they differ, the document is updated in the same change. Decided while validating this story (2026-11-17, `backlog/README.md` Decided 4): `needs_recipe` videos enter the feed showing their title only, and adding a recipe by hand is out of the MVP (`draft-backlog-list.md` D-7), so there is no `manual` source. Extra validation to recover a recipe for a `needs_recipe` video later is also out of the MVP (D-8). Candidates that fail ING-2 are stored as `rejected` (no recipe, not in the feed), so the daily search does not check them again. The feed-entry time only grows for videos newly entering the feed, so REC-002's cursor stays stable. Seed channels and search queries are ingestion configuration (REC-005, open decision 1), not part of the data model. The completeness rule (EXT-5) is an extraction rule owned by REC-008; the document mentions it in a note, not as a database constraint (applying it to hand-added recipes is part of D-7). Quantity and unit are text because amounts are not scaled in the MVP. Title and channel come from the YouTube API at ingestion: the title is shown for `needs_recipe` videos and in the Favorites list (REC-012), and the channel ID lets extraction prefer the creator's comment (EXT-2). The link to the original video is built from the YouTube ID, not stored. Favorites are out of scope: they live in the browser (REC-011, REC-012) and the server never sees them. `docs/architecture/README.md` lists the document as a non-C4 diagram. Whether an ingestion run is stored is an open decision to record, not to invent. Also linked from the Entrega 1 checklist (item 7). An architecture decision found while writing it goes through `write-adr`.
 
 ### Estimation notes
-S: one document with a diagram, drawn from the PRD and stories already validated; no code.
+S: one document with a diagram, drawn from the PRD and the current stories; no code.
 
 ## REC-021 · API specification document (no implementation)
 - **Status:** todo

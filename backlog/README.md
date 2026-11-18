@@ -8,7 +8,7 @@ the product at a high level; full conventions live in `AGENTS.md`.
 | Epic | File | PRD goal |
 |---|---|---|
 | E01 Browse a curated feed with no waiting | `E01-browse-feed.md` | G1 |
-| E02 A written recipe for every video | `E02-recipe-every-video.md` | G2 |
+| E02 A written recipe for every video that has one | `E02-recipe-every-video.md` | G2 |
 | E03 Save and share without an account | `E03-save-and-share.md` | G3 |
 | E04 Launch readiness | `E04-launch-readiness.md` | §8 |
 
@@ -92,6 +92,19 @@ user-facing slice and is `blocked-by` each child; each child is flagged
    change so it stays aligned with the backlog, code and documentation.
    Detail stays in the backlog; out-of-MVP items are tracked in
    `draft-backlog-list.md`. Decided 2026-11-16 (REC-002 validation, #22).
+4. Videos with no recipe: a `needs_recipe` video enters the feed and shows
+   its title only, with no recipe. Adding a recipe by hand (setting a video
+   to `ready` by editing the database) is out of the MVP
+   (`draft-backlog-list.md` D-7), so the recipe source is only
+   `description`, `comment` or `captions`. Recovering a recipe for a
+   `needs_recipe` video later is D-8. Candidates that fail ING-2 are stored
+   with a fifth status, `rejected`, so they are skipped next time (ING-3).
+   PRD §1, G2, §5.3, §5.5, ING-2, §6.4, API-1 and PERF-4, the README, the
+   C4 diagrams (the maintainer no longer edits recipes) and AGENTS.md updated
+   to match. Stories aligned the same day: REC-002 (reopened for validation),
+   REC-005, REC-006, REC-007, REC-008, REC-014, REC-018, REC-019; REC-011,
+   REC-012 and REC-013 carry `(assumed)` flags for title-only videos; E02's
+   title. Decided 2026-11-17 (REC-020 validation, #16, #20, #23, #24).
 
 ## Open decisions
 
@@ -100,5 +113,6 @@ user-facing slice and is `blocked-by` each child; each child is flagged
 3. What counts as one "view" for auto-opening the panel (REC-007).
 4. Whether the unmute "session" means the tab or the visit (REC-003).
 5. Deep link behavior for unknown or non-ready videos (REC-014).
-6. Whether to add a `type:docs` story for maintainers rescuing `needs_recipe`
-   videos by editing the database (§6.4).
+6. ~~Whether to add a `type:docs` story for maintainers rescuing
+   `needs_recipe` videos by editing the database (§6.4).~~ Closed by Decided
+   4: manual rescue is out of the MVP.
