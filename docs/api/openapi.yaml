@@ -1,0 +1,391 @@
+openapi: 3.1.0
+info:
+  title: Easy Recipes API
+  version: 0.3.0
+  summary: The feed and single-video endpoints of the Easy Recipes web app.
+  description: |
+    The contract between the Easy Recipes web app and its two read-only route
+    handlers (ADR 0002). Owned by backlog story REC-021: REC-002 (feed) and
+    REC-014 (deep link) implement it, and when code and this file differ,
+    this file is updated in the same change. The version follows the PRD
+    version (v0.3).
+
+    **Items.** The feed holds videos in the `ready` and `needs_recipe`
+    statuses (PRD API-1). A `ready` video comes with its recipe; a
+    `needs_recipe` video comes with its title only, as `recipe: null`.
+    Every field is always present; a field with no value is `null`, never
+    left out. Internal fields (internal id, status, feed-entry time,
+    timestamps, raw "easy" facts, channel ID) are never returned.
+
+    **Errors.** The app's 400, 404 and 5xx responses share one body,
+    `{ "error": { "code", "message" } }`. Platform errors the app does not
+    produce (for example a Vercel function timeout, 504) may have another
+    body, so clients rely only on the status code and treat any non-2xx
+    response as a failed request (REC-018).
+
+    **Caching.** Responses with at least one video send
+    `Cache-Control: public, s-maxage=3600` (PERF-6). Empty, 404 and error
+    responses send `Cache-Control: no-store`, so a video that enters the
+    feed later is not hidden by a cached response.
+
+    **Field mapping.** JSON names are camelCase, mapped from the snake_case
+    columns in the data model
+    ([docs/architecture/data-model.md](../architecture/data-model.md)):
+
+    | JSON field | Data model |
+    |---|---|
+    | `youtubeId` | `video.youtube_id` |
+    | `title` | `video.title` |
+    | `channelName` | `video.channel_name` |
+    | `recipe` | the video's `recipe` row; `null` when it has none (`needs_recipe`) |
+    | `recipe.servings` | `recipe.servings` |
+    | `recipe.ingredients` | `recipe.ingredients` (list) |
+    | `recipe.ingredients[].name` | `recipe.ingredients` item `name` |
+    | `recipe.ingredients[].quantity` | `recipe.ingredients` item `quantity` |
+    | `recipe.ingredients[].unit` | `recipe.ingredients` item `unit` |
+    | `recipe.steps` | `recipe.steps` (list, in order) |
+    | `recipe.source` | `recipe.source` |
+
+    Until E02 is built, REC-019 stores the recipe as one JSON value on the
+    videos table (data model, "Built now"); the JSON field names above do
+    not change. A change to the recipe structure (E02: REC-006, REC-008)
+    updates the data model document and this file in the same change.
+
+    **Types.** The response types live in one TypeScript module,
+    `src/lib/feed/types.ts`, used by the routes and the E2E stub data. It
+    is kept in sync with this file in review; there is no validator library.
+servers:
+  - url: /
+    description: Same origin as the web app.
+security: []  # public, read-only endpoints: no sign-in (PRD 5.4, no accounts)
+paths:
+  /api/feed:
+    get:
+      operationId: getFeedPage
+      summary: One page of the feed.
+      description: |
+        Returns up to 10 feed items, newest first by the time each video
+        entered the feed (API-2). The server does not shuffle; the client
+        shuffles each page (`backlog/README.md` Decided 2). Clients rely only
+        on `nextCursor`, never on the page size: pass it back to get the next
+        page, and stop when it is `null`.
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: |
+            A page of the feed. A page with items is cached
+            (`public, s-maxage=3600`); an empty feed is not (`no-store`).
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlFeed'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedPage'
+              examples:
+                feedPage:
+                  $ref: '#/components/examples/feedPage'
+                lastPage:
+                  $ref: '#/components/examples/lastPage'
+                emptyFeed:
+                  $ref: '#/components/examples/emptyFeed'
+        '400':
+          $ref: '#/components/responses/InvalidCursor'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+  /api/videos/{youtubeId}:
+    get:
+      operationId: getVideo
+      summary: One video in the feed, for deep links.
+      description: |
+        Returns one feed item by its YouTube ID (PRD 5.5, API-3), with the
+        same shape as a feed item. Only `ready` and `needs_recipe` videos are
+        found. An unknown or malformed ID, or a video outside the feed
+        (`not_easy`, `unavailable`, `rejected`), returns 404; the deep link
+        then opens the regular feed (REC-014, `backlog/README.md` Decided 5).
+      parameters:
+        - $ref: '#/components/parameters/YoutubeId'
+      responses:
+        '200':
+          description: The video, with its recipe or with its title only.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControlShared'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedItem'
+              examples:
+                readyItem:
+                  $ref: '#/components/examples/readyItem'
+                titleOnlyItem:
+                  $ref: '#/components/examples/titleOnlyItem'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          $ref: '#/components/responses/ServerError'
+components:
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: |
+        Opaque value from a previous page's `nextCursor`, passed back
+        unchanged. Leave it out to get the first page. A value that cannot be
+        decoded, the empty string included, returns 400 `invalid_cursor`.
+      schema:
+        type: string
+    YoutubeId:
+      name: youtubeId
+      in: path
+      required: true
+      description: |
+        A YouTube video ID, usually 11 characters. No format is enforced
+        here: a malformed ID returns 404, like an unknown one.
+      schema:
+        type: string
+  headers:
+    CacheControlShared:
+      description: Cached at the CDN for one hour (PERF-6).
+      schema:
+        type: string
+        const: public, s-maxage=3600
+    CacheControlFeed:
+      description: |
+        `public, s-maxage=3600` when the page has at least one item;
+        `no-store` for an empty feed.
+      schema:
+        type: string
+        enum:
+          - public, s-maxage=3600
+          - no-store
+    CacheControlNoStore:
+      description: Never cached.
+      schema:
+        type: string
+        const: no-store
+  responses:
+    InvalidCursor:
+      description: The cursor cannot be decoded.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControlNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidCursor:
+              $ref: '#/components/examples/invalidCursor'
+    NotFound:
+      description: Unknown or malformed ID, or a video outside the feed.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControlNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            notFound:
+              $ref: '#/components/examples/notFound'
+    ServerError:
+      description: |
+        An error the app produced (any 5xx status). Platform errors the app
+        does not produce may have another body.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControlNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            internalError:
+              $ref: '#/components/examples/internalError'
+  schemas:
+    FeedPage:
+      type: object
+      additionalProperties: false
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          maxItems: 10
+          description: Up to 10 items, newest first by feed-entry time.
+          items:
+            $ref: '#/components/schemas/FeedItem'
+        nextCursor:
+          type: [string, 'null']
+          description: |
+            Opaque cursor for the next page; `null` on the last page and for
+            an empty feed.
+    FeedItem:
+      type: object
+      additionalProperties: false
+      required: [youtubeId, title, channelName, recipe]
+      properties:
+        youtubeId:
+          type: string
+          description: |
+            The YouTube video ID. Unique, and used as the client's list key,
+            for the player and for deep links (`/r/{youtubeId}`).
+        title:
+          type: string
+          description: The video title from YouTube.
+        channelName:
+          type: [string, 'null']
+          description: The channel's display name, crediting the creator.
+        recipe:
+          description: |
+            The recipe for a `ready` video; `null` for a `needs_recipe`
+            video, which is shown with its title only.
+          oneOf:
+            - $ref: '#/components/schemas/Recipe'
+            - type: 'null'
+    Recipe:
+      type: object
+      additionalProperties: false
+      required: [servings, ingredients, steps, source]
+      properties:
+        servings:
+          type: [string, 'null']
+          description: As written in the source, for example "2" or "2–3".
+        ingredients:
+          type: array
+          description: In the order the recipe lists them.
+          items:
+            $ref: '#/components/schemas/Ingredient'
+        steps:
+          type: array
+          description: Step texts in order; the position is the step number.
+          items:
+            type: string
+        source:
+          type: string
+          enum: [description, comment, captions]
+          description: |
+            Where the recipe came from (EXT-6). `captions` stays unused unless
+            spike REC-009 says go.
+    Ingredient:
+      type: object
+      additionalProperties: false
+      required: [name, quantity, unit]
+      properties:
+        name:
+          type: string
+          example: flour
+        quantity:
+          type: [string, 'null']
+          description: As written, for example "1/2" or "a pinch".
+        unit:
+          type: [string, 'null']
+          description: For example "cup"; `null` for "salt to taste".
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [invalid_cursor, not_found, internal_error]
+              description: |
+                `invalid_cursor` with 400, `not_found` with 404,
+                `internal_error` with 5xx.
+            message:
+              type: string
+              description: Free text for maintainers; not shown to the user.
+  examples:
+    feedPage:
+      summary: A page with a ready item and a title-only item
+      value:
+        items:
+          - youtubeId: abc123XYZ_0
+            title: 3-ingredient banana pancakes
+            channelName: Quick Bites
+            recipe:
+              servings: '2'
+              ingredients:
+                - name: banana
+                  quantity: '1'
+                  unit: null
+                - name: eggs
+                  quantity: '2'
+                  unit: null
+                - name: salt
+                  quantity: null
+                  unit: null
+              steps:
+                - Mash the banana and whisk in the eggs.
+                - Cook small pancakes in a hot pan, 1 minute per side.
+              source: description
+          - youtubeId: def456UVW-1
+            title: Crispy garlic noodles
+            channelName: null
+            recipe: null
+        nextCursor: eyJ0IjoiMjAyNi0xMS0xOFQxMDowMDowMFoiLCJpZCI6NDJ9
+    lastPage:
+      summary: The last page
+      value:
+        items:
+          - youtubeId: ghi789RST_2
+            title: One-pan lemon rice
+            channelName: Home Cook Daily
+            recipe: null
+        nextCursor: null
+    emptyFeed:
+      summary: An empty feed (sent with no-store)
+      value:
+        items: []
+        nextCursor: null
+    readyItem:
+      summary: A ready video with its recipe
+      value:
+        youtubeId: abc123XYZ_0
+        title: 3-ingredient banana pancakes
+        channelName: Quick Bites
+        recipe:
+          servings: '2'
+          ingredients:
+            - name: banana
+              quantity: '1'
+              unit: null
+            - name: oats
+              quantity: '1/2'
+              unit: cup
+          steps:
+            - Blend the banana and oats.
+            - Cook small pancakes in a hot pan, 1 minute per side.
+          source: comment
+    titleOnlyItem:
+      summary: A needs_recipe video, title only
+      value:
+        youtubeId: def456UVW-1
+        title: Crispy garlic noodles
+        channelName: null
+        recipe: null
+    invalidCursor:
+      summary: A cursor that cannot be decoded
+      value:
+        error:
+          code: invalid_cursor
+          message: The cursor could not be decoded.
+    notFound:
+      summary: Unknown, malformed or out-of-feed ID
+      value:
+        error:
+          code: not_found
+          message: No video in the feed has this ID.
+    internalError:
+      summary: An error the app produced
+      value:
+        error:
+          code: internal_error
+          message: The feed could not be loaded.
