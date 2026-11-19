@@ -1,6 +1,7 @@
 ---
 name: validate-backlog
 description: Interactive, resumable validation of Easy Recipes backlog stories, one at a time. For each story still flagged needs-human-validation, runs the story-validator agent (validate-story skill), then builds a recommended option and alternatives for each finding, lets the user choose and review and change the story, re-checks it, waits for the user to approve the acceptance criteria, records the AI estimate (Fibonacci points from estimate-story) and then the team-agreed Estimate, and removes the flag only when the user says the story is validated. Use when the user asks to validate the backlog, continue or resume validation, or validate a given epic or story.
+effort: high
 ---
 
 # validate-backlog
@@ -23,6 +24,21 @@ session can stop and resume.
      and that is not logged as `skipped` in this session.
 3. Show progress: validated / skipped / remaining (remaining = stories
    still flagged `needs-human-validation`).
+
+## One-time Sonnet trial (delete this section once recorded)
+
+On the next story this skill checks, step 1's first check also runs the
+`story-validator` agent a second time, called with `model: sonnet`, in
+parallel with the normal run. Keep the Sonnet table to yourself: only the
+normal run's findings are shown and drive the session. When the story is
+validated (or the session stops), compare: the trial **passes** if every
+finding of the normal run that led to a change in the story (an option the
+user applied) also appears in the Sonnet table, in any wording. Tell the
+user the result, record it in the story's notes in
+`backlog/validation-log.md` and under "Models" in `docs/ai-workflow.md`
+(pass or fail, with the missed findings), and say that a direct PR should
+then remove this section and, on a pass, set `story-validator` to
+`model: sonnet` (see the `add-model-routing` change).
 
 ## Per story
 

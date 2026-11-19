@@ -1,6 +1,7 @@
 ---
 name: decompose-prd
 description: Breaks the Easy Recipes PRD (docs/PRD.md, or one section of it) into a file-based backlog — epics mapped to PRD goals, user stories in "As a / I want / so that" format, Given/When/Then acceptance criteria, module/type/size labels, and a short size rationale (no story-point estimate). Use when the user asks to turn the PRD into a backlog, generate user stories from the PRD, or populate backlog/ from docs/PRD.md. Never invents features outside the PRD and never proposes architecture.
+effort: high
 ---
 
 # decompose-prd

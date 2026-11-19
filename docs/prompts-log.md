@@ -2,7 +2,9 @@
 
 Prompts used in this session to align the agent setup with `docs/PRD.md`, in
 order. They are copied exactly as typed. Answers given through question dialogs
-or buttons are marked as such.
+or buttons are marked as such. From prompt 201 on, each summary also lists the
+models used (**Models:**) and a short reason for them (**Why:**); see
+[AGENTS.md › Model routing](../AGENTS.md#model-routing).
 
 ## 0. Setup before prompting
 
