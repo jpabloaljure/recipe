@@ -1389,3 +1389,91 @@ Yes, merge it
   - One-off `npx @redocly/cli lint` (approved, not added to the project): valid, one warning (no license).
   - REC-021 set to done (PR #28); change archived to `openspec/changes/archive/2026-11-18-add-api-specification/` (PR #29).
 - **Result:** REC-021 is done, and Entrega 1 items 8 (API specification) and 10 (work tickets) are ✅. REC-014 is unblocked; REC-002 waits only on its own validation.
+
+## 188. Explore keeping the README light while following the template
+
+```
+explore i was told to have the readme as the readme-template. but i don't want to loose the information on the actual readme. as example, things like the project tree i thing are nor require on the readme template. Think in a alternative to keep the information accecible for the project readers. but keep the readme, contributors and other first view documents light and easy to read.
+```
+
+## 189. Leave out unknown information and link to existing docs
+
+```
+the only thing any information we dont have yet dont put it. and if the documentation is else were just link to it @readme-template.md this is the readme template. explore do not execute yet
+```
+
+## 190. Ask whether the four new documents are linked from the README
+
+```
+those 4 documents are going to be referenced in the new readme?
+```
+
+## 191. Ask what the documentation map is
+
+```
+what is the map?
+```
+
+## 192. Ask whether CONTRIBUTING links the AI workflow
+
+```
+AI workflow is not linked from contribution?
+```
+
+## 193. Implement the README restructure
+
+```
+implement that.
+```
+
+## 194. Ask whether the left-out sections were removed
+
+```
+the left outs still ther to be fild or did you remove the sections?
+```
+
+## 195. Put the left-out sections back as TODO
+
+```
+put them back TODO with the description of the section that came in the template
+```
+
+## 196. Ask where the local setup steps are
+
+```
+where can i find the the get started or the steps to put up and running the project localy?
+```
+
+## 197. Ask whether CONTRIBUTING links development.md
+
+```
+is it development.md referecied from contriguting?
+```
+
+## 198. Ask for a recommendation on linking it
+
+```
+you sugest or not to have that on the contribution?
+```
+
+## 199. Add the link to CONTRIBUTING
+
+```
+Yes
+```
+
+## 200. Open the PR (button answer)
+
+```
+Create PR
+```
+
+### Summary (prompts 188–200)
+
+- **Goal:** make the README follow the delivery template (`readme-template.md`) without losing the old README's content, keeping the README and CONTRIBUTING short.
+- **Changes (PR #32):**
+  - `README.md`: template sections 0–7, each a short summary with links; sections with nothing yet (0.1 author, 1.3 design/UX, 2.5 security) marked TODO with the template's description; §5 and §6 use the validated stories REC-001, REC-020 and REC-021; §7 links PRs #1, #5 and #11.
+  - New `docs/README.md` (documentation map), `docs/development.md` (setup and tests), `docs/ai-workflow.md` (skills, guardrails, flow), `docs/architecture/repository-layout.md` (full tree).
+  - `CONTRIBUTING.md`: links to `docs/development.md` and `docs/ai-workflow.md`.
+  - `docs/checklist.md`: items 1, 4 and 8.
+- **Result:** PR #32 open with CI green; the README dropped from about 330 to about 200 lines with nothing lost.
