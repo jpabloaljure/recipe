@@ -20,6 +20,7 @@ Every project document, by what you want to know.
 | **How it's built with AI** | |
 | See the skills, hooks and OpenSpec flow | [AI workflow](ai-workflow.md) |
 | Read the rules the AI agents follow | [AGENTS.md](../AGENTS.md) |
-| See the prompts used | [Prompt log](prompts-log.md) |
+| See how AI was used: tools, models, key prompts | [AI usage log](../prompts.md) |
+| See every prompt used | [Prompt log](prompts-log.md) |
 | **Delivery** | |
 | Track what the delivery still needs | [Checklist](checklist.md) |
