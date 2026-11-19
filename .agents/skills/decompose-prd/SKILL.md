@@ -42,7 +42,7 @@ Format, exactly:
 Roles come only from the PRD:
 - **home cook** (§3): everything user-facing, and backend work whose value
   the cook feels (e.g. "every video in the feed already has its recipe").
-- **maintainer** (§6.4): operates and builds the app: operations (e.g.
+- **maintainer** (§9): operates and builds the app: operations (e.g.
   `needs_recipe` handling, manual database edits), plus technical and layer
   stories whose value is internal (e.g. a schema or a contract). Work whose
   value reaches the cook stays with the home cook.
@@ -143,9 +143,9 @@ with a timebox and the PRD's pass criteria as acceptance criteria.
   (accounts and sync, search/categories/filters, step timestamps, total time
   and difficulty, user-submitted URLs, languages other than English, analytics,
   admin UI, native apps) and everything in §10 Future roadmap. The maintainer
-  editing the database by hand (§6.4) is at most a `type:docs` story, never an
+  editing the database by hand (§9) is at most a `type:docs` story, never an
   admin UI.
-- **No architecture or implementation details.** The stack is TBD (PRD §11).
+- **No architecture or implementation details.** The stack is decided (`AGENTS.md` "Stack"); stories still leave it out.
   The "how" belongs in OpenSpec, not here. Stick to the "what" and the "why".
 - If a story is too large for one iteration (bigger than 13 points, i.e.
   beyond `size:XL`, or more than 5 acceptance criteria needed), flag it

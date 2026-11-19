@@ -29,7 +29,7 @@
 
 ## 5. Close-out
 
-- [ ] 5.1 Ship through the contribution flow: a `chore/model-routing` branch, a PR using the template, CI green (docs and config only, AI review optional), merge
+- [x] 5.1 Ship through the contribution flow: a `chore/model-routing` branch, a PR using the template, CI green (docs and config only, AI review optional), merge
 
 ## Workflow follow-up
 
