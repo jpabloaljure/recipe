@@ -3,7 +3,12 @@
 How work moves from a backlog story to production. Checklists:
 [Definition of Ready](docs/process/definition-of-ready.md) (a story may
 start) and [Definition of Done](docs/process/definition-of-done.md) (a story
-is finished). Project rules live in [AGENTS.md](AGENTS.md).
+is finished). Project rules live in [AGENTS.md](AGENTS.md); the skills,
+hooks and OpenSpec flow are explained in
+[docs/ai-workflow.md](docs/ai-workflow.md).
+
+Before your first change, set up and run the project locally:
+[docs/development.md](docs/development.md).
 
 ## Flow
 
@@ -104,7 +109,8 @@ Before merge, in order:
    /code-review --comment <PR number>
    ```
 
-   It posts its findings as review comments on the PR. Fix or answer each
+   See [AI workflow](docs/ai-workflow.md) for how it fits the rest of the
+   flow. It posts its findings as review comments on the PR. Fix or answer each
    one, then resolve the thread. **Required**, except for docs-only PRs
    (only Markdown or other non-code files changed), where it is optional.
 4. **Human review.** Optional for now. CODEOWNERS requests a review from the
