@@ -1,15 +1,19 @@
-# Entrega 1 — Checklist
+# Entrega 1 + 2 — Checklist
 
-Tracks what the first delivery needs. Update the status and notes as items are
-done.
+Tracks what each delivery needs. Entrega 2 includes everything in Entrega 1.
+Update the status and notes as items are done.
 
 Status: ✅ done · 🟡 partial · ❌ missing
 
-_Last updated: 2026-11-18_
+_Last updated: 2026-11-19_
+
+## Entrega 1 — Documentation
+
+Delivered on branch `feature/entrega-1-jpa`. Open items carry over to Entrega 2.
 
 | # | Item | Status | Where | Notes / what's left |
 |---|---|---|---|---|
-| 1 | README.md (root) | 🟡 | `README.md` | Follows the delivery template (sections 0–7), each section a short summary with links to the full docs; details moved to `docs/` (map in `docs/README.md`). Sections with nothing to show yet are marked TODO with the template's description: 0.1 author, 1.3 design/UX (placeholder app), 2.5 security. |
+| 1 | README.md (root) | 🟡 | `README.md` | Follows the delivery template (sections 0–7), each section a short summary with links to the full docs; details moved to `docs/` (map in `docs/README.md`). Sections with nothing to show yet are marked TODO with the template's description: 1.3 design/UX (placeholder app), 2.5 security; both are filled in Entrega 2 (item 14). |
 | 2 | Prompts log | 🟡 | `prompts.md`, `docs/prompts-log.md` | `prompts.md` is the AI usage log: tools and models by phase, up to 3 key prompts per template section with context and human adjustments, and a human-adjustments summary. `docs/prompts-log.md` is the full log (setup §0 and prompts 1–200), appended with the `pend-` keyword. Still missing: the prompts used to write the PRD itself. |
 | 3 | Project info sheet | 🟡 | `README.md` (§0) | Author (Juan Pablo Aljure), short description, project URL and repository filled in. Left: the final product name (working title for now, PRD §12). |
 | 4 | Overview (goal and features) | ✅ | `README.md` | Objective, target user and features summarized from the PRD; scope and performance targets linked to the PRD. |
@@ -21,7 +25,37 @@ _Last updated: 2026-11-18_
 | 10 | Work tickets (backend, frontend, DB) | ✅ | `AGENTS.md` ("Story slicing"), `backlog/E01`–`E04` | Stories are full-stack slices by default and split by layer only when needed (change `add-story-slicing-rules`); every story has a `layer:` label. DB: REC-019, REC-020. Backend: REC-005, REC-008, REC-009, REC-010, REC-016, REC-017, REC-021. Frontend: REC-001, REC-003, REC-004, REC-006, REC-007, REC-011–REC-013, REC-015, REC-018. Full stack: REC-002, REC-014. Validated per layer: DB REC-020 (2026-11-17), backend REC-021 (2026-11-18), frontend REC-001 (2026-11-16). |
 | 11 | Git repo | ✅ | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe), `.github/workflows/ci.yml` | Pushed to `main`; CI (typecheck, unit tests, build, E2E tests) runs on pull requests and pushes to `main`. `main` is protected (PR and green `check` required); the PR flow, DoR and DoD are in `CONTRIBUTING.md` and `docs/process/`, and a smoke check runs after each production deploy. |
 
+## Entrega 2 — Working code
+
+Connected scaffolds of the architecture and at least one feature working end
+to end. Scope chosen 2026-11-19 (option A): **a home cook opens the app and
+swipes through real cooking Shorts that come from the database through the
+API.** Stories: REC-001 (swipe feed), REC-019 (schema and migration), REC-002
+(feed API), plus an ingestion job scaffold that loads a curated list of real
+Shorts. Out of scope: daily discovery (REC-005) and recipe extraction (REC-008,
+blocked by the LLM provider decision).
+
+| # | Item | Status | Where | Notes / what's left |
+|---|---|---|---|---|
+| 12 | Connected scaffolds | ❌ | `src/`, Neon, Vercel, `.github/workflows/` | Web app ↔ `GET /api/feed` ↔ Postgres on Neon ↔ ingestion job scaffold (GitHub Actions), deployed. Needs a Neon database and `DATABASE_URL` in Vercel and GitHub secrets (human). |
+| 13 | End-to-end feature | ❌ | production URL | The feed in production shows real videos from the database, one per swipe. REC-001: change `add-vertical-swipe-feed` (planned, 0 of 13 tasks). REC-019 and REC-002: still `needs-human-validation`; validate before their OpenSpec changes. |
+| 14 | Updated files | ❌ | `README.md`, `docs/`, `prompts.md` | README §1.3 screenshots of the feed, §1.4 database setup, §2.4 secrets, §2.5 security practices; C4 levels 2–3 and the data model moved to `Current` where built; `docs/development.md` with the database setup; `prompts.md` with the Entrega 2 prompts. |
+| 15 | Tests | ❌ | `src/**/*.test.ts`, `e2e/` | Unit tests for the feed logic, schema rules and API; E2E tests for every automatable feed scenario (stub data, no shared database); device checks on Android and desktop; green smoke check in production. |
+
 ## Suggested order
+
+### Entrega 2
+
+```
+validate REC-019 and REC-002 ---------------------------------+
+                                                              v
+REC-001 swipe feed (stub data) --> REC-019 schema on Neon --> REC-002 feed API + ingestion scaffold
+                                                              |
+                                                              v
+                                    14 README, C4, data model, prompts.md --> branch feature/entrega-2-jpa
+```
+
+### Entrega 1
 
 Items 5–8 depend on picking the stack (6), and items 1, 3 and 4 collect everything at the end.
 
