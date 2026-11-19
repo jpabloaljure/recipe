@@ -2,6 +2,7 @@
 
 | | |
 |---|---|
+| **Author** | Juan Pablo Aljure |
 | **Status** | Draft v0.3 |
 | **Date** | 2026-11-14 (updated 2026-11-18) |
 | **Scope** | MVP |

@@ -27,7 +27,7 @@ cooking videos (Shorts), each with an easy written recipe.
 
 | | |
 |---|---|
-| **Author** | TODO: your full name. |
+| **Author** | Juan Pablo Aljure |
 | **Project name** | Easy Recipes from YouTube (working title) |
 | **Short description** | A vertical feed of YouTube cooking Shorts, each with an easy recipe (servings, ingredients, numbered steps) extracted ahead of time by an LLM. |
 | **Project URL** | [recipe-henna-pi.vercel.app](https://recipe-henna-pi.vercel.app) |
