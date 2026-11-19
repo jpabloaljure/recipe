@@ -7,6 +7,7 @@ and the ingestion job ([ADR 0005](../adr/0005-single-package-repository-layout.m
 .
 +-- README.md              project overview (start here)
 +-- CONTRIBUTING.md        how work goes from story to production
++-- prompts.md             AI usage log: tools, models, key prompts
 +-- AGENTS.md              context and rules for AI agents
 +-- CLAUDE.md              symlink to AGENTS.md (for Claude Code)
 +-- docs/

@@ -10,7 +10,7 @@ _Last updated: 2026-11-18_
 | # | Item | Status | Where | Notes / what's left |
 |---|---|---|---|---|
 | 1 | README.md (root) | 🟡 | `README.md` | Follows the delivery template (sections 0–7), each section a short summary with links to the full docs; details moved to `docs/` (map in `docs/README.md`). Sections with nothing to show yet are marked TODO with the template's description: 0.1 author, 1.3 design/UX (placeholder app), 2.5 security. |
-| 2 | Prompts log | 🟡 | `docs/prompts-log.md` | Full log with setup (§0) and prompts 1–200, appended with the `pend-` keyword; linked from the documentation map and the AI workflow page. Still missing: the prompts used to write the PRD itself. |
+| 2 | Prompts log | 🟡 | `prompts.md`, `docs/prompts-log.md` | `prompts.md` is the AI usage log: tools and models by phase, up to 3 key prompts per template section with context and human adjustments, and a human-adjustments summary. `docs/prompts-log.md` is the full log (setup §0 and prompts 1–200), appended with the `pend-` keyword. Still missing: the prompts used to write the PRD itself. |
 | 3 | Project info sheet | 🟡 | `README.md` | Table in place with description, platform and PRD status. Repo and deployed URLs filled in; name and author are TBD. |
 | 4 | Overview (goal and features) | ✅ | `README.md` | Objective, target user and features summarized from the PRD; scope and performance targets linked to the PRD. |
 | 5 | Architecture (diagram and components) | ✅ | `docs/architecture/`, `docs/adr/` | C4 levels 1–3 in Mermaid (context and containers Current; web app and ingestion components Proposed) and ADRs 0001–0006. Kept current with the `write-adr` skill. |
