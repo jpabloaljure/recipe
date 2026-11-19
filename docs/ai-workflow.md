@@ -38,6 +38,28 @@ links to them.
 | `write-adr` | Records an architecture decision and updates the C4 diagrams |
 | `openspec-*` | OpenSpec workflow: explore, propose, update, apply, sync, archive |
 
+Agents in `.claude/agents/`:
+
+| Agent | Model | What it does |
+|---|---|---|
+| `story-validator` | Opus 5.5, effort high | Runs `validate-story` on one story for `validate-backlog`; read-only |
+| `doc-checker` | Haiku 5.5, effort low | Checks links and that docs, ADRs, C4, data model, API spec and backlog agree; reports only |
+
+## Models
+
+Opus 5.5 is the session model, and every step that makes a decision stays on
+it, with `high` effort for decisions (PRD → backlog, ADRs, validation).
+Cheaper models run only in forked, read-only agents whose reports the main
+session checks: Haiku 5.5 for `doc-checker`. Rules, effort per skill and the
+`/effort high` habit for multi-turn sessions:
+[AGENTS.md › Model routing](../AGENTS.md#model-routing).
+
+**Sonnet trial for `story-validator`:** pending. On the next story validated
+with `validate-backlog`, the validator's first check also runs on Sonnet 5.5;
+it moves to Sonnet only if Sonnet finds every finding that changed the story.
+The result is recorded here and in the story's row of
+[`backlog/validation-log.md`](../backlog/validation-log.md).
+
 ## Guardrails
 
 - **Human validation.** Every AI-written story starts flagged

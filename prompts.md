@@ -23,11 +23,16 @@ conversation around it can be read.
 
 ## 0. Tools and models
 
-| Tool | Model | Phase | What it did |
-|---|---|---|---|
-| Claude Code (desktop app) | Opus 5.5 | Definition: PRD → backlog, story validation and estimation, architecture (ADRs, C4), data model, API spec, OpenSpec changes, scaffold, CI, PRs | Main agent for planning and building |
-| Claude Code (desktop app) | Haiku 5.5 | Some `openspec-explore` sessions | Quick exploration before a decision |
-| `story-validator` agent | Same as the session | Backlog validation | Reviews one story at a time |
+| Tool | Model | Effort | Phase | What it did |
+|---|---|---|---|---|
+| Claude Code (desktop app) | Opus 5.5 | session default; `high` in `decompose-prd`, `write-adr`, `validate-backlog` | Definition: PRD → backlog, story validation and estimation, architecture (ADRs, C4), data model, API spec, OpenSpec changes, scaffold, CI, PRs | Main agent for planning and building |
+| Claude Code (desktop app) | Haiku 5.5 | session default | Some `openspec-explore` sessions | Quick exploration before a decision |
+| `story-validator` agent | Same as the session; Opus 5.5 from `add-model-routing` on | `high` | Backlog validation | Reviews one story at a time |
+| `doc-checker` agent | Haiku 5.5 (from `add-model-routing` on) | `low` | Docs checks | Checks links and that docs agree; reports only |
+
+From the change `add-model-routing` on, models are chosen by how much
+judgment a step needs ([AGENTS.md › Model routing](AGENTS.md#model-routing)),
+and each summary in the full log lists the models used and why.
 
 **How the AI is set up.** `AGENTS.md` (linked as `CLAUDE.md`) holds the
 project rules every agent follows. Skills automate the repeatable steps:

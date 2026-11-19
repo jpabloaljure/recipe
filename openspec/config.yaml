@@ -17,6 +17,15 @@ rules:
     - When the design names ADRs or C4 updates, include a task to write each ADR with the write-adr skill and a task to update each affected C4 diagram, in the same group as the work they document
     - For each spec scenario, include an E2E test task in the same group as the work it tests, or list the scenario as a manual check with the reason (AGENTS.md "End-to-end (E2E) test rules")
 
+operations:
+  apply:
+    guidance:
+      - Follow AGENTS.md "Model routing". Before a task that touches the database schema, the API contract or a design decision, tell the human to raise effort with /effort high if the session is not already at high
+      - When tasks change docs (README, AGENTS.md, docs/, C4, ADRs), run the doc-checker agent on the changed files before marking the last such task done, and fix or explain each problem and unsure item it reports
+  archive:
+    guidance:
+      - Before finishing the archive, run the doc-checker agent on the files the change touched and fix or explain each problem and unsure item it reports
+
 # Project context (optional)
 # Add only constraints that should guide OpenSpec artifacts and workflows.
 # Include constraints an agent cannot infer by reading the code.

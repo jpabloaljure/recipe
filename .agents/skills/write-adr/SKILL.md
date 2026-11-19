@@ -1,6 +1,7 @@
 ---
 name: write-adr
 description: Creates or supersedes an Architecture Decision Record in docs/adr/ for Easy Recipes, updates the ADR index, and updates the affected C4 diagrams in docs/architecture/c4/. Use when the user (or an OpenSpec design/task) makes an architecture decision — choosing or replacing a framework, service, database, hosting, external API, or a major structural pattern — or asks to record, write, supersede or list ADRs, or to update the C4 diagrams.
+effort: high
 ---
 
 # write-adr
@@ -62,6 +63,9 @@ creating an ADR (no empty or speculative ADRs).
    - Each diagram you touched still renders (GitHub preview or
      https://mermaid.live). Mermaid C4 is experimental: keep diagrams small,
      and fall back to a `flowchart` with C4-style labels if one won't render.
+9. **Doc check:** run the `doc-checker` agent with the files you changed.
+   Fix each `problem` it reports, or say why it is not one; check each
+   `unsure` item yourself. It only reports; the decisions stay with you.
 
 ## Output
 

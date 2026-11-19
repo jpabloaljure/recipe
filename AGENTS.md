@@ -243,6 +243,38 @@ E2E tests use Playwright in Chromium (ADR 0006). Run them with
 - Launch checks (PRD §8: real-device performance, extraction accuracy review)
   are typed `type:spike` with a timebox.
 
+## Model routing
+
+Pick the model by how much judgment a step needs and what a mistake would
+cost. Decided in the OpenSpec change `add-model-routing`.
+
+| Tier | Model | Used for |
+|---|---|---|
+| Top | Opus 5.5, the session model | Every step that makes a decision: PRD → backlog, explore, propose and design, ADRs, validation with the human, estimates, applying changes, code review |
+| Mid | Sonnet 5.5 | Nothing yet (`story-validator` moves here only if its trial passes) |
+| Low | Haiku 5.5 | Forked, read-only checks the main session verifies: the `doc-checker` agent |
+
+- **Effort first.** Raise effort on the top model before considering a
+  cheaper one. Project skills set it in their frontmatter: `decompose-prd`,
+  `write-adr` and `validate-backlog` at `high`, `estimate-story` at
+  `medium`. A skill's effort lasts only for the turn it runs in, so the
+  human runs `/effort high` at the start of a validation or explore session.
+- **Cheaper models only in forked, read-only agents.** They get tools
+  `Read`, `Grep` and `Glob`, report facts with file and line, mark doubts as
+  `unsure`, and never edit or decide; the caller checks every `problem` and
+  `unsure` item itself.
+- **Never switch the main session's model mid-session** (prompt caches are
+  per model), and **never set `CLAUDE_CODE_EFFORT_LEVEL`** (it overrides
+  every skill and agent effort setting).
+- **Generated `openspec-*` skills** are not edited (`openspec update`
+  overwrites them): explore and propose run at `high` effort
+  (`/effort high`); `openspec-apply-change` runs at the session's effort,
+  raised to `high` for tasks that touch the database schema, the API
+  contract or a design decision; archive, sync and update at the session's
+  effort.
+- **`doc-checker`** runs after `write-adr`, at the change close-out, after
+  README or C4 updates, and before a `pend-` prompt-log commit.
+
 ## Contributing
 
 How work flows from story to production (branches, pull requests, the

@@ -1,6 +1,7 @@
 ---
 name: estimate-story
 description: Estimates one Easy Recipes backlog story (a REC-<NNN> section in backlog/E*.md) in Fibonacci story points (1, 2, 3, 5, 8, 13), acting as one peer in a planning-poker session — not the deciding vote. Runs only after the story's acceptance criteria are approved; fills the story's AI estimate, never the team Estimate. Honest about what it does not know, always commits to one Fibonacci number, and timeboxes spikes in hours instead of points.
+effort: medium
 ---
 
 # estimate-story
