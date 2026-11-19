@@ -1479,3 +1479,47 @@ Create PR
   - `CONTRIBUTING.md`: links to `docs/development.md` and `docs/ai-workflow.md`.
   - `docs/checklist.md`: items 1, 4 and 8.
 - **Result:** PR #32 open with CI green; the README dropped from about 330 to about 200 lines with nothing lost.
+
+## 201. Explore optimizing model use without losing quality, and logging the models
+
+```
+Explore onece more to optimice the strategy so every thing works as it is but implementing a optim model use withowut giving up qualiti of tesults. Also explore how to write in the prompts-log  from now on the model used and a short criteria on the summary.
+```
+
+## 202. Propose the change (button answer)
+
+```
+Yes, propose it
+```
+
+## 203. Apply without a proposal PR (button answer)
+
+```
+Apply it directly
+```
+
+## 204. Bring the PR up to date with main
+
+```
+This branch is out-of-date with the base branch
+Merge the latest changes from main into this branch.
+```
+
+## 205. Log the prompts after the merge
+
+```
+after merge PR #38
+```
+
+### Summary (prompts 201–205)
+
+- **Goal:** use cheaper models and lower effort where they don't weaken results, keep every decision on the top model, and record the models used in this log.
+- **Changes (OpenSpec change `add-model-routing`, PR #38):**
+  - `AGENTS.md`: new "Model routing" section (Opus 5.5 for every decision step, effort first, cheaper models only in forked read-only agents, `/effort high` for multi-turn sessions, routing for the generated `openspec-*` skills).
+  - Skills: `effort: high` on `decompose-prd`, `write-adr` and `validate-backlog`, `effort: medium` on `estimate-story`; `write-adr` runs `doc-checker` last; `validate-backlog` holds a one-time Sonnet trial for `story-validator`.
+  - Agents: `story-validator` pinned to Opus 5.5 at `high`; new `doc-checker` on Haiku 5.5 at `low` (read-only, reports `ok`/`problem`/`unsure`).
+  - `openspec/config.yaml`: apply and archive guidance that survives `openspec update`.
+  - `docs/ai-workflow.md`, `prompts.md` §0, this log's intro; the `pend-` memory rule (outside the repo) writes Models and Why lines.
+- **Result:** PR #38 merged with CI green. The `doc-checker` trial on the whole repo found no problems and one real mismatch left as is (ADR 0002 `{id}` vs `{youtubeId}`). Cursor and Codex don't document unknown frontmatter keys; neither is installed to test. Still open: archive the change, and run the Sonnet trial on the next validated story.
+- **Models:** Opus 5.5 (main session) · Haiku 5.5 (trial run of the `doc-checker` instructions) · `web-fetch` agent (Cursor, Codex and Agent Skills docs; model not set by the project) · Haiku 5.5, effort low (`doc-checker` on this log).
+- **Why:** the routing rules, design and skill edits are decisions, so they stayed on Opus; reading docs and checking the repo are read-only and easy to verify, so they ran on agents.
