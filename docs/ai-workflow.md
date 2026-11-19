@@ -59,4 +59,4 @@ links to them.
 
 ## Prompt log
 
-Every prompt used to build the project is in [prompts.md](prompts.md).
+Every prompt used to build the project is in [prompts-log.md](prompts-log.md).

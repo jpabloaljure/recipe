@@ -14,7 +14,7 @@ and the ingestion job ([ADR 0005](../adr/0005-single-package-repository-layout.m
 |   +-- PRD.md             product requirements
 |   +-- development.md     install, run and test locally
 |   +-- ai-workflow.md     how the project is built with AI
-|   +-- prompts.md         log of the prompts used to build the project
+|   +-- prompts-log.md     log of the prompts used to build the project
 |   +-- checklist.md       delivery checklist
 |   +-- api/               OpenAPI spec of the feed API
 |   +-- architecture/      C4 diagrams, data model, this file
