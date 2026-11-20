@@ -56,7 +56,7 @@
   - a note that Feed and the Feed route are built while the other components are still planned.
 
   Keep `Status: Proposed`; verify the Mermaid block still renders
-- [ ] 4.5 In `docs/api/openapi.yaml`, change the `info.description` implementers to REC-001 (the client and the stub feed route), REC-002 (the data) and REC-014 (the deep link); verify a one-off `npx @redocly/cli lint docs/api/openapi.yaml` still reports the file valid (ask the human before running it, as in REC-021)
+- [x] 4.5 In `docs/api/openapi.yaml`, change the `info.description` implementers to REC-001 (the client and the stub feed route), REC-002 (the data) and REC-014 (the deep link); verify a one-off `npx @redocly/cli lint docs/api/openapi.yaml` still reports the file valid (ask the human before running it, as in REC-021)
 
 ## 5. End-to-end tests (spec: feed)
 
@@ -78,7 +78,7 @@
   Each scrolls by code to its starting slide. Verify `pnpm test:e2e` passes
 - [x] 5.6 `e2e/feed/no-backward-wrap-on-the-first-video.spec.ts`: Swipe back on the first video, all projects; verify `pnpm test:e2e` passes
 - [x] 5.7 `e2e/feed/next-page-loads-ahead.spec.ts`: Approach the last loaded video, all projects, waiting for a request to `/api/feed?cursor=`; verify `pnpm test:e2e` passes
-- [ ] 5.8 Record these scenarios as manual in the PR description, with the reason (E2E rule 13):
+- [x] 5.8 Record these scenarios as manual in the PR description, with the reason (E2E rule 13):
   - Tap on the video: the YouTube player's own behavior, stubbed in E2E;
   - Video ends with no interaction: needs a playing real player;
   - Chrome on Android: real device.
