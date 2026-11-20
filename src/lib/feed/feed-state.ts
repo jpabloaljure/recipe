@@ -83,6 +83,17 @@ export function activeIndexFrom(scrollTop: number, slideHeight: number): number 
   return Math.max(0, Math.round(scrollTop / slideHeight));
 }
 
+/**
+ * The slide index when the scroll position sits on a slide boundary (within
+ * 1 px), else `null`. Mandatory snap always settles on a boundary, so this
+ * catches the settled slide even when `scrollend` fires early or not at all.
+ */
+export function settledIndexFrom(scrollTop: number, slideHeight: number): number | null {
+  if (slideHeight <= 0) return null;
+  const index = activeIndexFrom(scrollTop, slideHeight);
+  return Math.abs(scrollTop - index * slideHeight) < 1 ? index : null;
+}
+
 /** True for the active slide and its two neighbours, the only slides that render an iframe. */
 export function inPlayerWindow(index: number, activeIndex: number): boolean {
   return Math.abs(index - activeIndex) <= 1;

@@ -7,6 +7,7 @@ import {
   type FeedState,
   initialFeedState,
   inPlayerWindow,
+  settledIndexFrom,
   shouldRequestNextPage,
 } from "./feed-state";
 import type { FeedItem, FeedPage } from "./types";
@@ -106,6 +107,20 @@ describe("activeIndexFrom", () => {
   it("is 0 for a negative position or no slide height", () => {
     expect(activeIndexFrom(-20, 800)).toBe(0);
     expect(activeIndexFrom(500, 0)).toBe(0);
+  });
+});
+
+describe("settledIndexFrom", () => {
+  it("returns the slide on a boundary", () => {
+    expect(settledIndexFrom(0, 800)).toBe(0);
+    expect(settledIndexFrom(1600, 800)).toBe(2);
+    expect(settledIndexFrom(1600.4, 800)).toBe(2);
+  });
+
+  it("returns null between slides or with no slide height", () => {
+    expect(settledIndexFrom(1210, 800)).toBeNull();
+    expect(settledIndexFrom(799, 800)).toBeNull();
+    expect(settledIndexFrom(0, 0)).toBeNull();
   });
 });
 

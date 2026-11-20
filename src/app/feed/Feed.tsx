@@ -9,6 +9,7 @@ import {
   type FeedState,
   initialFeedState,
   inPlayerWindow,
+  settledIndexFrom,
   shouldRequestNextPage,
 } from "../../lib/feed/feed-state";
 import { createHttpFeedSource } from "../../lib/feed/http-source";
@@ -59,18 +60,26 @@ export function Feed() {
     setState((current) => ensureCycles(current, activeIndex));
   }, [activeIndex, state.catalogEnded]);
 
-  // Active slide from the settled scroll position, and again when the slide
-  // height changes (rotation, window resize), since a re-snap may not fire `scrollend`.
+  // Active slide from the settled scroll position: on `scrollend`, on any
+  // `scroll` event that lands on a slide boundary (`scrollend` can fire before
+  // a fling's snap finishes), and when the slide height changes (rotation,
+  // window resize), since a re-snap may not fire `scrollend`.
   useEffect(() => {
     const element = scroller.current;
     if (!element) return;
     const update = () => setActiveIndex(activeIndexFrom(element.scrollTop, element.clientHeight));
+    const onScroll = () => {
+      const settled = settledIndexFrom(element.scrollTop, element.clientHeight);
+      if (settled !== null) setActiveIndex(settled);
+    };
     update();
     element.addEventListener("scrollend", update);
+    element.addEventListener("scroll", onScroll, { passive: true });
     const resize = new ResizeObserver(update);
     resize.observe(element);
     return () => {
       element.removeEventListener("scrollend", update);
+      element.removeEventListener("scroll", onScroll);
       resize.disconnect();
     };
   }, []);
