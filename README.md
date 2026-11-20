@@ -186,7 +186,7 @@ Tickets are backlog stories with a `layer:` label (no separate tracker; see
 |---|---|
 | Database | [REC-020 · Data model document](backlog/E01-browse-feed.md#rec-020--data-model-document-no-implementation) |
 | Backend | [REC-021 · API specification document](backlog/E01-browse-feed.md#rec-021--api-specification-document-no-implementation) |
-| Frontend | [REC-001 · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe) |
+| Full stack (feed UI and a stub feed route) | [REC-001 · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe) |
 
 ---
 
