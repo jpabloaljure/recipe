@@ -4,9 +4,9 @@
 |---|---|
 | **Author** | Juan Pablo Aljure |
 | **Status** | Draft v0.3 |
-| **Date** | 2026-11-14 (updated 2026-11-18) |
+| **Date** | 2026-11-14 (updated 2026-11-19) |
 | **Scope** | MVP |
-| **Platform** | Web app (mobile-first, desktop supported) |
+| **Platform** | Web app (mobile-first, desktop supported), in Chrome on Android and on desktop |
 
 ---
 
@@ -39,6 +39,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 - Engagement analytics.
 - Admin UI for adding recipes by hand.
 - Native mobile apps.
+- Browsers other than Chrome on Android and desktop, including all iOS browsers (Chrome on iPhone uses WebKit).
 
 ## 5. User experience
 
