@@ -1,9 +1,9 @@
-import styles from "./page.module.css";
+import { Feed } from "./feed/Feed";
 
 export default function Home() {
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>Easy Recipes</h1>
+    <main>
+      <Feed />
     </main>
   );
 }

@@ -2,7 +2,8 @@
 
 Status: Proposed
 
-The main parts inside the Next.js app. Not built yet; this is the plan.
+The main parts inside the Next.js app. Feed and the Feed route are built
+(REC-001); the other components are still the plan.
 
 ```mermaid
 C4Component
@@ -13,12 +14,12 @@ C4Component
   ContainerDb(db, "Database", "Postgres on Neon")
 
   Container_Boundary(web, "Web app (Next.js)") {
-    Component(feed, "Feed", "React", "Vertical swipe feed, pagination, light shuffle (5.1, API-2)")
+    Component(feed, "Feed", "React", "CSS scroll-snap feed, one video per gesture, wrap-around, next page via /api/feed; light shuffle with REC-002 (5.1, API-2)")
     Component(player, "Player controller", "React + IFrame API", "Autoplay muted, unmute, loop, pause, preload (5.2, PERF-3, PERF-5)")
     Component(panel, "Recipe panel", "React", "Servings, ingredients, steps, source, auto-open (5.3, PERF-4)")
     Component(favs, "Favorites store", "localStorage", "Save, list, remove favorites (5.4)")
     Component(share, "Share", "Web Share API", "Share sheet or copy deep link (5.5)")
-    Component(feedApi, "Feed route", "Route handler", "GET /api/feed: ready videos with recipes and title-only needs_recipe videos, cacheable (API-1, PERF-6)")
+    Component(feedApi, "Feed route", "Route handler", "GET /api/feed: ready videos with recipes and title-only needs_recipe videos, cacheable (API-1, PERF-6); fixture data until REC-002")
     Component(videoApi, "Video route", "Route handler", "GET /api/videos/{youtubeId}: one feed video for deep links (API-3)")
   }
 
@@ -30,7 +31,7 @@ C4Component
   Rel(feed, share, "Shares")
   Rel(feed, feedApi, "Fetches pages", "JSON")
   Rel(feed, videoApi, "Fetches deep-linked video", "JSON")
-  Rel(feedApi, db, "Reads", "SQL")
+  Rel(feedApi, db, "Reads (from REC-002)", "SQL")
   Rel(videoApi, db, "Reads", "SQL")
 ```
 
@@ -40,6 +41,11 @@ C4Component
   request (PERF-4).
 - Component names are a plan; the scaffolding change may rename or merge
   them and must update this diagram (and set `Status: Current`).
+- Built so far (REC-001, change `add-vertical-swipe-feed`): the Feed, which
+  embeds the YouTube player as a plain iframe until the Player controller
+  (REC-003) exists, and the Feed route, which serves a title-only fixture of
+  real videos in the API contract's shape until REC-002 reads the database.
+  The diagram stays `Proposed` until the other components exist.
 
 ## Related ADRs
 
