@@ -2,17 +2,28 @@
 
 ## Context
 
-See proposal.md - Why. Current state, checked on 2026-11-16:
+See proposal.md - Why. Current state, checked on 2026-11-19:
 
 - `src/app/page.tsx` is a server component that shows the working title.
   `globals.css` already sets a full-height black body with
   `overflow: hidden`; `layout.tsx` sets `viewport-fit=cover`.
-- Vitest runs in the `node` environment on `src/**/*.test.ts`. There is no
-  DOM test environment, and the human decided this change adds none: logic
-  is tested as pure functions, and scrolling and layout are checked by hand
-  on devices.
-- No feed API exists yet (REC-002). REC-002's story requires the feed
-  response to say when there are no more pages.
+- Vitest runs in the `node` environment on `src/**/*.test.ts`. Browser
+  behavior is tested with Playwright (ADR 0006):
+  - `e2e/support/test.ts` stubs YouTube embed hosts with a local page
+    (`data-testid="youtube-stub"`) and fails on any other outside request;
+  - `e2e/support/gestures.ts` sends CDP touch swipes and resolves on
+    `scrollend`;
+  - `e2e/support/projects.ts` defines `phone-portrait`, `phone-landscape`
+    and `desktop`, with `onlyOn`.
+
+  The `@smoke` test loads `/` with no API stub.
+- The feed API contract is `docs/api/openapi.yaml` (REC-021): pages of
+  `{ items, nextCursor }`, items `{ youtubeId, title, channelName, recipe }`,
+  an opaque cursor, 400 `invalid_cursor`, and `Cache-Control` per response.
+  No route exists yet. REC-002 will fill the route from the database
+  (REC-019).
+- REC-001 was re-validated on 2026-11-19 with a stub route, AC6 (next page)
+  and the E2E plan (backlog `E01-browse-feed.md`, REC-001 Technical context).
 - REC-001's technical check (2026-11-16, Chrome on Android and desktop)
   showed that plain CSS scroll-snap with `scroll-snap-stop: always` moves one
   video per gesture, and that swipes over a YouTube iframe move the feed
@@ -22,18 +33,22 @@ See proposal.md - Why. Current state, checked on 2026-11-16:
 ## Goals / Non-Goals
 
 **Goals:**
-- A feed whose data source can be swapped for REC-002's API without
-  touching the scroll, layout or wrap-around code.
+- A feed whose data comes over HTTP from `/api/feed` from day one, so
+  REC-002 swaps only the route's data and the client and tests stay as
+  they are.
 - Wrap-around to the first video with no visible jump or double snap (the
   main risk named in REC-001's estimate).
-- All order and wrap-around rules covered by Vitest tests in Node.
+- Order, wrap-around and next-page rules covered by Vitest; every
+  automatable spec scenario covered by a Playwright test (E2E rule 12).
 
 **Non-Goals:**
 - The YouTube IFrame Player API, autoplay, mute, loop, pause (REC-003).
 - Preloading and measuring the three-player cap (REC-004, REC-015).
-- Loading, empty and error messages (REC-018). A failed stub page load is
-  not handled here.
-- Recipe data on feed items (REC-002, REC-006).
+- Loading, empty and error messages (REC-018). A failed page load is not
+  handled here.
+- The database query, shuffle, empty-feed and 5xx responses of the route
+  (REC-002).
+- Showing a video's title or recipe (REC-006, REC-007).
 
 ## Decisions
 
@@ -59,7 +74,8 @@ The feed is a client component that renders a vertical scroll container
 
 The active index is `Math.round(scrollTop / slideHeight)`, computed on the
 container's `scrollend` event (and once on mount). The calculation is a pure
-function in `src/lib/feed/`.
+function in `src/lib/feed/`. The active slide carries `data-active="true"`
+so tests can find it (Decision 8).
 
 - **Why:** with mandatory snap the container always settles on a slide
   boundary, so the rounded position is exact. `scrollend` is supported in
@@ -70,15 +86,16 @@ function in `src/lib/feed/`.
 ### 3. Wrap-around by appending another cycle, not by jumping
 
 The client keeps the **visit order**: every item received, in the order
-received, plus a `catalogEnded` flag set when a page reports no next page.
-The rendered slide list is the visit order, and once the catalog has ended,
-further copies of it ("cycles") are appended whenever the active slide gets
-within two slides of the end. Each slide's React key is
-`<cycle>-<videoId>`.
+received, plus a `catalogEnded` flag set when a page's `nextCursor` is
+`null`. The rendered slide list is the visit order. Once the catalog has
+ended, more copies of it ("cycles") are appended whenever the active slide
+gets within two slides of the end. Each slide's React key is
+`<cycle>-<youtubeId>`.
 
 So a forward swipe on the last video of the catalog is an ordinary snap to
 the next slide, which is the first video of the visit order. Nothing jumps,
-and the second, third… swipes continue through the same order.
+and the second, third… swipes continue through the same order. A catalog
+of one video wraps to the same video, with no special case.
 
 - **Why:** a `scrollTo(0)` jump back to the top is the glitch the estimate
   warned about (visible jump, or a second snap while the browser settles).
@@ -91,29 +108,64 @@ and the second, third… swipes continue through the same order.
   for the MVP.
 - Backward never wraps: the list has nothing above the first slide.
 
-### 4. A typed, page-based feed source with a stub
+### 4. A stub feed route and an HTTP feed source
 
-`src/lib/feed/types.ts` defines a feed item (`youtubeId`, `title`; no
-separate `id`, matching the API specification owned by REC-021, which later
-adds `channelName` and `recipe` in REC-002) and a page (`items`, `nextCursor: string | null`, where `null` means end of
-catalog), plus a `FeedSource` interface: `getPage(cursor: string | null):
-Promise<FeedPage>`. `src/lib/feed/stub-source.ts` implements it in memory
-over a fixture of real, embeddable public cooking Shorts, with a small page
-size (3) so that a catalog of about 7 videos spans three pages and the
-cross-page wrap is exercised.
+- **Types:** `src/lib/feed/types.ts` holds the contract's response types:
+  - `FeedItem`: `youtubeId`, `title`, `channelName: string | null`,
+    `recipe: Recipe | null`;
+  - `Recipe`: `servings`, `ingredients: Ingredient[]`, `steps`, `source`;
+  - `Ingredient`: `name`, `quantity`, `unit`;
+  - `FeedPage`: `items`, `nextCursor: string | null`, where `null` means
+    end of catalog;
+  - `ApiError`: the error body;
+  - the `FeedSource` interface: `getPage(cursor: string | null):
+    Promise<FeedPage>`.
 
-The client loads the first page on mount and requests the next page when
-the active slide is within two slides of the last loaded one and the
-catalog has not ended. A pure function decides this.
+  There is no `id`. The route, REC-014's route and the E2E stub data all
+  import these types.
+- **Fixture:** `src/lib/feed/fixture.ts` holds about 7 real, embeddable
+  public cooking Shorts, each with its real `title` and `channelName`, and
+  `recipe: null`. Production therefore shows title-only items, and no
+  invented recipe is ever served.
+- **Paging:** `src/lib/feed/fixture-pages.ts` is a pure function that turns
+  a cursor into a page, 3 items per page, so the catalog spans three pages
+  and the cross-page wrap runs on the live site. The cursor is the next
+  offset, encoded as base64url JSON. A value that cannot be decoded,
+  including the empty string, is an error.
+- **Route:** `src/app/api/feed/route.ts` (`GET`) reads `cursor` and calls
+  the paging function. It returns:
+  - a page with `Cache-Control: public, s-maxage=3600`;
+  - for an undecodable cursor, 400 with
+    `{ "error": { "code": "invalid_cursor", "message" } }` and
+    `Cache-Control: no-store`.
 
-- **Why:** this is the shape REC-002 must provide ("tell the client when
-  there are no more pages"). REC-002 replaces the stub with a source that
-  calls `GET /api/feed` and may extend the types (recipe, cursor format);
-  the feed component does not change.
-- The stub is async on purpose, so loading order and races behave as with
-  the real API.
-- The fixture uses real YouTube video IDs picked at apply time and checked
-  to be embeddable; no IDs are invented.
+  It produces no empty-feed or 5xx response (REC-002 adds them with the
+  database).
+- **Client:** `src/lib/feed/http-source.ts` is a `FeedSource` that fetches
+  `/api/feed` (with `?cursor=` after the first page) and returns the parsed
+  page. It throws on a non-2xx response; showing that error is REC-018's.
+- **Next page:** the client loads the first page on mount and requests the
+  next one when the active slide is within two slides of the last loaded
+  slide and the catalog has not ended. A pure function decides this.
+- **Tests:** the paging function, the route handler (called with a
+  `Request` in Vitest) and the HTTP source (with a stubbed `fetch`) have
+  unit tests. Their expected values (fields, status codes, error code,
+  `Cache-Control` values) are written into the tests by hand and checked
+  against `openapi.yaml` in review; there is no YAML parser or validator
+  library (REC-021 Conformance).
+
+- **Why:**
+  - E2E tests stub `/api/feed` with `page.route`, so they stay valid when
+    REC-002 replaces the fixture with the database.
+  - The live site exercises real paging.
+  - The response shape is the contract from the start.
+- **Alternative: an in-memory stub source** (the earlier plan). Rejected in
+  REC-001's re-check (#42): tests would rely on built-in data and need
+  rewriting when REC-002 lands, and the next-page request could not be
+  seen.
+- **Alternative: a separate backend story for the route.** Rejected in the
+  same re-check: a full-stack slice is the default, and splitting would
+  block REC-001 on a new story.
 
 ### 5. Plain YouTube embed, only around the active slide
 
@@ -123,15 +175,16 @@ with no overlay above it. Only the active slide and its two neighbors render
 an iframe; other slides render an empty frame.
 
 - **Why:** the human chose a plain embed so that swipes over the iframe and
-  "the video ends and the feed stays" can be checked now. `playsinline=1`
-  keeps playback in the page on mobile. No `autoplay` or `loop` parameters:
-  those belong to REC-003, which replaces this embed with the player
-  controller. `youtube-nocookie.com` is the privacy-enhanced host of the
-  same official player (PRD §9 still holds); REC-003 can revisit it.
+  "a playing video ends and the feed stays" can be checked now.
+  `playsinline=1` keeps playback in the page on mobile. No `autoplay` or
+  `loop` parameters: those belong to REC-003, which replaces this embed with
+  the player controller. `youtube-nocookie.com` is the privacy-enhanced host
+  of the same official player (PRD §9 still holds); REC-003 can revisit it.
 - **Why the ±1 window:** without it, every slide (and every lap from
-  Decision 3) would load a YouTube player. This is the minimum guard, not
-  REC-004's work: REC-004 still owns preloading, the < 500 ms target and
-  verifying the cap.
+  Decision 3) would load a YouTube player. It also means the gesture checks
+  run with three live players, which is the case that failed with an
+  overlay. REC-004 still owns preloading, the < 500 ms target and the PERF-5
+  cap.
 - **Alternative: placeholder cards.** Rejected by the human: they would not
   let the swipe-over-iframe and end-of-video behavior be checked.
 
@@ -148,46 +201,87 @@ frame. Slides keep the black body background around the frame.
 - Safe-area insets: the slide pads with `env(safe-area-inset-*)` like the
   placeholder page did, so the player is not under a notch in landscape.
 
-### 7. File layout and C4
+### 7. File layout, C4 and the contract
 
 - `src/app/page.tsx` stays a server component and renders the client
   `Feed` component (`src/app/feed/Feed.tsx` and `Feed.module.css`).
-- Pure logic and types live in `src/lib/feed/` with `*.test.ts` next to
-  them, matching ADR 0005's `src/lib` for shared code (REC-002's API route
-  will import the same types).
+- Pure logic, types and the fixture live in `src/lib/feed/` with
+  `*.test.ts` next to them, matching ADR 0005's `src/lib` for shared code.
 - **No new ADR:** no library, service, data store or structural pattern is
-  added; the approach follows ADRs 0002 and 0005.
-- **C4 level 3 (web app):** the Feed component is now built. Update its
-  description (scroll-snap feed, wrap-around, stub source until REC-002) and
-  the notes. The diagram stays `Proposed` until the other components exist.
-  Levels 1 and 2 do not change (YouTube's embedded player is already an
-  external system).
+  added; the approach follows ADRs 0002, 0005 and 0006.
+- **C4 level 3 (web app):**
+  - Feed is built: scroll-snap feed, one video per gesture, wrap-around,
+    next page via `/api/feed`.
+  - Feed route: "fixture data until REC-002"; its read of the database
+    starts with REC-002.
+
+  The diagram stays `Proposed` until the other components exist. Levels 1
+  and 2 do not change.
+- **`docs/api/openapi.yaml`:** the description lists REC-001 (the client
+  and the stub route), REC-002 (the data) and REC-014 (the deep link) as
+  implementers.
+
+### 8. End-to-end tests
+
+- **Location:** one file per requirement in `e2e/feed/`, named
+  `<requirement-kebab>.spec.ts`. Each test is named
+  `feed › <Requirement> › <Scenario>` (rules 2 and 4).
+- **Shared helper:** `e2e/support/feed.ts` provides:
+  - `stubFeed(page, pages)`, which answers `/api/feed` with `page.route`
+    from a list of pages built from the shared types, so each test chooses
+    its own catalog (rule 5);
+  - `activeSlide(page)`, which finds the slide with `data-active="true"`;
+  - `scrollToSlide(page, index)`, which sets up a starting slide by code and
+    waits for `scrollend` (rule 3).
+- **Selectors:** slides carry `data-testid="feed-slide"`,
+  `data-youtube-id` and `data-active` (rule 7).
+- **What each test checks:**
+  - **Layout:** read the frame's box against the viewport.
+  - **Gestures:** use `swipeNext` and `swipePrevious` from
+    `e2e/support/gestures.ts`.
+  - **Wrap-around:** a one-page or multi-page stub catalog, scrolled by code
+    to the last slide, then one swipe.
+  - **Next page:** wait for a request to `/api/feed?cursor=` after
+    scrolling near the last loaded slide.
+- **Manual, with the reason (rule 13):**
+  - taps reach the YouTube player and a playing video ends with no
+    autoscroll: both need the real YouTube player, which E2E stubs;
+  - real finger flicks on Android and real wheel or trackpad scrolling on
+    desktop;
+  - "Supported browsers": real devices.
+
+- **Why:** this is the plan agreed in REC-001's re-check (#42), and it
+  follows E2E rules 1–13 with the existing support code.
 
 ## Risks / Trade-offs
 
 - [`scrollend` fires late or twice on some Android builds] → the active
   index is derived from position, so a repeat is harmless; check on the
   Android test device during manual checks.
+- [Synthetic swipes over scroll-snap with three iframes are flaky in
+  Chromium] → retries are off and a flaky test is a bug (rule 10): fix the
+  wait, or mark it `test.fixme` with a backlog link; never add a fixed wait.
 - [Appended cycles reuse the same YouTube IDs, so two slides can embed the
   same video] → keys include the cycle, and only the ±1 window has iframes,
   so at most a short catalog shows the same video twice at once. Accepted.
 - [Next page not loaded yet when the user reaches the last loaded slide] →
-  the feed simply cannot scroll further until the page arrives; with the
-  stub this is instant. Real network delays and failures are REC-002 and
-  REC-018.
-- [Hard flicks over three live iframes skip a video] → the technical check
-  used one player; this change checks with the ±1 window on device, and
-  REC-004/REC-015 re-check under load.
+  the feed cannot scroll further until the page arrives. Real network
+  delays and failures are REC-002 and REC-018.
+- [Hard flicks over three live iframes skip a video] → this change checks
+  with the ±1 window on device, and REC-004/REC-015 re-check under load.
+- [Production serves the fixture, cached for an hour, until REC-002] →
+  title-only items of real videos, so nothing invented is shown; REC-002
+  replaces the data.
 - [Pull-to-refresh or browser chrome resizing changes `100dvh` mid-swipe] →
   `dvh` and `overscroll-behavior-y: contain`; covered by the manual checks.
 
 ## Migration Plan
 
-The placeholder page is replaced; there is no data or API to migrate.
-Deploy is Vercel's Git integration on merge to `main`. Rollback: revert the
-merge commit.
+The placeholder page is replaced; there is no data to migrate. Deploy is
+Vercel's Git integration on merge to `main`. Rollback: revert the merge
+commit.
 
 ## Open Questions
 
-- Which public cooking Shorts make up the stub fixture: picked at apply
-  time; any embeddable Shorts work and the choice does not affect behavior.
+- Which public cooking Shorts make up the fixture: picked at apply time;
+  any embeddable Shorts work and the choice does not affect behavior.
