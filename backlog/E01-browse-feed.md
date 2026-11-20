@@ -5,7 +5,7 @@ prd-goal: G1
 ---
 
 ## REC-001 · Vertical full-screen feed with manual swipe
-- **Status:** todo
+- **Status:** in-progress
 - **Labels:** module:feed, type:feature, size:M, layer:fullstack
 - **PRD:** 5.1, 5.2
 - **Flags:** —
