@@ -80,7 +80,10 @@ export function activeFrame(page: Page): Locator {
 /**
  * Sets up a starting slide by code, not by gestures (E2E rule 3): scrolls one
  * slide at a time so pages and cycles load as they would, and waits until
- * each slide is the active one.
+ * each slide is the active one. Each scroll resolves on `scrollend`, or after
+ * 10 animation frames with no `scroll` event if nothing moved, so a scroll
+ * that cannot happen fails on the `data-active` assertion instead of hanging
+ * (same rule as e2e/support/gestures.ts; no fixed waits, rule 6).
  */
 export async function scrollToSlide(page: Page, index: number): Promise<void> {
   const feed = page.getByTestId("feed");
@@ -89,8 +92,16 @@ export async function scrollToSlide(page: Page, index: number): Promise<void> {
     await feed.evaluate(
       (element, target) =>
         new Promise<void>((resolve) => {
+          let scrolled = false;
+          let quietFrames = 0;
+          element.addEventListener("scroll", () => (scrolled = true), { once: true });
           element.addEventListener("scrollend", () => resolve(), { once: true });
           element.scrollTop = target * element.clientHeight;
+          const tick = () => {
+            if (!scrolled && ++quietFrames >= 10) return resolve();
+            if (!scrolled) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
         }),
       i,
     );

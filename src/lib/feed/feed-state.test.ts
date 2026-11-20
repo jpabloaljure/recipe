@@ -65,6 +65,15 @@ describe("wrap-around", () => {
   });
 });
 
+describe("appendPage", () => {
+  it("skips a video already in the visit order", () => {
+    let state = appendPage(initialFeedState, pageOf(["a", "b"], "c1"));
+    state = appendPage(state, pageOf(["b", "c", "c"], null));
+    expect(state.visit.map((i) => i.youtubeId)).toEqual(["a", "b", "c"]);
+    expect(state.catalogEnded).toBe(true);
+  });
+});
+
 describe("shouldRequestNextPage", () => {
   const firstPage = appendPage(initialFeedState, pageOf(["a", "b", "c", "d", "e"], "c1"));
 

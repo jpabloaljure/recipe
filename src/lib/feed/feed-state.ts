@@ -31,11 +31,20 @@ export const initialFeedState: FeedState = {
   cycles: 1,
 };
 
-/** Adds a received page to the visit order. */
+/**
+ * Adds a received page to the visit order. A video already in the visit is
+ * skipped, so each `youtubeId` appears once per cycle and slide keys stay unique.
+ */
 export function appendPage(state: FeedState, page: FeedPage): FeedState {
+  const seen = new Set(state.visit.map((item) => item.youtubeId));
+  const added = page.items.filter((item) => {
+    if (seen.has(item.youtubeId)) return false;
+    seen.add(item.youtubeId);
+    return true;
+  });
   return {
     ...state,
-    visit: [...state.visit, ...page.items],
+    visit: [...state.visit, ...added],
     nextCursor: page.nextCursor,
     catalogEnded: page.nextCursor === null,
   };

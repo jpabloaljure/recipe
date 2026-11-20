@@ -12,6 +12,7 @@ import {
   shouldRequestNextPage,
 } from "../../lib/feed/feed-state";
 import { createHttpFeedSource } from "../../lib/feed/http-source";
+import { PageRequests } from "../../lib/feed/page-requests";
 import styles from "./Feed.module.css";
 
 /**
@@ -27,23 +28,20 @@ export function Feed() {
   const source = useMemo(() => createHttpFeedSource(), []);
   const [state, setState] = useState<FeedState>(initialFeedState);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const scroller = useRef<HTMLDivElement>(null);
-  // Each page is requested once, even when React runs an effect twice.
-  const requested = useRef(new Set<string>());
+  // Each page is requested once at a time; the next cursor is only known after
+  // the current page arrives, so requests never overlap.
+  const requests = useRef(new PageRequests());
 
   const load = useCallback(
     (cursor: string | null) => {
-      const key = cursor ?? "";
-      if (requested.current.has(key)) return;
-      requested.current.add(key);
-      setLoading(true);
+      if (!requests.current.begin(cursor)) return;
       source
         .getPage(cursor)
         .then((page) => setState((current) => appendPage(current, page)))
-        // A failed page load is shown by REC-018; here the feed just stops growing.
-        .catch(() => undefined)
-        .finally(() => setLoading(false));
+        // A failed load can be tried again by the next trigger (the next
+        // settled scroll); showing the failure is REC-018's.
+        .catch(() => requests.current.fail(cursor));
     },
     [source],
   );
@@ -51,24 +49,30 @@ export function Feed() {
   // First page on mount.
   useEffect(() => load(null), [load]);
 
-  // Next page, one request at a time, when the active slide nears the last loaded one.
+  // Next page when the active slide nears the last loaded one.
   useEffect(() => {
-    if (!loading && shouldRequestNextPage(state, activeIndex)) load(state.nextCursor);
-  }, [state, activeIndex, loading, load]);
+    if (shouldRequestNextPage(state, activeIndex)) load(state.nextCursor);
+  }, [state, activeIndex, load]);
 
   // After the catalog ends, keep more slides ahead so the feed wraps to the first video.
   useEffect(() => {
     setState((current) => ensureCycles(current, activeIndex));
   }, [activeIndex, state.catalogEnded]);
 
-  // Active slide from the settled scroll position.
+  // Active slide from the settled scroll position, and again when the slide
+  // height changes (rotation, window resize), since a re-snap may not fire `scrollend`.
   useEffect(() => {
     const element = scroller.current;
     if (!element) return;
     const update = () => setActiveIndex(activeIndexFrom(element.scrollTop, element.clientHeight));
     update();
     element.addEventListener("scrollend", update);
-    return () => element.removeEventListener("scrollend", update);
+    const resize = new ResizeObserver(update);
+    resize.observe(element);
+    return () => {
+      element.removeEventListener("scrollend", update);
+      resize.disconnect();
+    };
   }, []);
 
   const slides = buildSlides(state);
