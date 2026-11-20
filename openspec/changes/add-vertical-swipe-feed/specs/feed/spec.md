@@ -23,7 +23,7 @@ The feed MUST NOT change the active video on its own. Only a user gesture
 moves the feed.
 
 #### Scenario: Video ends with no interaction
-- **GIVEN** a video is active and I do not interact
+- **GIVEN** a video is playing
 - **WHEN** it reaches the end
 - **THEN** the same video stays active
 
@@ -104,6 +104,16 @@ A backward gesture on the first video of the visit SHALL leave it active.
 - **GIVEN** the first video of the visit is active
 - **WHEN** I swipe or scroll backward
 - **THEN** the first video stays active
+
+### Requirement: Next page loads ahead
+The feed SHALL request the next page of the catalog when the active video is
+within two slides of the last loaded video and more pages remain, so the
+next videos are there before the home cook reaches them.
+
+#### Scenario: Approach the last loaded video
+- **GIVEN** more pages remain
+- **WHEN** the active video is within two slides of the last loaded video
+- **THEN** the next page is requested
 
 ### Requirement: Supported browsers
 The feed behavior in this spec SHALL hold in Chrome on Android and Chrome on
