@@ -131,7 +131,8 @@ of one video wraps to the same video, with no special case.
   a cursor into a page, 3 items per page, so the catalog spans three pages
   and the cross-page wrap runs on the live site. The cursor is the next
   offset, encoded as base64url JSON. A value that cannot be decoded,
-  including the empty string, is an error.
+  including the empty string, or that points past the end, is an error
+  (noted in the contract on 2026-11-20).
 - **Route:** `src/app/api/feed/route.ts` (`GET`) reads `cursor` and calls
   the paging function. It returns:
   - a page with `Cache-Control: public, s-maxage=3600`;

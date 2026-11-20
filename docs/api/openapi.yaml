@@ -136,7 +136,8 @@ components:
       description: |
         Opaque value from a previous page's `nextCursor`, passed back
         unchanged. Leave it out to get the first page. A value that cannot be
-        decoded, the empty string included, returns 400 `invalid_cursor`.
+        decoded, the empty string included, or that points past the end of
+        the feed, returns 400 `invalid_cursor`.
       schema:
         type: string
     YoutubeId:
@@ -170,7 +171,7 @@ components:
         const: no-store
   responses:
     InvalidCursor:
-      description: The cursor cannot be decoded.
+      description: The cursor cannot be decoded, or points past the end of the feed.
       headers:
         Cache-Control:
           $ref: '#/components/headers/CacheControlNoStore'
