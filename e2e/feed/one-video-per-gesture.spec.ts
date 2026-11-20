@@ -23,7 +23,12 @@ test("feed › One video per gesture › Swipe to the previous video", async ({ 
 });
 
 // Synthesized flick; real finger-flick physics on a phone stay a manual check (E2E rule 13).
+// Skipped on CI (rule 10): on the Linux runner the synthesized flick moved two
+// videos in about 3 of 8 runs (trace: scrollTop = 2 slides), and neither a
+// slower flick nor waiting for the embed fixed it. It still runs locally.
+// Follow-up: backlog/draft-backlog-list.md D-9.
 test("feed › One video per gesture › Hard flick", async ({ page }) => {
+  test.fixme(!!process.env.CI, "Flaky on the Linux CI runner: see backlog/draft-backlog-list.md D-9");
   await openFeed(page, fiveVideos());
 
   await swipeNext(page, { strength: "hard" });
