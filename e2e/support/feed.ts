@@ -55,11 +55,18 @@ export async function stubFeed(page: Page, pages: FeedPage[]): Promise<(string |
   return requested;
 }
 
-/** Opens the feed on `pages` and waits for its first slide. */
+/**
+ * Opens the feed on `pages` and waits until the first slide is active and its
+ * embed has loaded (the network guard's YouTube stub page). Swipes start over
+ * the cross-origin embed, and Chromium routes a touch over an out-of-process
+ * iframe differently while it is still loading, which made a hard flick move
+ * two videos on slower CI runs.
+ */
 export async function openFeed(page: Page, pages: FeedPage[]): Promise<(string | null)[]> {
   const requested = await stubFeed(page, pages);
   await page.goto("/");
   await expect(activeSlide(page)).toBeAttached();
+  await expect(activeFrame(page).frameLocator("iframe").getByTestId("youtube-stub")).toBeAttached();
   return requested;
 }
 

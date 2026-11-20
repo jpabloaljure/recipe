@@ -41,16 +41,13 @@ export function swipePrevious(page: Page, options: GestureOptions = {}): Promise
 
 // Both gestures cover 70% of the screen height, so a slow drag (which snaps to
 // the nearest item) ends clearly past halfway. The hard flick moves at about
-// 8,400 px/s on a Pixel 7, still nearly three times the speed of the normal
-// drag and a fast real flick. Faster synthesized flicks were seen to skip past
-// `scroll-snap-stop: always`, which a real flick does not: ~20,000 px/s
-// always, and ~12,000 px/s sometimes on the slower Linux CI runner (REC-001's
-// "Hard flick" test moved two videos in 2 of 4 CI runs), so the speed keeps a
-// margin below that threshold.
+// 12,000 px/s on a Pixel 7, the top of a real finger flick; far faster
+// synthesized flicks (~20,000 px/s) were seen to skip past
+// `scroll-snap-stop: always`, which a real flick does not.
 const DISTANCE = 0.7;
 const STROKES = {
   normal: { moves: 12, msPerMove: 16 },
-  hard: { moves: 5, msPerMove: 14 },
+  hard: { moves: 5, msPerMove: 10 },
 } as const;
 
 type GestureState = { started: boolean; ended: boolean };
