@@ -87,13 +87,13 @@
 
 ## 6. Manual checks on devices
 
-- [ ] 6.1 Desktop Chrome (`pnpm dev` or a Vercel preview), checking each item and noting the results in the PR description:
+- [x] 6.1 Desktop Chrome (`pnpm dev` or a Vercel preview), checking each item and noting the results in the PR description:
   - real wheel and trackpad move one video per gesture, including over the video;
   - the video is centered at full height;
   - at the last video the next scroll shows the first video, with no visible jump or second snap;
   - a video played to the end stays active;
   - clicking the YouTube player's controls works and does not move the feed.
-- [ ] 6.2 Chrome on Android (human, Vercel preview), checking each item and noting the results in the PR description:
+- [x] 6.2 Chrome on Android (human, Vercel preview), checking each item and noting the results in the PR description:
   - the same checks as 6.1, by swipe;
   - portrait shows one full-screen video, and landscape shows it centered;
   - five hard flicks each move exactly one video, with three live iframes;
