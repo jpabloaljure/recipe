@@ -270,8 +270,9 @@ cost. Decided in the OpenSpec change `add-model-routing`.
   overwrites them): explore and propose run at `high` effort
   (`/effort high`); `openspec-apply-change` runs at the session's effort,
   raised to `high` for tasks that touch the database schema, the API
-  contract or a design decision; archive, sync and update at the session's
-  effort.
+  contract or a design decision, and the agent tells the human when those
+  tasks are done so effort can go back down; archive, sync and update at
+  the session's effort.
 - **`doc-checker`** runs after `write-adr`, at the change close-out, after
   README or C4 updates, and before a `pend-` prompt-log commit.
 

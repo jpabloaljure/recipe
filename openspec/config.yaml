@@ -20,7 +20,7 @@ rules:
 operations:
   apply:
     guidance:
-      - Follow AGENTS.md "Model routing". Before a task that touches the database schema, the API contract or a design decision, tell the human to raise effort with /effort high if the session is not already at high
+      - Follow AGENTS.md "Model routing". Before a task that touches the database schema, the API contract or a design decision, tell the human to raise effort with /effort high if the session is not already at high. After the last such task in a run of them, tell the human they can lower effort again with /effort (to the level they use for routine work) before continuing with routine tasks
       - When tasks change docs (README, AGENTS.md, docs/, C4, ADRs), run the doc-checker agent on the changed files before marking the last such task done, and fix or explain each problem and unsure item it reports
   archive:
     guidance:
