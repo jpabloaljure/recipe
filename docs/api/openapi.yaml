@@ -5,8 +5,10 @@ info:
   summary: The feed and single-video endpoints of the Easy Recipes web app.
   description: |
     The contract between the Easy Recipes web app and its two read-only route
-    handlers (ADR 0002). Owned by backlog story REC-021: REC-002 (feed) and
-    REC-014 (deep link) implement it, and when code and this file differ,
+    handlers (ADR 0002). Owned by backlog story REC-021. Implemented by
+    REC-001 (the feed client and a stub feed route serving a title-only
+    fixture), REC-002 (the feed's data from the database) and REC-014 (the
+    deep link). When code and this file differ,
     this file is updated in the same change. The version follows the PRD
     version (v0.3).
 
@@ -134,7 +136,8 @@ components:
       description: |
         Opaque value from a previous page's `nextCursor`, passed back
         unchanged. Leave it out to get the first page. A value that cannot be
-        decoded, the empty string included, returns 400 `invalid_cursor`.
+        decoded, the empty string included, or that points past the end of
+        the feed, returns 400 `invalid_cursor`.
       schema:
         type: string
     YoutubeId:
@@ -168,7 +171,7 @@ components:
         const: no-store
   responses:
     InvalidCursor:
-      description: The cursor cannot be decoded.
+      description: The cursor cannot be decoded, or points past the end of the feed.
       headers:
         Cache-Control:
           $ref: '#/components/headers/CacheControlNoStore'

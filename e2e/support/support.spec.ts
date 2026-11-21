@@ -1,6 +1,15 @@
+import { catalog, openFeed, slides, videos } from "./feed";
 import { expect, test } from "./test";
 
-// Self-tests of the network guard in e2e/support/test.ts.
+// Self-tests of the network guard in e2e/support/test.ts and the feed stub in e2e/support/feed.ts.
+
+test("feed stub › stubbed page › renders its slides", async ({ page }) => {
+  const requested = await openFeed(page, catalog(videos(2), 2));
+
+  await expect(slides(page)).toHaveCount(4); // two videos, then one wrap-around cycle
+  await expect(slides(page).first()).toHaveAttribute("data-youtube-id", "video1");
+  expect(requested).toEqual([null]);
+});
 
 test("network guard › YouTube embed › serves the local stub page", async ({ page, blockedRequests }) => {
   await page.setContent(

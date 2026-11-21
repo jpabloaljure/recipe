@@ -1523,3 +1523,248 @@ after merge PR #38
 - **Result:** PR #38 merged with CI green. The `doc-checker` trial on the whole repo found no problems and one real mismatch left as is (ADR 0002 `{id}` vs `{youtubeId}`). Cursor and Codex don't document unknown frontmatter keys; neither is installed to test. Still open: archive the change, and run the Sonnet trial on the next validated story.
 - **Models:** Opus 5.5 (main session) · Haiku 5.5 (trial run of the `doc-checker` instructions) · `web-fetch` agent (Cursor, Codex and Agent Skills docs; model not set by the project) · Haiku 5.5, effort low (`doc-checker` on this log).
 - **Why:** the routing rules, design and skill edits are decisions, so they stayed on Opus; reading docs and checking the repo are read-only and easy to verify, so they ran on agents.
+
+## 206. Re-check REC-001 against what changed
+
+```
+lets /validate-story  REC-001 to see if still fits.
+```
+
+## 207. Reopen REC-001 (button answer)
+
+```
+Yes, reopen it
+```
+
+## 208. Ask whether REC-001 has a prerequisite
+
+```
+this has a pre requisit or can i implemented independently after validation?
+```
+
+## 209. Pick all recommended options for #30–#41 (button answer)
+
+```
+All A
+```
+
+## 210. Take #43 A and ask whether #42 B is better long term
+
+```
+#43 A. Question for #42. Do you beleve B its bette in the long run?
+```
+
+## 211. Ask to move the backend part to another story
+
+```
+For the cons. backend work in a frontend story, overlaps REC-002, and likely raises the estimate. Can we move the backend side to REC-019 or any other?
+```
+
+## 212. Choose #42 B and keep the route in REC-001
+
+```
+#42 B, keep the route in REC-001
+```
+
+## 213. Pick all recommended options for #44–#46 (button answer)
+
+```
+All A
+```
+
+## 214. Pick the options for #47–#50
+
+```
+#48 B, the rest A
+```
+
+## 215. Pick the option for #51
+
+```
+#51 A
+```
+
+## 216. Approve the acceptance criteria (button answer)
+
+```
+AC approved
+```
+
+## 217. Team estimate (button answer)
+
+```
+5
+```
+
+## 218. Validate REC-001 (button answer)
+
+```
+Validated
+```
+
+## 219. Open the re-validation PR (button answer)
+
+```
+Open the PR
+```
+
+## 220. Merge the re-validation PR (button answer)
+
+```
+Yes, merge it
+```
+
+## 221. Align the swipe-feed change with REC-001 (button answer)
+
+```
+Yes, align it
+```
+
+## 222. Write all four artifacts (button answer)
+
+```
+Yes, write all four
+```
+
+## 223. Merge the alignment PR (button answer)
+
+```
+Yes, merge it
+```
+
+## 224. Apply the change (button answer)
+
+```
+Apply it
+```
+
+## 225. Ask where the effort rule is in AGENTS.md
+
+```
+where is that on my agenst? and what exacly says?
+```
+
+## 226. Ask why the effort rule exists
+
+```
+why yoy have this rule what is the purpouse?
+```
+
+## 227. Ask what "Effort first" means
+
+```
+(“Effort first”): raise effort on the main model before using a cheaper one
+```
+
+## 228. Continue the apply
+
+```
+ok go
+```
+
+## 229. Point out that effort was never lowered again
+
+```
+hey but you made me rise to high but never aske me to low it back
+```
+
+## 230. Add the "lower effort again" rule
+
+```
+yes please.
+```
+
+## 231. Merge the effort-rule PR (button answer)
+
+```
+Yes, merge it
+```
+
+## 232. Approve the one-off OpenAPI linter (button answer)
+
+```
+Yes, run it
+```
+
+## 233. Note the past-end cursor in the contract (button answer)
+
+```
+Yes, note it
+```
+
+## 234. Run the AI review (button answer)
+
+```
+Yes, run it
+```
+
+## 235. Fix all five review findings (button answer)
+
+```
+Fix all five
+```
+
+## 236. Report the device checks (button answer)
+
+```
+Checks passed
+```
+
+## 237. Merge the REC-001 PR (Sonnet 5.5; button answer)
+
+The `/model claude-sonnet-5-5` command ran just before this prompt.
+
+```
+Yes, merge it
+```
+
+## 238. Choose how to handle the flaky Hard flick test (Sonnet 5.5; button answer)
+
+```
+Slow the flick
+```
+
+## 239. Merge the REC-001 PR after CI turned green (Sonnet 5.5; button answer)
+
+```
+Yes, merge it
+```
+
+## 240. Skip Hard flick on CI (Sonnet 5.5; button answer)
+
+```
+Yes, fixme on CI
+```
+
+## 241. Merge the fixme PR (Sonnet 5.5; button answer)
+
+```
+Yes, merge it
+```
+
+## 242. Close out REC-001 (Sonnet 5.5; button answer)
+
+```
+Yes, close it out
+```
+
+## 243. Merge the close-out PR (Sonnet 5.5; button answer)
+
+```
+Yes, merge it
+```
+
+### Summary (prompts 206–243)
+
+- **Goal:** check that REC-001 still fits the project, re-validate it, build it through OpenSpec, and close it out.
+- **Changes:**
+  - **REC-001 re-validated** (twelve findings #30–#51 resolved; estimate 3 → 5; `layer:fullstack`): AC2 reworded, new AC6 (next page), a stub `GET /api/feed` route plus client `FeedSource`, the E2E test plan; linked notes in REC-002, REC-004 and REC-021, the PRD browser scope, README and checklist (PR #41).
+  - **`add-vertical-swipe-feed` aligned** with the story: 24 tasks, a new "Next page loads ahead" requirement (PR #42).
+  - **REC-001 built** (PR #43): the scroll-snap `Feed`, the stub route paging 7 real title-only Shorts, contract types, an HTTP source, feed logic with Vitest, Playwright tests for every automatable feed scenario, C4 level 3, `openapi.yaml` implementers and a past-end cursor note.
+  - **AI review:** 5 findings fixed (retry after a failed page, resize, duplicate IDs, a test helper that could hang, redundant state).
+  - **CI flake:** the `Hard flick` E2E test failed in about 3 of 8 CI runs (the feed moved two videos); a slower flick and an embed-load wait did not fix it, so it is skipped on CI with `test.fixme` and tracked as `draft-backlog-list.md` D-9 (PR #45).
+  - **Effort guidance** (PR #44): the agent tells the human when effort can go back down (`AGENTS.md`, `openspec/config.yaml`).
+  - **Close-out** (PR #46): REC-001 `done`, the change archived, the first main spec `openspec/specs/feed/spec.md` (9 requirements, 15 scenarios), and four stale doc lines fixed.
+- **Result:** REC-001 done; `main` green and the production smoke check passing; the feed is live with stub data. Still open: a human look at the feed on the production URL, #41 (Definition of Ready "Sliced" wording), D-9, REC-019 and REC-002 validation.
+- **Models:** Opus 5.5 (main session, prompts 206–236) · Sonnet 5.5 (main session from the `/model` switch, prompts 237–243; the harness reported the switch during prompt 236, so its last part may already have been Sonnet) · Opus 5.5, effort high (`story-validator` re-checks, `code-review`) · Opus 5.5, effort medium (`estimate-story`) · Haiku 5.5, effort low (`doc-checker`: the apply docs, the close-out and this log).
+- **Why:** re-validation, the stub-route design, the apply and the review fixes are decisions and ran on the top model; reading and cross-checking docs is read-only and easy to verify, so it ran on `doc-checker`; the model switch only changed the routine merges and the close-out.
