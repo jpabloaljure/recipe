@@ -50,7 +50,7 @@
 
   Verify in `pnpm dev` that scrolling from the first slide past the last fixture video shows the fixture videos, then video 1 again, that the network panel shows `/api/feed?cursor=…` requests, and that the DOM never holds more than three iframes.
 - [x] 4.3 Replace the placeholder in `src/app/page.tsx` with `<Feed />` and remove the unused placeholder styles from `page.module.css` (delete the file if nothing uses it); verify `pnpm typecheck`, `pnpm test` and `pnpm build` pass, and that the `@smoke` test still passes against the build
-- [ ] 4.4 Update the C4 level 3 web-app diagram (`docs/architecture/c4/03-components-web-app.md`):
+- [x] 4.4 Update the C4 level 3 web-app diagram (`docs/architecture/c4/03-components-web-app.md`):
   - Feed: CSS scroll-snap, one video per gesture, wrap-around, next page via `/api/feed`;
   - Feed route: fixture data until REC-002, with its database read starting in REC-002;
   - a note that Feed and the Feed route are built while the other components are still planned.
@@ -98,7 +98,7 @@
   - portrait shows one full-screen video, and landscape shows it centered;
   - five hard flicks each move exactly one video, with three live iframes;
   - a backward swipe on the first video does not trigger pull-to-refresh.
-- [ ] 6.3 Set REC-001 to `**Status:** done` with the Edit tool once every E2E test in group 5 passes in CI and 6.1 and 6.2 pass (Definition of Done); verify the hook accepts the edit
+- [x] 6.3 Set REC-001 to `**Status:** done` with the Edit tool once every E2E test in group 5 passes in CI and 6.1 and 6.2 pass (Definition of Done); verify the hook accepts the edit
 
 ## Workflow follow-up
 

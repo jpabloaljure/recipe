@@ -5,7 +5,7 @@ Update the status and notes as items are done.
 
 Status: ✅ done · 🟡 partial · ❌ missing
 
-_Last updated: 2026-11-19_
+_Last updated: 2026-11-21_
 
 ## Entrega 1 — Documentation
 
@@ -21,7 +21,7 @@ Delivered on branch `feature/entrega-1-jpa`. Open items carry over to Entrega 2.
 | 6 | Tech stack | ✅ | `AGENTS.md`, `README.md` | Next.js + React 19 on Vercel, Postgres on Neon + Drizzle, ingestion on GitHub Actions, pnpm, Vitest (change `choose-tech-stack`); Playwright for end-to-end tests (ADR 0006, change `add-e2e-testing`). LLM provider is a pending decision. |
 | 7 | Data model | ✅ | [docs/architecture/data-model.md](architecture/data-model.md) | REC-020 (change `add-data-model-document`): Mermaid ER diagram of video and recipe with field types and keys, the five statuses, the feed-entry time rule and required fields. `Status: Proposed` until REC-019 builds the schema. Whether an ingestion run is stored is a pending decision. |
 | 8 | API specification | ✅ | [README › API specification](../README.md#4-api-specification), [docs/api/openapi.yaml](api/openapi.yaml) | REC-021 (change `add-api-specification`): OpenAPI 3.1 for `GET /api/feed` (paged by opaque cursor, up to 10 items) and `GET /api/videos/{youtubeId}`, with item, recipe and error schemas, cache headers, examples and a field-to-column table; the README has an endpoint table. REC-002 and REC-014 implement it. |
-| 9 | User stories | 🟡 | `backlog/E01`–`E04` | 21 stories (REC-001 to REC-021): generated with `decompose-prd`, plus REC-019 split out during validation and REC-020/REC-021 (data model and API spec documents). REC-001, REC-020 and REC-021 are validated and estimated; REC-002 (reopened 2026-11-17, title-only videos, Decided 4) and REC-003 are in review; the other 16 are flagged `needs-human-validation`. Validation in progress with `validate-backlog`. |
+| 9 | User stories | 🟡 | `backlog/E01`–`E04` | 21 stories (REC-001 to REC-021): generated with `decompose-prd`, plus REC-019 split out during validation and REC-020/REC-021 (data model and API spec documents). REC-001 (done 2026-11-21), REC-020 and REC-021 are validated and estimated; REC-002 (reopened 2026-11-17, title-only videos, Decided 4) and REC-003 are in review; the other 16 are flagged `needs-human-validation`. Validation in progress with `validate-backlog`. |
 | 10 | Work tickets (backend, frontend, DB) | ✅ | `AGENTS.md` ("Story slicing"), `backlog/E01`–`E04` | Stories are full-stack slices by default and split by layer only when needed (change `add-story-slicing-rules`); every story has a `layer:` label. DB: REC-019, REC-020. Backend: REC-005, REC-008, REC-009, REC-010, REC-016, REC-017, REC-021. Frontend: REC-003, REC-004, REC-006, REC-007, REC-011–REC-013, REC-015, REC-018. Full stack: REC-001, REC-002, REC-014. Validated per layer: DB REC-020 (2026-11-17), backend REC-021 (2026-11-18), full stack REC-001 (feed UI plus a stub feed route; re-validated 2026-11-19, was frontend). No frontend-only story is validated yet. |
 | 11 | Git repo | ✅ | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe), `.github/workflows/ci.yml` | Pushed to `main`; CI (typecheck, unit tests, build, E2E tests) runs on pull requests and pushes to `main`. `main` is protected (PR and green `check` required); the PR flow, DoR and DoD are in `CONTRIBUTING.md` and `docs/process/`, and a smoke check runs after each production deploy. |
 
@@ -38,9 +38,9 @@ blocked by the LLM provider decision).
 | # | Item | Status | Where | Notes / what's left |
 |---|---|---|---|---|
 | 12 | Connected scaffolds | ❌ | `src/`, Neon, Vercel, `.github/workflows/` | Web app ↔ `GET /api/feed` ↔ Postgres on Neon ↔ ingestion job scaffold (GitHub Actions), deployed. Needs a Neon database and `DATABASE_URL` in Vercel and GitHub secrets (human). |
-| 13 | End-to-end feature | ❌ | production URL | The feed in production shows real videos from the database, one per swipe. REC-001: change `add-vertical-swipe-feed` (planned, 0 of 13 tasks). REC-019 and REC-002: still `needs-human-validation`; validate before their OpenSpec changes. |
+| 13 | End-to-end feature | ❌ | production URL | The feed in production shows real videos from the database, one per swipe. REC-001: done 2026-11-21 (PR #43; change `add-vertical-swipe-feed` archived, spec in `openspec/specs/feed/`); production already serves the stub `/api/feed` with 7 fixture videos, title only. REC-019 and REC-002: still `needs-human-validation`; validate before their OpenSpec changes. |
 | 14 | Updated files | ❌ | `README.md`, `docs/`, `prompts.md` | README §1.3 screenshots of the feed, §1.4 database setup, §2.4 secrets, §2.5 security practices; C4 levels 2–3 and the data model moved to `Current` where built; `docs/development.md` with the database setup; `prompts.md` with the Entrega 2 prompts. |
-| 15 | Tests | ❌ | `src/**/*.test.ts`, `e2e/` | Unit tests for the feed logic, schema rules and API; E2E tests for every automatable feed scenario (stub data, no shared database); device checks on Android and desktop; green smoke check in production. |
+| 15 | Tests | ❌ | `src/**/*.test.ts`, `e2e/` | Unit tests for the feed logic, schema rules and API; E2E tests for every automatable feed scenario (stub data, no shared database); device checks on Android and desktop; green smoke check in production. Done for REC-001: Vitest for the feed logic, stub route and HTTP source, Playwright for every automatable feed scenario, device checks passed 2026-11-20, smoke green; its `Hard flick` E2E test is skipped on CI (`backlog/draft-backlog-list.md` D-9). Left: schema, API and ingestion tests (REC-019, REC-002). |
 
 ## Suggested order
 
@@ -49,7 +49,7 @@ blocked by the LLM provider decision).
 ```
 validate REC-019 and REC-002 ---------------------------------+
                                                               v
-REC-001 swipe feed (stub data) --> REC-019 schema on Neon --> REC-002 feed API + ingestion scaffold
+REC-001 swipe feed (done) ------> REC-019 schema on Neon --> REC-002 feed API + ingestion scaffold
                                                               |
                                                               v
                                     14 README, C4, data model, prompts.md --> branch feature/entrega-2-jpa
