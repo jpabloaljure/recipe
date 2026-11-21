@@ -5,7 +5,7 @@ prd-goal: G1
 ---
 
 ## REC-001 · Vertical full-screen feed with manual swipe
-- **Status:** in-progress
+- **Status:** done
 - **Labels:** module:feed, type:feature, size:M, layer:fullstack
 - **PRD:** 5.1, 5.2
 - **Flags:** —
@@ -278,7 +278,7 @@ Documentation only: no route, no code. Decided while validating this story (2026
 - **Errors:** one body for 400, 404 and 5xx, `{ "error": { "code", "message" } }`. Platform errors the app does not produce (for example a Vercel function timeout, 504) may have another body and headers, so clients rely only on the status code and treat any non-2xx response as a failed request (REC-018).
 - **Consumers:** the feed client (REC-001, REC-002), the deep link (REC-014), and possibly the Favorites view (REC-012): if open decision 2 keeps favorites as references only, it calls the single-video endpoint once per saved video, and a 404 means the video is gone. No batch endpoint for now. Favorites themselves live in the browser (PRD 5.4); the server never stores them.
 - **Keeping it current:** a change to the recipe structure (E02: REC-006, REC-008) updates `docs/architecture/data-model.md` and this specification in the same change.
-- **Conformance:** the response types live in one TypeScript module, `src/lib/feed/types.ts` (planned by REC-001's `add-vertical-swipe-feed` change, whose feed item drops its `id` to match; REC-001 also adds `channelName` and `recipe`, decided in its re-check #44 on 2026-11-19), used by REC-001's stub feed route, the REC-002 and REC-014 routes and the E2E stub data; the specification and those types are kept in sync in review. No validator library.
+- **Conformance:** the response types live in one TypeScript module, `src/lib/feed/types.ts` (built by REC-001's `add-vertical-swipe-feed` change, archived 2026-11-21, whose feed item has no `id`; REC-001 also adds `channelName` and `recipe`, decided in its re-check #44 on 2026-11-19), used by REC-001's stub feed route, the REC-002 and REC-014 routes and the E2E stub data; the specification and those types are kept in sync in review. No validator library.
 Also linked from the Entrega 1 checklist (item 8). The C4 level 3 Feed route description was aligned with Decided 4 outside this story (2026-11-18).
 
 ### Estimation notes

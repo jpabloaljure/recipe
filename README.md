@@ -3,8 +3,9 @@
 A mobile-first web app with a vertical, full-screen feed of short YouTube
 cooking videos (Shorts), each with an easy written recipe.
 
-> Status: **MVP planning.** The app is scaffolded (a placeholder page, no
-> product features yet). Delivery progress:
+> Status: **MVP in progress.** The vertical swipe feed is live with stub data
+> (7 fixture videos from `GET /api/feed`, title only); the database, the real
+> feed data and recipes are not built yet. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
 ## Index
@@ -153,8 +154,8 @@ the feed. ER diagram, fields, types, keys and rules:
 
 | Endpoint | Returns |
 |---|---|
-| `GET /api/feed` | One page of the feed, each video with its recipe |
-| `GET /api/videos/{youtubeId}` | One video and its recipe, for deep links |
+| `GET /api/feed` | One page of the feed: `ready` videos with their recipe, `needs_recipe` videos with their title only |
+| `GET /api/videos/{youtubeId}` | One feed video (with its recipe, or title only), for deep links |
 
 OpenAPI 3.1 spec with schemas and examples:
 [docs/api/openapi.yaml](docs/api/openapi.yaml).
