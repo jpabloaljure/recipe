@@ -54,10 +54,17 @@ session checks: Haiku 5.5 for `doc-checker`. Rules, effort per skill and the
 `/effort high` habit for multi-turn sessions:
 [AGENTS.md › Model routing](../AGENTS.md#model-routing).
 
-**Sonnet trial for `story-validator`:** pending. On the next story validated
-with `validate-backlog`, the validator's first check also runs on Sonnet 5.5;
-it moves to Sonnet only if Sonnet finds every finding that changed the story.
-The result is recorded here and in the story's row of
+**Sonnet trial for `story-validator`: failed (REC-019, 2026-11-21).** The
+first check ran on Opus 5.5 and on Sonnet 5.5. All 18 Opus findings led to
+changes in the story; Sonnet found 15 of them and missed three:
+- a database constraint for a feed video with no feed-entry time;
+- the dependent stories not marked `blocked-by:REC-019`, and no owner for the
+  curated-list loader;
+- most of "other updates and console edits keep the time".
+
+Sonnet raised one point Opus did not (AC1 bundling several checks). The rule
+was "every finding that changed the story", so `story-validator` stays on
+Opus 5.5. Details in REC-019's row of
 [`backlog/validation-log.md`](../backlog/validation-log.md).
 
 ## Guardrails

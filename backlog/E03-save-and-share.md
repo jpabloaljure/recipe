@@ -75,7 +75,7 @@ Depends on REC-014 for the link target.
 - **Status:** todo
 - **Labels:** module:sharing, type:feature, size:M, layer:fullstack
 - **PRD:** 5.5, API-3
-- **Flags:** needs-human-validation; blocked-by:REC-021
+- **Flags:** needs-human-validation; blocked-by:REC-021; blocked-by:REC-019
 - **AI estimate:** —
 - **Estimate:** —
 

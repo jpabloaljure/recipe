@@ -25,21 +25,6 @@ session can stop and resume.
 3. Show progress: validated / skipped / remaining (remaining = stories
    still flagged `needs-human-validation`).
 
-## One-time Sonnet trial (delete this section once recorded)
-
-On the next story this skill checks, step 1's first check also runs the
-`story-validator` agent a second time, called with `model: sonnet`, in
-parallel with the normal run. Keep the Sonnet table to yourself: only the
-normal run's findings are shown and drive the session. When the story is
-validated (or the session stops), compare: the trial **passes** if every
-finding of the normal run that led to a change in the story (an option the
-user applied) also appears in the Sonnet table, in any wording. Tell the
-user the result, record it in the story's notes in
-`backlog/validation-log.md` and under "Models" in `docs/ai-workflow.md`
-(pass or fail, with the missed findings), and say that a direct PR should
-then remove this section and, on a pass, set `story-validator` to
-`model: sonnet` (see the `add-model-routing` change).
-
 ## Per story
 
 1. **Check:** run the `story-validator` agent with the story ID (plus the

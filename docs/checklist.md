@@ -37,7 +37,7 @@ blocked by the LLM provider decision).
 
 | # | Item | Status | Where | Notes / what's left |
 |---|---|---|---|---|
-| 12 | Connected scaffolds | ❌ | `src/`, Neon, Vercel, `.github/workflows/` | Web app ↔ `GET /api/feed` ↔ Postgres on Neon ↔ ingestion job scaffold (GitHub Actions), deployed. Needs a Neon database and `DATABASE_URL` in Vercel and GitHub secrets (human). |
+| 12 | Connected scaffolds | ❌ | `src/`, Neon, Vercel, `.github/workflows/` | Web app ↔ `GET /api/feed` ↔ Postgres on Neon ↔ ingestion job scaffold (GitHub Actions), deployed. Needs a Neon project (Postgres 17) with a read-only user and a write user, `DATABASE_URL` (pooled, read-only) in Vercel and `DATABASE_URL_DIRECT` (direct, write) in GitHub Actions secrets (human; REC-019). |
 | 13 | End-to-end feature | ❌ | production URL | The feed in production shows real videos from the database, one per swipe. REC-001: change `add-vertical-swipe-feed` (planned, 0 of 13 tasks). REC-019 and REC-002: still `needs-human-validation`; validate before their OpenSpec changes. |
 | 14 | Updated files | ❌ | `README.md`, `docs/`, `prompts.md` | README §1.3 screenshots of the feed, §1.4 database setup, §2.4 secrets, §2.5 security practices; C4 levels 2–3 and the data model moved to `Current` where built; `docs/development.md` with the database setup; `prompts.md` with the Entrega 2 prompts. |
 | 15 | Tests | ❌ | `src/**/*.test.ts`, `e2e/` | Unit tests for the feed logic, schema rules and API; E2E tests for every automatable feed scenario (stub data, no shared database); device checks on Android and desktop; green smoke check in production. |
