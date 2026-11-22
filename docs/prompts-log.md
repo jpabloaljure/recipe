@@ -1899,3 +1899,179 @@ Yes, merge it
 - **Result:** REC-019 validated (4 of 21 stories). The Sonnet trial failed: Sonnet 5.5 found 15 of the 18 Opus findings that changed the story, so `story-validator` stays on Opus 5.5. PR #48 merged with CI green after resolving two conflicts with `main`. REC-002 is the next validation.
 - **Models:** Opus 5.5 (main session, prompts 244–261) · Opus 5.5, effort high (`story-validator`, all seven rounds) · Sonnet 5.5 (`story-validator`, first check only, for the trial) · Sonnet 5.5 (main session from prompt 262: commit, PR, conflict resolution, merge) · Haiku 5.5, effort low (`doc-checker` on this log).
 - **Why:** findings, options and the estimate are decisions, so they stayed on Opus; the trial tested whether a cheaper validator holds, and it didn't; the last steps were mechanical, so the session ran on Sonnet.
+
+## 264. Explore REC-019 as a change (slash command)
+
+```
+/openspec-explore REC-019
+```
+
+## 265. Propose the change in two PRs
+
+```
+2 PR is fine to me, openspec-propose
+```
+
+## 266. Question: why was the worktree in another project?
+
+```
+why is al this created in other project? insted of recipe?
+```
+
+## 267. Keep the worktree (button answer)
+
+```
+Keep the worktree
+```
+
+## 268. Open the PR (button answer)
+
+```
+Open the PR
+```
+
+## 269. Merge PR #51 (button answer)
+
+```
+Yes, merge it
+```
+
+## 270. Apply the change (button answer)
+
+```
+Apply it
+```
+
+## 271. Merge PR #52 (button answer)
+
+```
+Yes, merge it
+```
+
+## 272. Continue after the usage limit reset
+
+```
+I hit my usage limit while you were working, but it has reset now. Please continue from where you left off.
+```
+
+## 273. Cap all model use at Sonnet medium
+
+```
+Fix all my use of models to at max use sonet medium for all this project.
+```
+
+## 274. Merge PR #53 (button answer)
+
+```
+Yes, merge it
+```
+
+## 275. Apply the change, PR 2 (slash command)
+
+```
+/openspec-apply-change
+```
+
+## 276. Ask for the Neon steps (task 9.1)
+
+```
+give me the instructions for 9.1
+```
+
+## 277. Ask which database name to use
+
+```
+what name for database name?
+```
+
+## 278. Task 9.1 done
+
+```
+9.1 done
+```
+
+## 279. Generate a password (shell command; output left out because it was a secret)
+
+```
+!openssl rand -hex 24
+```
+
+## 280. Ask which password to use for app_readonly
+
+```
+CREATE ROLE app_readonly WITH LOGIN PASSWORD '<your password>'; what password should i use?
+```
+
+## 281. Task 9.2 done
+
+```
+“9.2 done”
+```
+
+## 282. Ask what a connection string is
+
+```
+what is a connection string?
+```
+
+## 283. Report a psql error
+
+```
+psql: error: invalid integer value
+```
+
+## 284. Task 9.3 done
+
+```
+9.3 done
+```
+
+## 285. PR #54 merged
+
+```
+merged
+```
+
+## 286. Run the first production migration (button answer)
+
+```
+Yes, run it
+```
+
+## 287. Both production checks passed
+
+```
+Both passed
+```
+
+## 288. Merge PR #55 (button answer)
+
+```
+Yes, merge it
+```
+
+## 289. Archive the change (button answer)
+
+```
+Yes, archive it
+```
+
+## 290. Merge PR #56
+
+```
+merge
+```
+
+### Summary (prompts 264–290)
+
+- **Goal:** build REC-019 (database schema and migrations for the video catalog) as the OpenSpec change `add-video-catalog-schema` in two PRs, put it in production, and close it out.
+- **Changes:**
+  - PR #51: the change artifacts (proposal, design, spec with 21 scenarios, tasks).
+  - PR #52: ADR 0007, the Drizzle schema, four migrations, the client, the Postgres test harness (68 database tests), `docker-compose.yml`, CI with a Postgres service; fixes for the nine findings of the AI review.
+  - PR #53: every model and effort setting capped at Sonnet 5.5 and medium (`.claude/settings.json`, agents, skills, AGENTS.md, OpenSpec config).
+  - PR #54: the migrate-on-merge workflow and the C4 update; the Neon project, the `app_readonly` role and the secrets were set up by the user step by step.
+  - PR #55: close-out (REC-019 `done`, data model `Current`, checklist, README) after the first production migration and two production checks.
+  - PR #56: change archived, `video-catalog` main spec created.
+- **Result:** the database schema is in production (still empty), REC-019 is done and archived. The feed does not read the database yet. REC-002 is the next story.
+- **Models:** Sonnet 5.5 (main session, all prompts) · Haiku 5.5, effort low (`doc-checker` after doc changes). The AI review of PR #52 ran in the main session on the Sonnet 5.5 session model.
+- **Why:** the work was building from a validated spec, so Sonnet fit; the cap came at prompt 273 (the earlier routing allowed Opus). The password generated in prompt 279 was shown in the chat, so it was discarded and replaced.
