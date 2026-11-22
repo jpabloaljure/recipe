@@ -21,7 +21,7 @@ Diagrams that are not C4 levels. They follow the same status convention.
 
 | Diagram | Shows | File | Status |
 |---|---|---|---|
-| Data model | The server data: videos, recipes, statuses and their rules (Mermaid `erDiagram`) | [data-model.md](data-model.md) | Proposed |
+| Data model | The server data: videos, recipes, statuses and their rules (Mermaid `erDiagram`) | [data-model.md](data-model.md) | Current |
 
 ## Status convention
 

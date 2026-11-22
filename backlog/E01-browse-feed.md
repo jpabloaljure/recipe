@@ -173,7 +173,7 @@ M: three simple messages, plus skipping a video on a player error.
 The player error event's timing and reliability is the main unknown.
 
 ## REC-019 · Database schema and migration for the video catalog
-- **Status:** in-progress
+- **Status:** done
 - **Labels:** module:ingestion, type:feature, size:L, layer:db
 - **PRD:** 6.4, 6.5, ING-2, ING-3, EXT-4, EXT-6, API-2, API-3
 - **Flags:** split-from:REC-002

@@ -70,13 +70,13 @@ the two scenarios that need production are manual checks in group 11.
 
 ## 11. Production checks (manual, after PR 2 merges)
 
-- [ ] 11.1 Manual check: the first run of the migration workflow (started with `gh workflow run migrate.yml` from `main`, after confirming that `gh workflow list` shows it) is green and applies all four migrations to the production database; verify the run's log and that the `video` and `recipe` tables exist in Neon's SQL editor. Reason it is manual: it needs the production database
-- [ ] 11.2 Manual check: connected as `app_readonly` to production, a `SELECT` on `video` succeeds and an `INSERT` is rejected; verify and write the result in the PR. Reason it is manual: only the human holds the production credential, and the test database cannot prove Neon's role model
+- [x] 11.1 Manual check: the first run of the migration workflow (started with `gh workflow run migrate.yml` from `main`, after confirming that `gh workflow list` shows it) is green and applies all four migrations to the production database; verify the run's log and that the `video` and `recipe` tables exist in Neon's SQL editor. Reason it is manual: it needs the production database
+- [x] 11.2 Manual check: connected as `app_readonly` to production, a `SELECT` on `video` succeeds and an `INSERT` is rejected; verify and write the result in the PR. Reason it is manual: only the human holds the production credential, and the test database cannot prove Neon's role model
 
 ## 12. Ship PR 2 and close out
 
-- [ ] 12.1 Open the PR from `feat/rec-019-migrate-production` with the PR template, resolve review threads and merge once `check` is green; verify the migration workflow's first run starts on the merge
-- [ ] 12.2 After 11.1 and 11.2 pass, in one close-out PR: set `docs/architecture/data-model.md` and `docs/architecture/README.md` to `Status: Current`, update `docs/checklist.md` Entrega 2 items 7, 12, 13 and 15 to what now exists (item 13 still calls REC-019 `needs-human-validation`), add REC-019 to the README's list of validated stories, and set REC-019 to `**Status:** done` with the Edit tool once the Definition of Done is met; verify the hook accepts the edit, the validation log row stays `validated`, and the `doc-checker` agent reports no problem
+- [x] 12.1 Open the PR from `feat/rec-019-migrate-production` with the PR template, resolve review threads and merge once `check` is green; verify the migration workflow's first run starts on the merge
+- [x] 12.2 After 11.1 and 11.2 pass, in one close-out PR: set `docs/architecture/data-model.md` and `docs/architecture/README.md` to `Status: Current`, update `docs/checklist.md` Entrega 2 items 7, 12, 13 and 15 to what now exists (item 13 still calls REC-019 `needs-human-validation`), add REC-019 to the README's list of validated stories, and set REC-019 to `**Status:** done` with the Edit tool once the Definition of Done is met; verify the hook accepts the edit, the validation log row stays `validated`, and the `doc-checker` agent reports no problem
 
 ## Workflow follow-up
 

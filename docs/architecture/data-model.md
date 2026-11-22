@@ -1,11 +1,12 @@
 # Data model
 
-Status: Proposed
+Status: Current
 
 The logical model of the data Easy Recipes keeps on the server: the videos
-found by the daily ingestion job and the recipes extracted from them. It is
-the target design that the schema (REC-019), the feed API (REC-002, REC-021)
-and the ingestion job (REC-005, REC-008, REC-010) follow. It is not a C4
+found by the daily ingestion job and the recipes extracted from them. The
+schema (REC-019: `src/lib/db/schema.ts` and the migrations) is built from it
+and has run in production since 2026-11-22; the feed API (REC-002, REC-021) and
+the ingestion job (REC-005, REC-008, REC-010) follow it. It is not a C4
 diagram; see [README](README.md) for the C4 levels.
 
 Sources: PRD v0.3 (§5.3, §6.1–§6.5, EXT-2 to EXT-6, API-1, PERF-4) and the
@@ -157,6 +158,6 @@ A `needs_recipe` video has no recipe panel (PRD §5.3, PERF-4).
   (`draft-backlog-list.md` D-7).
 - **Open.** Whether an ingestion run is stored (for monitoring) is a
   pending decision in [`docs/adr/README.md`](../adr/README.md).
-- **Keeping it current.** REC-019 sets this document to `Status: Current`
-  once the schema matches it. A story that changes the model updates this
-  document in the same change.
+- **Keeping it current.** REC-019 set this document to `Status: Current` once
+  the schema matched it and ran in production. A story that changes the model
+  updates this document, the schema and a new migration in the same change.
