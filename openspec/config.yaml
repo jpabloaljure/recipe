@@ -20,7 +20,7 @@ rules:
 operations:
   apply:
     guidance:
-      - Follow AGENTS.md "Model routing": Sonnet 5.5 at medium effort at most, never higher. For a task that touches the database schema, the API contract or a design decision, split the work into smaller steps and check each one (run the tests, re-read the spec) instead of raising the model or the effort
+      - 'Follow AGENTS.md "Model routing": Sonnet 5.5 at medium effort at most, never higher. For a task that touches the database schema, the API contract or a design decision, split the work into smaller steps and check each one (run the tests, re-read the spec) instead of raising the model or the effort'
       - When tasks change docs (README, AGENTS.md, docs/, C4, ADRs), run the doc-checker agent on the changed files before marking the last such task done, and fix or explain each problem and unsure item it reports
   archive:
     guidance:

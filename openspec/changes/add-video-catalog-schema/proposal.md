@@ -55,8 +55,12 @@ in two pull requests:
 - Two manual checks: the workflow applies a merged migration to production,
   and a write as `app_readonly` on production is rejected.
 - C4 level 2 (the migration workflow, the app reading as `app_readonly`, the
-  CI test database as tooling) and `docs/architecture/data-model.md` set to
-  `Status: Current`, because both describe what now runs in production.
+  CI test database as tooling).
+- **Close-out** (one more PR), after the two manual checks pass:
+  `docs/architecture/data-model.md` and `docs/architecture/README.md` set to
+  `Status: Current` (they describe what runs in production), the checklist,
+  the README's list of validated stories, REC-019 set to `done`, and the
+  archive.
 
 **Precondition done by the human** before PR 2: a Neon project on Postgres
 17, `app_readonly` created with SQL (not from the Console), `DATABASE_URL` in
@@ -88,10 +92,10 @@ None.
 - **Docs:** ADR 0007 and its index row, C4 level 2
   (`docs/architecture/c4/02-containers.md`, in PR 2),
   `docs/architecture/data-model.md`, `docs/api/openapi.yaml`,
-  `docs/development.md`, `README.md`, `docs/checklist.md` (Entrega 2 items 12
-  and 15).
-- **Backlog:** REC-019 set to `done` at the end (PR 2) once the Definition of
-  Done is met.
+  `docs/development.md`, `README.md`, `docs/checklist.md` (items 7, 12, 13 and 15,
+  in the close-out).
+- **Backlog:** REC-019 set to `done` in the close-out, once the two production
+  checks pass and the Definition of Done is met.
 - **Architecture:** new ADR 0007 and a C4 level 2 update (a new job and a new
   dev and CI tool). No existing ADR is edited.
 - **Dependencies on people:** the Neon setup (human) gates PR 2 only.

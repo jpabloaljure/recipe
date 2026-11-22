@@ -1,0 +1,66 @@
+name: Migrate production database
+
+# Applies the Drizzle migrations (src/lib/db/migrations/) to the production
+# Neon database after a merge to main (ADR 0007, change add-video-catalog-schema).
+#
+# - Runs only when a migration file changed, so Neon is not woken for nothing;
+#   it can also be started by hand from `main`: `gh workflow run migrate.yml`.
+# - Uses the owner role through the direct connection (DATABASE_URL_DIRECT,
+#   set only in GitHub Actions secrets, never in Vercel). The grants in
+#   migration 0003 depend on the same role running every migration.
+# - One run at a time: a later run waits, it never cancels one in progress.
+# - A failed run is a red run. There is no automatic rollback: the fix is a
+#   new migration in a new pull request. Migrations are additive only, so the
+#   app works whether the deploy or the migration finishes first.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/lib/db/migrations/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migrate-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    # Never migrate production from an unmerged branch started by hand.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          # v5 caches automatically when package.json has "packageManager",
+          # which needs pnpm before it is installed below.
+          package-manager-cache: false
+
+      # Node 25+ ships no Corepack: install the pnpm version pinned in
+      # package.json ("packageManager") with npm, as the CI workflow does.
+      - name: Install pnpm
+        run: npm install -g "$(node -p "require('./package.json').packageManager")"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Three attempts: the first connection after the database has been idle
+      # meets Neon's cold start (ADR 0003).
+      - name: Apply migrations
+        env:
+          DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm db:migrate; then
+              exit 0
+            fi
+            echo "::warning::Attempt $attempt failed; waiting for the database to wake up"
+            sleep 10
+          done
+          echo "::error::Migrations failed after 3 attempts"
+          exit 1

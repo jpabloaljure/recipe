@@ -54,31 +54,31 @@ the two scenarios that need production are manual checks in group 11.
 
 ## 8. Ship PR 1
 
-- [ ] 8.1 Run `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm build` and `pnpm test:e2e` locally; open the PR from `feat/rec-019-video-catalog-schema` with the PR template, run `/code-review --comment <PR#>`, resolve every thread and merge once CI `check` is green; verify the AGENTS.md "Stack" table and the PR description name the new dependencies
+- [x] 8.1 Run `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm build` and `pnpm test:e2e` locally; open the PR from `feat/rec-019-video-catalog-schema` with the PR template, run `/code-review --comment <PR#>`, resolve every thread and merge once CI `check` is green; verify the AGENTS.md "Stack" table and the PR description name the new dependencies
 
 ## 9. Neon setup (human; PR 2 waits for it)
 
-- [ ] 9.1 The human creates the Neon project on Postgres 17 (a region near Vercel's), following `docs/development.md`; verify they confirm in chat and give no secret
-- [ ] 9.2 The human creates `app_readonly` with SQL in Neon's SQL editor, not from the Console's roles page; verify they confirm the role is not a member of `neon_superuser` (Neon docs, checked when done)
-- [ ] 9.3 The human sets `DATABASE_URL` (pooled, `app_readonly`) in Vercel for Production and Preview and `DATABASE_URL_DIRECT` (direct, owner) in GitHub Actions secrets; verify `gh secret list` shows `DATABASE_URL_DIRECT` and the human confirms the Vercel variable (values are never shown in chat)
+- [x] 9.1 The human creates the Neon project on Postgres 17 (a region near Vercel's), following `docs/development.md`; verify they confirm in chat and give no secret
+- [x] 9.2 The human creates `app_readonly` with SQL in Neon's SQL editor, not from the Console's roles page; verify they confirm the role is not a member of `neon_superuser` (Neon docs, checked when done)
+- [x] 9.3 The human sets `DATABASE_URL` (pooled, `app_readonly`) in Vercel for Production and Preview and `DATABASE_URL_DIRECT` (direct, owner) in GitHub Actions secrets; verify `gh secret list` shows `DATABASE_URL_DIRECT` and the human confirms the Vercel variable (values are never shown in chat)
 
 ## 10. Migration workflow and C4 (PR 2)
 
-- [ ] 10.1 From an up-to-date `main`, create `feat/rec-019-migrate-production` and add `.github/workflows/migrate.yml` (design Decision 9: push to `main` with the migrations `paths` filter, `workflow_dispatch`, concurrency group `migrate-production` without cancelling, `contents: read`, three attempts with a pause); verify the YAML parses and the workflow appears in `gh workflow list` after the PR is opened
-- [ ] 10.2 Update `docs/architecture/c4/02-containers.md` (the migration workflow container writing as the owner, the app-to-database relation as `app_readonly`, a Paths bullet for the CI test database, ADR 0007 in Related ADRs) and set `docs/architecture/data-model.md` and `docs/architecture/README.md` to `Status: Current`; verify the Mermaid block still renders and the `doc-checker` agent reports no problem
-- [ ] 10.3 Update `docs/checklist.md` Entrega 2 items 12 (Neon, secrets and the migration workflow done) and 15 (database tests); verify the statuses match what exists
+- [x] 10.1 From an up-to-date `main`, create `feat/rec-019-migrate-production` and add `.github/workflows/migrate.yml` (design Decision 9: push to `main` with the migrations `paths` filter, `workflow_dispatch`, concurrency group `migrate-production` without cancelling, `contents: read`, three attempts with a pause); verify the YAML parses, and that the retry script succeeds against a migrated database and, with nothing listening, tries three times and exits 1 (run locally); that it appears in `gh workflow list` is checked in 11.1, because a new workflow only appears once it is on `main`
+- [x] 10.2 Update `docs/architecture/c4/02-containers.md` (the migration workflow container writing as the owner, the app-to-database relation as `app_readonly`, Paths bullets for the migration path, the roles and the CI test database, ADR 0007 in Related ADRs), and add "Production migrations" to `docs/development.md` and one sentence to README §2.4; verify the Mermaid block still renders and the `doc-checker` agent reports no problem. (`Status: Current` on the data model waits for 12.2: it describes production, which only has the schema after 11.1.)
+- [x] 10.3 Tick the finished tasks (8.1, 9.1 to 9.3: the secret is confirmed with `gh secret list`, the rest by the human) in this file; verify `openspec instructions apply` shows the new count
 
 ## 11. Production checks (manual, after PR 2 merges)
 
-- [ ] 11.1 Manual check: the first run of the migration workflow (triggered by the merge, or `workflow_dispatch`) is green and applies all four migrations to the production database; verify the run's log and that the `video` and `recipe` tables exist in Neon's SQL editor. Reason it is manual: it needs the production database
+- [ ] 11.1 Manual check: the first run of the migration workflow (started with `gh workflow run migrate.yml` from `main`, after confirming that `gh workflow list` shows it) is green and applies all four migrations to the production database; verify the run's log and that the `video` and `recipe` tables exist in Neon's SQL editor. Reason it is manual: it needs the production database
 - [ ] 11.2 Manual check: connected as `app_readonly` to production, a `SELECT` on `video` succeeds and an `INSERT` is rejected; verify and write the result in the PR. Reason it is manual: only the human holds the production credential, and the test database cannot prove Neon's role model
 
 ## 12. Ship PR 2 and close out
 
 - [ ] 12.1 Open the PR from `feat/rec-019-migrate-production` with the PR template, resolve review threads and merge once `check` is green; verify the migration workflow's first run starts on the merge
-- [ ] 12.2 Set REC-019 to `**Status:** done` with the Edit tool once 11.1 and 11.2 pass and the Definition of Done is met; verify the hook accepts the edit and the validation log row stays `validated`
+- [ ] 12.2 After 11.1 and 11.2 pass, in one close-out PR: set `docs/architecture/data-model.md` and `docs/architecture/README.md` to `Status: Current`, update `docs/checklist.md` Entrega 2 items 7, 12, 13 and 15 to what now exists (item 13 still calls REC-019 `needs-human-validation`), add REC-019 to the README's list of validated stories, and set REC-019 to `**Status:** done` with the Edit tool once the Definition of Done is met; verify the hook accepts the edit, the validation log row stays `validated`, and the `doc-checker` agent reports no problem
 
 ## Workflow follow-up
 
-- Archive this change after PR 2 merges (sync `specs/video-catalog` into `openspec/specs/video-catalog/`).
+- Archive this change after the close-out in 12.2 (sync `specs/video-catalog` into `openspec/specs/video-catalog/`).
 - REC-002 is then unblocked: remove its `blocked-by:REC-019` flag when its validation resumes, and revisit its estimate for the curated-list loader.

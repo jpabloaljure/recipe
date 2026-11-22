@@ -132,8 +132,10 @@ smoke test runs against production. Flow:
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The database is Postgres on Neon. The app reads it as a read-only role; schema
-changes are migrations in the repo, reviewed in a pull request
-([ADR 0007](docs/adr/0007-database-connections-roles-and-migrations.md)).
+changes are migrations in the repo, reviewed in a pull request and applied to
+production by a workflow after the merge
+([ADR 0007](docs/adr/0007-database-connections-roles-and-migrations.md),
+[docs/development.md](docs/development.md#production-migrations)).
 
 ### 2.5. Security
 

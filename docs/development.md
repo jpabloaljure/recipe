@@ -181,3 +181,29 @@ connection string or password into a chat, an issue or a commit.**
 
 A preview whose code needs a migration that is not merged yet can fail; test
 schema changes locally first.
+
+## Production migrations
+
+`.github/workflows/migrate.yml` applies the migrations to the production
+database after a merge to `main`.
+
+- **When it runs:** on a push to `main` that changes `src/lib/db/migrations/`
+  (so Neon is not woken for nothing), or by hand from `main`:
+
+  ```bash
+  gh workflow run migrate.yml        # then: gh run watch
+  ```
+
+  Started from any other branch, the job is skipped, so an unmerged migration
+  can never reach production.
+- **How:** as the owner role, through `DATABASE_URL_DIRECT` (a GitHub Actions
+  secret), one run at a time (a later run waits). The first connection after the
+  database has been idle can meet Neon's cold start, so it tries up to three
+  times, ten seconds apart.
+- **Only new migrations run.** Drizzle records the ones already applied in its
+  own `drizzle` schema, so a run with nothing new does nothing.
+- **If a run fails:** it is a red run. There is no automatic rollback: read the
+  log, and fix it with a **new** migration in a new pull request. Never edit a
+  migration that is merged.
+- **Additive only:** Vercel deploys and the migration finish in either order, so
+  a migration only adds (see "Reviewing a migration" above).

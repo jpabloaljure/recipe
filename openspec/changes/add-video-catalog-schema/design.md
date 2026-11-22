@@ -57,16 +57,20 @@ section of `backlog/E01-browse-feed.md` (52 validator findings, all settled
 - **PR 1 (foundation):** ADR 0007, dependencies, schema, hand-written SQL,
   client, test harness, local and CI Postgres, and the docs that describe
   them. It needs no Neon and can merge first.
-- **PR 2 (production):** `migrate.yml`, the two manual checks, C4 level 2 and
-  `Status: Current` on the data model. It starts after the human's Neon setup.
-- The change is archived and REC-019 set to `done` after PR 2.
+- **PR 2 (production):** `migrate.yml`, C4 level 2 and the docs for the
+  workflow. It starts after the human's Neon setup.
+- **Close-out** (after PR 2 merges and the two manual checks pass): `Status:
+  Current` on the data model and `docs/architecture/README.md`, the checklist,
+  the README's list of validated stories, REC-019 set to `done`, and the
+  archive.
 - **Why:** PR 1 is the large review (three SQL migrations, about 25 database
   tests); PR 2 waits on a human task and ends in manual checks that keep a PR
   open for days. **Alternative:** one PR. Rejected for both reasons.
-- **Why C4 and `Current` are in PR 2:** the diagram shows the migration
-  workflow, which only exists in PR 2, and the data model document describes
-  the production database, so it becomes `Current` once the schema runs
-  there.
+- **Why C4 is in PR 2:** the diagram shows the migration workflow, which only
+  exists in PR 2. **Why `Current` waits for the close-out:** the data model
+  document describes the production database, and a new workflow cannot be
+  started from an unmerged branch, so the schema only reaches production after
+  PR 2 is merged and its first run (task 11.1) has passed.
 
 ### 2. Spec scenarios are proved by Vitest database tests, not E2E
 
