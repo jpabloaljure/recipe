@@ -1768,3 +1768,134 @@ Yes, merge it
 - **Result:** REC-001 done; `main` green and the production smoke check passing; the feed is live with stub data. Still open: a human look at the feed on the production URL, #41 (Definition of Ready "Sliced" wording), D-9, REC-019 and REC-002 validation.
 - **Models:** Opus 5.5 (main session, prompts 206–236) · Sonnet 5.5 (main session from the `/model` switch, prompts 237–243; the harness reported the switch during prompt 236, so its last part may already have been Sonnet) · Opus 5.5, effort high (`story-validator` re-checks, `code-review`) · Opus 5.5, effort medium (`estimate-story`) · Haiku 5.5, effort low (`doc-checker`: the apply docs, the close-out and this log).
 - **Why:** re-validation, the stub-route design, the apply and the review fixes are decisions and ran on the top model; reading and cross-checking docs is read-only and easy to verify, so it ran on `doc-checker`; the model switch only changed the routine merges and the close-out.
+
+## 244. Ask what is next for review
+
+```
+what is next for review
+```
+
+## 245. Ask which stories are missing validation
+
+```
+what REC is mising to validate
+```
+
+## 246. Run the story check on REC-019
+
+```
+/validate-story REC-019
+```
+
+## 247. Start the validation session for REC-019
+
+```
+/validate-backlog REC-019
+```
+
+## 248. Ask which database engine and where it runs
+
+```
+In simple words what is the databace motor you are sugesting and where will be?
+```
+
+## 249. Ask how CI reaches production
+
+```
+CI send the changes to production? or how that will work?
+```
+
+## 250. Ask how to change the database locally
+
+```
+how localy i change that? i have a local version of the DB?
+```
+
+## 251. Ask whether migration files go in the repo
+
+```
+the migration file goes in the repo?
+```
+
+## 252. Ask what to review in a migration
+
+```
+what to review in them?
+```
+
+## 253. Choose options for the first check
+
+```
+#1 A, #2 A, #4 A, #6 A, #8 A, #13 A
+```
+
+## 254. Choose options for the first re-check
+
+```
+#15 B, the rest A
+```
+
+## 255. Choose options for the second re-check
+
+```
+all A
+```
+
+## 256. Choose options for the third re-check
+
+```
+all A
+```
+
+## 257. Choose options for the fourth re-check
+
+```
+All A
+```
+
+## 258. Choose options for the fifth re-check
+
+```
+All A
+```
+
+## 259. Choose options for the sixth re-check
+
+```
+All A
+```
+
+## 260. Approve the acceptance criteria
+
+```
+AC approved
+```
+
+## 261. Team estimate and validation
+
+```
+8 validated
+```
+
+## 262. Open the PR and remove the trial section (Sonnet 5.5; button answer)
+
+```
+Yes, both
+```
+
+## 263. Merge PR #48 (Sonnet 5.5; button answer)
+
+```
+Yes, merge it
+```
+
+### Summary (prompts 244–263)
+
+- **Goal:** validate REC-019 (database schema and migration), the first of the two stories blocking the database and API work for Entrega 2, and run the one-time Sonnet trial for `story-validator`.
+- **Changes (PR #48):**
+  - `backlog/E01-browse-feed.md`: REC-019 rewritten over seven validator rounds (52 findings): 21 acceptance criteria, `size:L`, AI and team estimate 8, flag removed. Decisions: Drizzle with the `pg` driver; a Postgres trigger that always sets the feed-entry time (`timestamptz(3)`); constraints; a read-only `app_readonly` user (Neon's owner role is the write user); a Postgres test database in CI and locally (`pnpm test:db`); one Neon production database, migrations run on push to `main`; `DATABASE_URL` (pooled) and `DATABASE_URL_DIRECT`.
+  - REC-002 takes the curated-list loader (its estimate is to be revisited) and the database constraint replaces "excluded and logged"; REC-008 owns recipe presence; REC-005, REC-008, REC-010 and REC-014 are `blocked-by:REC-019`.
+  - `docs/checklist.md` row 12, `backlog/validation-log.md`, `docs/ai-workflow.md` (trial result), and the trial section removed from `.agents/skills/validate-backlog/SKILL.md`.
+- **Result:** REC-019 validated (4 of 21 stories). The Sonnet trial failed: Sonnet 5.5 found 15 of the 18 Opus findings that changed the story, so `story-validator` stays on Opus 5.5. PR #48 merged with CI green after resolving two conflicts with `main`. REC-002 is the next validation.
+- **Models:** Opus 5.5 (main session, prompts 244–261) · Opus 5.5, effort high (`story-validator`, all seven rounds) · Sonnet 5.5 (`story-validator`, first check only, for the trial) · Sonnet 5.5 (main session from prompt 262: commit, PR, conflict resolution, merge) · Haiku 5.5, effort low (`doc-checker` on this log).
+- **Why:** findings, options and the estimate are decisions, so they stayed on Opus; the trial tested whether a cheaper validator holds, and it didn't; the last steps were mechanical, so the session ran on Sonnet.
