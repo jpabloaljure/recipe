@@ -2193,3 +2193,76 @@ Merge
 - **Result:** REC-002 is validated (8 points, no flag). Next is its OpenSpec change (recommended path); REC-001's Technical context line about the route shuffle, the `openapi.yaml` cursor wording and the C4 level 3 lines are fixed in that change. The README "Validated stories" list is stale (no REC-019 or REC-002).
 - **Models:** Sonnet 5.5 (main session, all prompts, including the AI estimate) · Sonnet 5.5, effort medium (`story-validator`, re-checks 10–12) · Haiku 5.5, effort low (`doc-checker` on this log).
 - **Why:** after the all-Sonnet cap (prompt 273) every step runs on Sonnet; the validator and the read-only doc check keep their frontmatter models.
+
+## 309. Collect a curated list of real Shorts (research task, built-in browser)
+
+```
+Task: collect candidate YouTube Shorts for a curated seed list, and write them to a scratch JSON file. Research only. Do not change the repository.
+
+Context
+I'm building a mobile web app with a vertical feed of YouTube cooking Shorts. I need a hand-checked list of about 25 real Shorts that pass the checks below, plus 2 or 3 that fail on purpose, to be loaded into the database later. The list is read by a loader, so the format must be exact.
+
+Checks a video must pass (to be stored as a normal video)
+- It is a YouTube Short, duration at most [60 seconds | 180 seconds: DELETE ONE].
+- It is embeddable: https://www.youtube-nocookie.com/embed/<id> loads and plays in the browser.
+- The spoken or written language is English.
+- It shows an easy cooking recipe (few ingredients, simple steps).
+- [Preferences or channels to avoid/include: FILL IN OR DELETE.]
+
+Deliberate failures (2 or 3 entries, to prove the checks work)
+- One Short-looking cooking video that is longer than the limit.
+- One that is not embeddable, if you find one.
+Mark them clearly in your report; they stay in the file with their real facts.
+
+How to work
+- Use the built-in browser. Open each video's watch page and read the facts from the page. Never take an ID from memory or from a search snippet alone: every ID must come from a page you opened.
+- Embeddable: load the embed URL and confirm it plays.
+- Language: judge it from the title, description and audio, and say when you are unsure.
+- channel_id: the channel's UC... ID, from the channel page or the page source.
+- Do not sign in, post, like, subscribe or download anything.
+- Do not use any API key or YouTube Data API.
+- No more than 2 videos per channel, so the feed has variety.
+
+Output
+Write a JSON array to the scratchpad directory (not inside the project) as curated-shorts.json. One object per video, exactly these keys:
+{
+  "youtube_id": "11 characters",
+  "title": "as shown on YouTube",
+  "channel_name": "display name",
+  "channel_id": "UC...",
+  "duration_seconds": 42,
+  "embeddable": true,
+  "language": "en"
+}
+Use "en" for English. Use real values for the deliberate failures too (for example duration_seconds: 140).
+
+Then report: the file's full path, a table (youtube_id, title, channel, duration, passes or fails and why), and a list of every entry where you were unsure about language or embeddability.
+
+Do not edit any file in the repository, do not commit, and do not run the app.
+```
+
+## 310. Ask where the curated list goes
+
+```
+are you dold where to place the curated list?
+```
+
+## 311. Ask for the file location
+
+```
+give me the location where is now
+```
+
+## 312. Ask for the results table as a Markdown file
+
+```
+make me also a .md with the table with results thay you displayed before.
+```
+
+### Summary (prompts 309–312)
+
+- **Goal:** collect about 25 real, embeddable English cooking Shorts, plus 2–3 deliberate failures, as the curated list that REC-002's loader reads (task 4.4 of `add-database-feed`), without touching the repository.
+- **Changes:** none in the repo. Two files in the scratchpad: `curated-shorts.json` (27 entries: 24 pass, 3 fail on purpose) and `curated-shorts-results.md` (the results table and the language and embed doubts).
+- **Result:** every ID, title, channel and duration was read from a watch page; embeds were tested in an iframe on an https page, because opening the embed URL directly gives a referrer error. Four videos were blocked in the embed by a music rights holder though the watch page said embeddable; two are in the file as the not-embeddable failures and one regular 5:36 video is the too-long failure. The loader expects the file at `scripts/db/curated-shorts.json`; copying it there is the user's step. The pasted task left the duration limit open; 180 s (PRD ING-2) was used.
+- **Models:** Sonnet 5.5 (main session, all prompts); no agents.
+- **Why:** browsing, reading pages and writing a JSON file are mechanical work, so the capped Sonnet model fits.
