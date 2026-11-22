@@ -2266,3 +2266,155 @@ make me also a .md with the table with results thay you displayed before.
 - **Result:** every ID, title, channel and duration was read from a watch page; embeds were tested in an iframe on an https page, because opening the embed URL directly gives a referrer error. Four videos were blocked in the embed by a music rights holder though the watch page said embeddable; two are in the file as the not-embeddable failures and one regular 5:36 video is the too-long failure. The loader expects the file at `scripts/db/curated-shorts.json`; copying it there is the user's step. The pasted task left the duration limit open; 180 s (PRD ING-2) was used.
 - **Models:** Sonnet 5.5 (main session, all prompts); no agents.
 - **Why:** browsing, reading pages and writing a JSON file are mechanical work, so the capped Sonnet model fits.
+
+## 313. Explore REC-002 (OpenSpec explore)
+
+```
+/openspec-explore REC-002
+```
+
+## 314. Ask for a suggestion on each open point
+
+```
+what are your sugestions for each point.
+```
+
+## 315. Propose the change
+
+```
+openspec-propose
+```
+
+## 316. Ask for an example of the curated JSON file
+
+```
+show me a short example of the json file
+```
+
+## 317. Ask whether the JSON needs the recipe
+
+```
+thi json does not need to have the recipe?
+```
+
+## 318. Ask how many videos the JSON needs
+
+```
+how many videos we need in that json?
+```
+
+## 319. Ask for help finding the videos and creating the file
+
+```
+Can you helpme to find those videos in youtube by and create this file?
+```
+
+## 320. Ask for a prompt to send to another session
+
+```
+give me here a text prompt so sendit to other session.
+```
+
+## 321. Apply the change (OpenSpec apply)
+
+```
+/openspec-apply-change
+```
+
+## 322. Hand over the curated list and its results table
+
+```
+@"/private/tmp/claude-501/-Users-juanpabloaljure-Development-workspace-AI-recipe/964e0df1-9f3b-4f64-93bd-b0557d195b82/scratchpad/curated-shorts.json" @"/private/tmp/claude-501/-Users-juanpabloaljure-Development-workspace-AI-recipe/964e0df1-9f3b-4f64-93bd-b0557d195b82/scratchpad/curated-shorts-results.md"
+This is the curated list. And the result expectation table to used to validate.
+```
+
+## 323. Commit and open the PR
+
+```
+go ahead
+```
+
+## 324. Turn on Auto-fix (button answer)
+
+```
+Yes, Auto-fix
+```
+
+## 325. Run the AI review
+
+```
+run
+```
+
+## 326. Fix all review findings (button answer)
+
+```
+Fix all
+```
+
+## 327. Merge PR #59
+
+```
+Yes
+```
+
+## 328. CI is green
+
+```
+green
+```
+
+## 329. Report the black screen in production
+
+```
+Deployed I see now a black screen
+```
+
+## 330. Run the loader on production
+
+```
+run now
+```
+
+## 331. Report the iPhone landscape layout bug (two screenshots attached)
+
+```
+On a real phone on a horizontal view browser the channel header stays at the side while the video runs on the left side moved. Chrome on the Iphone. First image Expected and secon is current view
+```
+
+## 332. Reproduce the bug in the simulator
+
+```
+Yes
+```
+
+## 333. Record the bug in the draft backlog, then archive and close
+
+```
+Lets just create a bug for this in the traft backlog with the information you discover now and save the images some how that you can reach them as evidence when we handle tihs bug. then Archive and close.
+```
+
+## 334. Ask which prompts to register
+
+```
+Ask what prompt register from
+```
+
+## 335. Register from the first prompt of the session (question dialog answer)
+
+```
+/openspec-explore REC-002
+```
+
+### Summary (prompts 313–335)
+
+- **Goal:** take REC-002 from exploration to production: explore and propose the OpenSpec change `add-database-feed`, build it, review it, merge it, load a curated list of real Shorts into production, record the iPhone landscape bug found on a real phone, and close out the story.
+- **Changes:**
+  - **OpenSpec:** change `add-database-feed` (proposal, `feed` and `video-catalog` delta specs, design, tasks), synced into `openspec/specs/` and archived to `openspec/changes/archive/2026-11-22-add-database-feed/`.
+  - **Code:** the feed route reads the database (`src/lib/feed/`: cursor, query, request handler, shuffle, recipe check), the client shuffle in `Feed.tsx`, `src/lib/catalog/` (seed rows, curated-list rules, writer), `scripts/db/` (`seed.mts`, `load-curated.mts`, `curated-shorts.json`), the fixture files removed.
+  - **CI and workflows:** a step that migrates and seeds the E2E database in `ci.yml`; the manual `load-curated.yml`; the `@smoke` test moved to `e2e/feed/`.
+  - **Docs and backlog:** `openapi.yaml`, the two C4 files, `docs/development.md`, `README.md`, `docs/checklist.md`; REC-002 set to `done`; draft backlog row D-11 with its screenshots in `backlog/evidence/D-11-ios-landscape-header/`.
+  - **PRs:** #59 (the feature, merged) and #61 (the close-out).
+- **Result:** production serves 24 curated Shorts from the database (10 per page, a next cursor, CDN `HIT`) and the re-run production smoke is green. The AI review found seven issues: five fixed, two answered (the production smoke order, a partial index). The manual checks (cache `HIT`, the loaded feed, the real-device wrap) were done by the maintainer and were successful; the embeds were not rechecked before loading, only by hand afterwards. The iPhone landscape bug is recorded as D-11 with its cause still unconfirmed (Xcode is not installed for the simulator). PR #61 was waiting for CI at the time of this entry.
+- **Models:** Sonnet 5.5 (main session, all prompts) · Haiku 5.5, effort low (`doc-checker`, four runs: the OpenAPI file, the changed docs, the close-out files and this log) · a separate Sonnet 5.5 session produced the curated list (prompts 309–312).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent.
