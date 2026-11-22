@@ -5,8 +5,7 @@ cooking videos (Shorts), each with an easy written recipe.
 
 > Status: **MVP in progress.** The vertical swipe feed is live with stub data
 > (7 fixture videos from `GET /api/feed`, title only). The database schema is
-> built and tested locally and in CI, but is not in production yet; the real
-> feed data and recipes are not built yet. Delivery progress:
+> in production (still empty); the real feed data and recipes are not built yet. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
 ## Index
@@ -181,6 +180,10 @@ Validated stories (all stories: [backlog/](backlog/README.md)):
 - [**REC-001** · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe):
   as a home cook, I want to swipe through short recipe videos one at a time,
   so that I can quickly find something to cook today.
+- [**REC-019** · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog):
+  as a maintainer, I want one versioned database schema for videos, their
+  status and their recipe, so that the feed and the ingestion job read and write
+  the same data.
 - [**REC-020** · Data model document](backlog/E01-browse-feed.md#rec-020--data-model-document-no-implementation):
   as a maintainer, I want the data model written down before the schema is
   built, so that the feed, the recipe panel and the ingestion job agree.
@@ -197,7 +200,7 @@ Tickets are backlog stories with a `layer:` label (no separate tracker; see
 
 | Layer | Ticket |
 |---|---|
-| Database | [REC-020 · Data model document](backlog/E01-browse-feed.md#rec-020--data-model-document-no-implementation) |
+| Database | [REC-019 · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog) |
 | Backend | [REC-021 · API specification document](backlog/E01-browse-feed.md#rec-021--api-specification-document-no-implementation) |
 | Full stack (feed UI and a stub feed route) | [REC-001 · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe) |
 
