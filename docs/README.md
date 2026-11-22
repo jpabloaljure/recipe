@@ -12,6 +12,7 @@ Every project document, by what you want to know.
 | See the data model | [Data model](architecture/data-model.md) |
 | See the API endpoints and schemas | [OpenAPI spec](api/openapi.yaml) |
 | Know why a technology was chosen | [ADRs](adr/README.md) |
+| See the security practices and known gaps | [Security](security.md) |
 | Find my way around the folders | [Repository layout](architecture/repository-layout.md) |
 | **Working on the code** | |
 | Install, run and test locally | [Development](development.md) |
