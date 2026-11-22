@@ -93,7 +93,7 @@ drops the copies afterwards. Every database it creates is named
 it never touches `easy_recipes`, your other databases or production, and two
 runs at the same time do not disturb each other. Each test is named after a
 scenario of
-[`video-catalog`](../openspec/changes/add-video-catalog-schema/specs/video-catalog/spec.md).
+[`video-catalog`](../openspec/specs/video-catalog/spec.md).
 
 If the database is not running you will see `Cannot reach the test database.
 Start Postgres with pnpm db:up`. Vitest may print `No test files found` just
