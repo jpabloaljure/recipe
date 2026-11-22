@@ -42,4 +42,13 @@ describe("feed cursor", () => {
     expect(decodeCursor(b64({ t, i: 0 }))).toEqual({ ok: false });
     expect(decodeCursor(b64({ t, i: -3 }))).toEqual({ ok: false });
   });
+
+  test("a value the database column cannot hold is invalid, so it never reaches the query", () => {
+    const t = "2026-11-20T10:15:30.123Z";
+    expect(decodeCursor(b64({ t, i: 2_147_483_647 })).ok).toBe(true);
+    expect(decodeCursor(b64({ t, i: 2_147_483_648 }))).toEqual({ ok: false });
+    expect(decodeCursor(b64({ t, i: 99_999_999_999 }))).toEqual({ ok: false });
+    expect(decodeCursor(b64({ t: "+275760-09-13T00:00:00.000Z", i: 1 }))).toEqual({ ok: false });
+    expect(decodeCursor(b64({ t: "1969-12-31T23:59:59.999Z", i: 1 }))).toEqual({ ok: false });
+  });
 });

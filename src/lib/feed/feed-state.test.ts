@@ -12,24 +12,20 @@ import {
 } from "./feed-state";
 import type { FeedItem, FeedPage } from "./types";
 
-/** A random source that keeps the order, so these tests can list videos in arrival order. */
-const keepOrder = () => 0.999999;
-const append = (state: FeedState, page: FeedPage) => appendPage(state, page, keepOrder);
-
 const item = (id: string): FeedItem => ({ youtubeId: id, title: id, channelName: null, recipe: null });
 const pageOf = (ids: string[], nextCursor: string | null): FeedPage => ({ items: ids.map(item), nextCursor });
 const ids = (state: FeedState) => buildSlides(state).map((slide) => slide.item.youtubeId);
 
 /** A catalog loaded over three pages: a b c | d e f | g. */
 function threePages(): FeedState {
-  let state = append(initialFeedState, pageOf(["a", "b", "c"], "c1"));
-  state = append(state, pageOf(["d", "e", "f"], "c2"));
-  return append(state, pageOf(["g"], null));
+  let state = appendPage(initialFeedState, pageOf(["a", "b", "c"], "c1"));
+  state = appendPage(state, pageOf(["d", "e", "f"], "c2"));
+  return appendPage(state, pageOf(["g"], null));
 }
 
 describe("wrap-around", () => {
   it("puts the first video of the visit order after the last catalog video", () => {
-    const state = ensureCycles(append(initialFeedState, pageOf(["a", "b", "c"], null)), 2);
+    const state = ensureCycles(appendPage(initialFeedState, pageOf(["a", "b", "c"], null)), 2);
     expect(ids(state).slice(2, 4)).toEqual(["c", "a"]);
   });
 
@@ -45,7 +41,7 @@ describe("wrap-around", () => {
   });
 
   it("wraps a one-video catalog to the same video", () => {
-    const state = ensureCycles(append(initialFeedState, pageOf(["a"], null)), 0);
+    const state = ensureCycles(appendPage(initialFeedState, pageOf(["a"], null)), 0);
     expect(ids(state).slice(0, 2)).toEqual(["a", "a"]);
   });
 
@@ -55,7 +51,7 @@ describe("wrap-around", () => {
   });
 
   it("appends nothing before the catalog ends", () => {
-    const state = append(initialFeedState, pageOf(["a", "b", "c"], "c1"));
+    const state = appendPage(initialFeedState, pageOf(["a", "b", "c"], "c1"));
     expect(ensureCycles(state, 2)).toBe(state);
   });
 
@@ -72,29 +68,29 @@ describe("wrap-around", () => {
 
 describe("appendPage", () => {
   it("skips a video already in the visit order", () => {
-    let state = append(initialFeedState, pageOf(["a", "b"], "c1"));
-    state = append(state, pageOf(["b", "c", "c"], null));
+    let state = appendPage(initialFeedState, pageOf(["a", "b"], "c1"));
+    state = appendPage(state, pageOf(["b", "c", "c"], null));
     expect(state.visit.map((i) => i.youtubeId)).toEqual(["a", "b", "c"]);
     expect(state.catalogEnded).toBe(true);
   });
 
-  it("shuffles the videos of a received page, holding exactly the same videos", () => {
-    const state = appendPage(initialFeedState, pageOf(["a", "b", "c", "d", "e"], null), () => 0);
-    expect(state.visit.map((i) => i.youtubeId)).toEqual(["b", "c", "d", "e", "a"]);
-  });
-
-  it("keeps the pages already in the visit order when a later page loads", () => {
-    const first = appendPage(initialFeedState, pageOf(["a", "b", "c"], "c1"), () => 0);
-    const second = appendPage(first, pageOf(["d", "e", "f"], "c2"), () => 0);
-    const third = appendPage(second, pageOf(["g", "h"], null), () => 0);
+  it("adds a page's videos in the order given and keeps the pages already in the visit order", () => {
+    const first = appendPage(initialFeedState, pageOf(["c", "a", "b"], "c1"));
+    const second = appendPage(first, pageOf(["f", "d", "e"], "c2"));
+    const third = appendPage(second, pageOf(["h", "g"], null));
+    expect(third.visit.map((i) => i.youtubeId)).toEqual(["c", "a", "b", "f", "d", "e", "h", "g"]);
     expect(third.visit.slice(0, 3)).toEqual(first.visit);
     expect(third.visit.slice(0, 6)).toEqual(second.visit);
-    expect(third.visit.map((i) => i.youtubeId).sort()).toEqual(["a", "b", "c", "d", "e", "f", "g", "h"]);
+  });
+
+  it("gives the same result when run twice (no randomness inside)", () => {
+    const page = pageOf(["a", "b", "c"], "c1");
+    expect(appendPage(initialFeedState, page)).toEqual(appendPage(initialFeedState, page));
   });
 });
 
 describe("shouldRequestNextPage", () => {
-  const firstPage = append(initialFeedState, pageOf(["a", "b", "c", "d", "e"], "c1"));
+  const firstPage = appendPage(initialFeedState, pageOf(["a", "b", "c", "d", "e"], "c1"));
 
   it("requests when the active slide is within two slides of the last loaded one", () => {
     expect(shouldRequestNextPage(firstPage, 2)).toBe(true);

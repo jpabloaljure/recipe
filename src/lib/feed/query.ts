@@ -6,7 +6,8 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Db } from "../db/client";
 import { recipe, video } from "../db/schema";
 import { encodeCursor, type FeedPosition } from "./cursor";
-import type { FeedItem, FeedPage, Ingredient, Recipe } from "./types";
+import { toRecipe } from "./recipe";
+import type { FeedItem, FeedPage, Recipe } from "./types";
 
 export const PAGE_SIZE = 10;
 
@@ -42,20 +43,16 @@ export function createFeedQuery(db: Db): FeedQuery {
       .limit(PAGE_SIZE + 1);
 
     const pageRows = rows.slice(0, PAGE_SIZE);
-    const items: FeedItem[] = pageRows.map((row) => ({
-      youtubeId: row.youtubeId,
-      title: row.title,
-      channelName: row.channelName,
-      recipe:
-        row.hasRecipe === null || row.source === null
-          ? null
-          : ({
-              servings: row.servings,
-              ingredients: row.ingredients as Ingredient[],
-              steps: row.steps as string[],
-              source: row.source,
-            } satisfies Recipe),
-    }));
+    const items: FeedItem[] = pageRows.map((row) => {
+      // No recipe row (a left join gives nulls): a title-only video.
+      let found: Recipe | null = null;
+      if (row.hasRecipe !== null && row.source !== null) {
+        found = toRecipe({ servings: row.servings, ingredients: row.ingredients, steps: row.steps, source: row.source });
+        // A row that exists but is malformed is served title-only, and logged so it can be fixed.
+        if (found === null) console.error(`Video ${row.youtubeId} has a malformed recipe; served without it.`);
+      }
+      return { youtubeId: row.youtubeId, title: row.title, channelName: row.channelName, recipe: found };
+    });
 
     let nextCursor: string | null = null;
     if (rows.length > PAGE_SIZE) {

@@ -10,13 +10,14 @@
 //   an ID. Videos already in the database are left as they are (ING-3).
 // - Uses DATABASE_URL_DIRECT, the only write credential (ADR 0007).
 import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { Client } from "pg";
 import { parseList, planLoad } from "../../src/lib/catalog/curated.mts";
 import { writePlan } from "../../src/lib/catalog/load.mts";
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
-const listPath = process.argv[2] ?? new URL("./curated-shorts.json", import.meta.url).pathname;
+const listPath = process.argv[2] ?? fileURLToPath(new URL("./curated-shorts.json", import.meta.url));
 
 let text: string;
 try {

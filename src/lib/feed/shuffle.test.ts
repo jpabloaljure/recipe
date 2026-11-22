@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { shufflePage } from "./shuffle";
+import { shuffleFeedPage, shufflePage } from "./shuffle";
 
 /** A repeatable random source (mulberry32). */
 function seeded(seed: number) {
@@ -36,5 +36,19 @@ describe("shufflePage", () => {
   it("handles empty and one-item pages", () => {
     expect(shufflePage([], seeded(1))).toEqual([]);
     expect(shufflePage(["a"], seeded(1))).toEqual(["a"]);
+  });
+});
+
+describe("shuffleFeedPage", () => {
+  const page = {
+    items: ["a", "b", "c", "d", "e"].map((id) => ({ youtubeId: id, title: id, channelName: null, recipe: null })),
+    nextCursor: "next",
+  };
+
+  it("keeps the cursor and holds exactly the same videos", () => {
+    const shuffled = shuffleFeedPage(page, () => 0);
+    expect(shuffled.nextCursor).toBe("next");
+    expect(shuffled.items.map((i) => i.youtubeId)).toEqual(["b", "c", "d", "e", "a"]);
+    expect(page.items.map((i) => i.youtubeId)).toEqual(["a", "b", "c", "d", "e"]);
   });
 });

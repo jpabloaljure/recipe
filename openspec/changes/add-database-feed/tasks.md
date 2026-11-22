@@ -23,7 +23,7 @@ open a pull request (`main` is protected); run `pnpm typecheck`, `pnpm test`,
 
 - [x] 3.1 Add `shufflePage(items, random)` in `src/lib/feed/` and use it in `appendPage` with an optional random source defaulting to `Math.random` (D5); verify `pnpm test` covers: a shuffled page holds exactly the server page's videos, a seeded source gives a known order, pages already in the visit keep their order when a later page loads, and a video already in the visit is still skipped
 - [x] 3.2 Rework `e2e/feed/wrap-to-the-start-after-the-last-video.spec.ts` so its three tests (`feed › Wrap to the start after the last video › Swipe past the last video`, `› Catalog spans several pages`, `› Keep swiping after the wrap`) read the first, second and last video of the order actually shown and do not assume arrival order; verify `pnpm test:e2e` passes on `phone-portrait`, `phone-landscape` and `desktop`, and that the tests still stub `/api/feed` with `page.route`
-- [x] 3.3 Keep `e2e/app/smoke.spec.ts` unstubbed (REC-001 #45): verify it passes in CI against the seeded database (scenario `feed › Real data reaches the deployed feed build › Smoke test against a seeded database`)
+- [x] 3.3 Keep the `@smoke` test unstubbed (REC-001 #45), now `e2e/feed/real-data-reaches-the-deployed-feed-build.spec.ts` (E2E rule 4): verify it passes in CI against the seeded database (scenario `feed › Real data reaches the deployed feed build › Smoke test against a seeded database`)
 - [x] 3.4 Update the REC-001 Technical context line that says REC-002 "puts the shuffle in the route" in `backlog/E01-browse-feed.md`, with the Edit tool; verify the line now says the shuffle is a client function (REC-002 D5)
 
 ## 4. Curated-list loader
@@ -58,4 +58,5 @@ to 2.3 and 3.1; the `video-catalog` loader scenarios by tasks 4.1 and 4.2.
 
 ## Workflow follow-up
 
+- The first production smoke run on the merge commit is expected to fail (production has no videos yet). After the loader workflow has run (M.2), re-run that smoke run (`gh run rerun <run-id>`) and check it is green.
 - After the merge and the deploy, run M.1 to M.3, then archive the change with `openspec-archive-change` and set REC-002 to `Status: done` once the Definition of Done is met.

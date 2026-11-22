@@ -14,6 +14,7 @@ import {
 } from "../../lib/feed/feed-state";
 import { createHttpFeedSource } from "../../lib/feed/http-source";
 import { PageRequests } from "../../lib/feed/page-requests";
+import { shuffleFeedPage } from "../../lib/feed/shuffle";
 import styles from "./Feed.module.css";
 
 /**
@@ -39,7 +40,11 @@ export function Feed() {
       if (!requests.current.begin(cursor)) return;
       source
         .getPage(cursor)
-        .then((page) => setState((current) => appendPage(current, page)))
+        .then((page) => {
+          // Shuffle here, once per arrival, not inside the updater (REC-002, API-2).
+          const shuffled = shuffleFeedPage(page);
+          setState((current) => appendPage(current, shuffled));
+        })
         // A failed load can be tried again by the next trigger (the next
         // settled scroll); showing the failure is REC-018's.
         .catch(() => requests.current.fail(cursor));

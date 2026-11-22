@@ -1,7 +1,7 @@
 // Database tests for the feed query (REC-002). Names follow
 // `feed › <Requirement> › <Scenario>` (change add-database-feed, specs/feed).
 import type { Client } from "pg";
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { type DbClient, createAppDb } from "../db/client";
 import { insertRecipe, insertVideo, youtubeId } from "../db/test/fixtures";
 import { useTestDatabase } from "../db/test/test-database";
@@ -94,6 +94,21 @@ describe("feed › Feed contains ready and title-only videos", () => {
     });
     expect(byId.get(titleOnly)?.recipe).toBeNull();
     expect(byId.get(titleOnly)?.channelName).toBe("A channel");
+  });
+});
+
+describe("feed › Feed contains ready and title-only videos (malformed recipe)", () => {
+  test("a recipe whose items are not the contract's shape is served title-only", async () => {
+    const id = youtubeId();
+    const row = await insertVideo(owner, { youtube_id: id, status: "ready" });
+    await insertRecipe(owner, row, { ingredients: JSON.stringify(["flour"]) });
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const page = await query(null);
+
+    expect(page.items).toEqual([{ youtubeId: id, title: "A video", channelName: "A channel", recipe: null }]);
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining(id));
+    spy.mockRestore();
   });
 });
 

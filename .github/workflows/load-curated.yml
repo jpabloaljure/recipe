@@ -13,6 +13,9 @@ name: Load curated Shorts
 #   (ING-3), so the retry below and a re-run after a failure only add what is
 #   missing. New videos can take up to an hour to show in the feed (the 1 hour
 #   CDN cache, PERF-6).
+# - The first production smoke run after REC-002 merges fails, because the @smoke
+#   test needs a video and production has none yet. Run this workflow, then
+#   re-run that smoke run (`gh run rerun <run-id>`).
 # - One run at a time; a later run waits, it never cancels one in progress.
 on:
   workflow_dispatch:

@@ -82,6 +82,9 @@ docker compose down -v       # stop it and delete the data: start again from emp
   YouTube ID. A missing or invalid file fails before anything is written, and
   a video already stored is never changed. It uses `DATABASE_URL_DIRECT`, so
   locally it writes to the local database.
+- **First deploy of the real feed:** the production smoke run on the merge
+  commit fails until the loader has run, because the `@smoke` test needs a
+  video. Run the loader workflow, then re-run that smoke run.
 - **In production** the loader runs as the manual workflow
   `.github/workflows/load-curated.yml` (Actions tab, "Load curated Shorts", or
   `gh workflow run load-curated.yml`). It runs only from `main` and uses the
