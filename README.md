@@ -5,7 +5,7 @@ cooking videos (Shorts), each with an easy written recipe.
 
 > Status: **MVP in progress.** The vertical swipe feed reads its videos from
 > the database through `GET /api/feed` (newest first, shuffled within each
-> page). Production shows videos once the curated list is loaded; recipes are
+> page). Production serves 24 curated Shorts from the database; recipes are
 > not built yet, so every video is title only. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
