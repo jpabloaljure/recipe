@@ -106,11 +106,12 @@ Before merge, in order:
 3. **AI review.** Run locally in Claude Code:
 
    ```
-   /code-review --comment <PR number>
+   /code-review medium --comment <PR number>
    ```
 
-   See [AI workflow](docs/ai-workflow.md) for how it fits the rest of the
-   flow. It posts its findings as review comments on the PR. Fix or answer each
+   `medium` keeps the review within the model and effort cap
+   ([Model routing](AGENTS.md#model-routing)). See [AI workflow](docs/ai-workflow.md)
+   for how it fits the rest of the flow. It posts its findings as review comments on the PR. Fix or answer each
    one, then resolve the thread. **Required**, except for docs-only PRs
    (only Markdown or other non-code files changed), where it is optional.
 4. **Human review.** Optional for now. CODEOWNERS requests a review from the

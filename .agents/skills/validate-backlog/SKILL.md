@@ -1,7 +1,7 @@
 ---
 name: validate-backlog
 description: Interactive, resumable validation of Easy Recipes backlog stories, one at a time. For each story still flagged needs-human-validation, runs the story-validator agent (validate-story skill), then builds a recommended option and alternatives for each finding, lets the user choose and review and change the story, re-checks it, waits for the user to approve the acceptance criteria, records the AI estimate (Fibonacci points from estimate-story) and then the team-agreed Estimate, and removes the flag only when the user says the story is validated. Use when the user asks to validate the backlog, continue or resume validation, or validate a given epic or story.
-effort: high
+effort: medium
 ---
 
 # validate-backlog

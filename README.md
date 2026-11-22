@@ -4,8 +4,8 @@ A mobile-first web app with a vertical, full-screen feed of short YouTube
 cooking videos (Shorts), each with an easy written recipe.
 
 > Status: **MVP in progress.** The vertical swipe feed is live with stub data
-> (7 fixture videos from `GET /api/feed`, title only); the database, the real
-> feed data and recipes are not built yet. Delivery progress:
+> (7 fixture videos from `GET /api/feed`, title only). The database schema is
+> in production (still empty); the real feed data and recipes are not built yet. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
 ## Index
@@ -66,16 +66,21 @@ Full requirements, scope and performance targets: [PRD](docs/PRD.md).
 
 ### 1.4. Installation
 
-Prerequisites: Node 26+ and pnpm.
+Prerequisites: Node 26+, pnpm, and Docker for the local database.
 
 ```bash
-pnpm install      # install dependencies
-pnpm dev          # dev server at http://localhost:3000
-pnpm test         # unit tests
-pnpm test:e2e     # end-to-end tests
+pnpm install                 # install dependencies
+cp .env.example .env.local   # local settings (git-ignored)
+pnpm db:up                   # local Postgres 17 in Docker
+pnpm db:setup                # the read-only role the app uses
+pnpm db:migrate              # create the tables
+pnpm dev                     # dev server at http://localhost:3000
+pnpm test                    # unit tests (no database needed)
+pnpm test:db                 # database tests
+pnpm test:e2e                # end-to-end tests
 ```
 
-Setup details, E2E tests and testing a deployed site:
+Setup details, the database, E2E tests and testing a deployed site:
 [docs/development.md](docs/development.md).
 
 ---
@@ -125,6 +130,12 @@ every change goes through a pull request with CI green. After each deploy, a
 smoke test runs against production. Flow:
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
+The database is Postgres on Neon. The app reads it as a read-only role; schema
+changes are migrations in the repo, reviewed in a pull request and applied to
+production by a workflow after the merge
+([ADR 0007](docs/adr/0007-database-connections-roles-and-migrations.md),
+[docs/development.md](docs/development.md#production-migrations)).
+
 ### 2.5. Security
 
 > **TODO:** list and describe the main security practices implemented in the
@@ -169,6 +180,10 @@ Validated stories (all stories: [backlog/](backlog/README.md)):
 - [**REC-001** · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe):
   as a home cook, I want to swipe through short recipe videos one at a time,
   so that I can quickly find something to cook today.
+- [**REC-019** · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog):
+  as a maintainer, I want one versioned database schema for videos, their
+  status and their recipe, so that the feed and the ingestion job read and write
+  the same data.
 - [**REC-020** · Data model document](backlog/E01-browse-feed.md#rec-020--data-model-document-no-implementation):
   as a maintainer, I want the data model written down before the schema is
   built, so that the feed, the recipe panel and the ingestion job agree.
@@ -185,7 +200,7 @@ Tickets are backlog stories with a `layer:` label (no separate tracker; see
 
 | Layer | Ticket |
 |---|---|
-| Database | [REC-020 · Data model document](backlog/E01-browse-feed.md#rec-020--data-model-document-no-implementation) |
+| Database | [REC-019 · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog) |
 | Backend | [REC-021 · API specification document](backlog/E01-browse-feed.md#rec-021--api-specification-document-no-implementation) |
 | Full stack (feed UI and a stub feed route) | [REC-001 · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe) |
 

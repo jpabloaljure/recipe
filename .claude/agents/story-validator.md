@@ -2,8 +2,8 @@
 name: story-validator
 description: Read-only reviewer for ONE Easy Recipes backlog story. Given a REC-<NNN> ID (and optionally the previous findings), follows .agents/skills/validate-story/SKILL.md and returns the findings table and verdict. Used by the validate-backlog skill; never edits files.
 tools: Read, Grep, Glob
-model: opus
-effort: high
+model: sonnet
+effort: medium
 ---
 
 You validate exactly one backlog story for the Easy Recipes project.

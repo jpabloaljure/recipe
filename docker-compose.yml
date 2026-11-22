@@ -1,0 +1,22 @@
+# Local Postgres for development and database tests (ADR 0007). Host port 54329
+# (not 5432), so it does not clash with other Postgres containers on a laptop.
+# Same major version as Neon and CI. Start it with `pnpm db:up`.
+services:
+  db:
+    image: postgres:17
+    ports:
+      # Loopback only: the superuser password is the well-known `postgres`.
+      - "127.0.0.1:54329:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: easy_recipes
+    volumes:
+      - easy-recipes-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d easy_recipes"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  easy-recipes-db:

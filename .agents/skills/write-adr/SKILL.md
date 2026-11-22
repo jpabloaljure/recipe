@@ -1,7 +1,7 @@
 ---
 name: write-adr
 description: Creates or supersedes an Architecture Decision Record in docs/adr/ for Easy Recipes, updates the ADR index, and updates the affected C4 diagrams in docs/architecture/c4/. Use when the user (or an OpenSpec design/task) makes an architecture decision — choosing or replacing a framework, service, database, hosting, external API, or a major structural pattern — or asks to record, write, supersede or list ADRs, or to update the C4 diagrams.
-effort: high
+effort: medium
 ---
 
 # write-adr
