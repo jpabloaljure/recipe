@@ -138,10 +138,37 @@ production by a workflow after the merge
 ([ADR 0007](docs/adr/0007-database-connections-roles-and-migrations.md),
 [docs/development.md](docs/development.md#production-migrations)).
 
+Secrets are never committed. `DATABASE_URL` (the pooled connection as the
+read-only role) is set in Vercel for Production and Preview.
+`DATABASE_URL_DIRECT` (the owner role, direct connection) is only in GitHub
+Actions secrets: the migration workflow and the curated loader use it, the web
+app never sees it. `.env.example` holds only local development values; how to
+set the real ones is in
+[docs/development.md](docs/development.md#create-the-neon-project-production).
+
 ### 2.5. Security
 
-> **TODO:** list and describe the main security practices implemented in the
-> project, with examples where relevant.
+The app is a public, read-only feed with no accounts and no user data on the
+server, so the practices target a leaked write credential, an unreviewed change
+reaching production, and bad input on the one public endpoint. The main ones:
+
+- **Read-only app.** It connects as `app_readonly` (`SELECT` only); the write
+  credential lives only in GitHub Actions secrets.
+- **Rules in the database.** Triggers and constraints hold for every writer,
+  including a console edit.
+- **Strict input checks.** The feed `cursor` is validated and bounded; a bad
+  one is a `400` and never reaches Postgres. Errors return a generic message.
+- **Parameterized queries** (Drizzle and `pg`); no `eval` or raw HTML.
+- **Privacy-enhanced embed** (`youtube-nocookie.com`, explicit `allow` list,
+  referrer policy).
+- **Protected `main`.** A pull request, a green `check`, an up-to-date branch
+  and resolved review conversations are required, admins included; writes to
+  production run only from `main`.
+- **Pinned dependencies** and installs from the lockfile.
+
+Each practice with its example and source file, and the known gaps (no security
+headers, no Dependabot, no rate limiting), are in
+[docs/security.md](docs/security.md).
 
 ### 2.6. Tests
 
