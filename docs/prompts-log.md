@@ -2075,3 +2075,121 @@ merge
 - **Result:** the database schema is in production (still empty), REC-019 is done and archived. The feed does not read the database yet. REC-002 is the next story.
 - **Models:** Sonnet 5.5 (main session, all prompts) · Haiku 5.5, effort low (`doc-checker` after doc changes). The AI review of PR #52 ran in the main session on the Sonnet 5.5 session model.
 - **Why:** the work was building from a validated spec, so Sonnet fit; the cap came at prompt 273 (the earlier routing allowed Opus). The password generated in prompt 279 was shown in the chat, so it was discarded and replaced.
+
+## 291. Ask whether REC-001 is implemented and archived
+
+```
+Is rec-001 implemented and archived?
+```
+
+## 292. Ask what to implement next
+
+```
+what will be next to implement
+```
+
+## 293. Validate REC-002 (slash command)
+
+```
+/validate-backlog REC-002
+```
+
+## 294. Stop the validation
+
+```
+stop
+```
+
+## 295. Do not merge PR #50 yet (button answer)
+
+```
+Not yet
+```
+
+## 296. Resume the validation
+
+```
+resume validation
+```
+
+## 297. Ask whether main was pulled first
+
+```
+did you pill before?
+```
+
+## 298. Ask what pool tuning is
+
+```
+what is pool tuning
+```
+
+## 299. Ask about a cursor with no rows left
+
+```
+Explain A valid cursor with no rows left
+```
+
+## 300. Choose options for re-check 10
+
+```
+#55, #57 B,  #56 And all rest A
+```
+
+## 301. Choose options for re-check 11
+
+```
+N1, N2 B, Rest A
+```
+
+## 302. Ask how a duplicate ID can happen
+
+```
+The same YouTube ID twice in the list file how can this happen if is unique?
+```
+
+## 303. Choose options for re-check 12
+
+```
+All A
+```
+
+## 304. Approve the acceptance criteria
+
+```
+AC approved
+```
+
+## 305. Team estimate
+
+```
+8
+```
+
+## 306. Validate the story
+
+```
+Validate
+```
+
+## 307. Ask what the OpenSpec path is
+
+```
+What is openSpec Path?
+```
+
+## 308. Merge PR #50
+
+```
+Merge
+```
+
+### Summary (prompts 291–308)
+
+- **Goal:** re-validate REC-002 (feed API) against the code and stories that changed since its last check (REC-001 built, REC-019 built), and get it to `validated`.
+- **Changes:**
+  - **REC-002 re-validated** (`backlog/E01-browse-feed.md`): twelve re-checks' worth of findings resolved (#28/#50, #44, #46, #47, #51–#57, N1–N7, M1–M3). Client shuffle with an injectable random source; an empty last page for a stale cursor; CI that migrates and seeds a database for the E2E step; the curated-list loader kept in the story with five criteria and a JSON list file as its source; `size:L`, estimate 8/8; `blocked-by` flags removed.
+  - **`backlog/validation-log.md`** and **`docs/checklist.md`** updated; PR #50 merged.
+- **Result:** REC-002 is validated (8 points, no flag). Next is its OpenSpec change (recommended path); REC-001's Technical context line about the route shuffle, the `openapi.yaml` cursor wording and the C4 level 3 lines are fixed in that change. The README "Validated stories" list is stale (no REC-019 or REC-002).
+- **Models:** Sonnet 5.5 (main session, all prompts, including the AI estimate) · Sonnet 5.5, effort medium (`story-validator`, re-checks 10–12) · Haiku 5.5, effort low (`doc-checker` on this log).
+- **Why:** after the all-Sonnet cap (prompt 273) every step runs on Sonnet; the validator and the read-only doc check keep their frontmatter models.
