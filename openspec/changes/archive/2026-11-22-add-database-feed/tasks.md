@@ -9,7 +9,7 @@ open a pull request (`main` is protected); run `pnpm typecheck`, `pnpm test`,
 
 - [x] 1.1 Set REC-002 to `**Status:** in-progress` in `backlog/E01-browse-feed.md` with the Edit tool (so `.claude/hooks/validate-ac.sh` runs); verify the hook accepts the edit and the story's Flags are still `—`
 - [x] 1.2 Add `scripts/db/seed.mts` (D7) that writes fixture videos through `createDirectDb()`: `ready` videos with recipes, `needs_recipe`, and one of each excluded status, with ties from one transaction and an order from separate ones; add a unit test for the pure part that builds the rows; verify `pnpm test` passes and a second run against the same database fails clearly or changes nothing (documented in the script header)
-- [ ] 1.3 Add a CI step before `E2E tests` in `.github/workflows/ci.yml` (D6) that migrates the service container, runs `setup-roles`, runs the seed script, and sets `DATABASE_URL` (the `app_readonly` role) for the E2E step; verify the CI `check` job runs the step green on the pull request and that `pnpm start` serves `/api/feed` from the seeded database (read the job log)
+- [x] 1.3 Add a CI step before `E2E tests` in `.github/workflows/ci.yml` (D6) that migrates the service container, runs `setup-roles`, runs the seed script, and sets `DATABASE_URL` (the `app_readonly` role) for the E2E step; verify the CI `check` job runs the step green on the pull request and that `pnpm start` serves `/api/feed` from the seeded database (read the job log)
 
 ## 2. Feed route and cursor
 
@@ -30,21 +30,20 @@ open a pull request (`main` is protected); run `pnpm typecheck`, `pnpm test`,
 
 - [x] 4.1 Add `validateEntry` and the list reading in `scripts/db/` (D7): fails before any write when the file is missing or not valid JSON; skips an entry without a title, channel, `channel_id`, `duration_seconds`, `embeddable` or `language`, logging its YouTube ID and reason; keeps the first of a duplicated ID and logs the later one; marks an entry that fails the ING-2 checks `rejected`; add unit tests and verify `pnpm test` covers each of those cases
 - [x] 4.2 Add `scripts/db/load-curated.mts`, which inserts with `on conflict (youtube_id) do nothing` through `createDirectDb()` and sets no feed-entry time; add `*.db.test.ts` and verify `pnpm test:db` covers: entries stored as `needs_recipe` with the listed values, a failing Short stored as `rejected` and absent from the feed query, a second run changing and duplicating nothing, and a run that failed partway followed by a re-run loading only the remaining entries
-- [ ] 4.3 Add `.github/workflows/load-curated.yml` (D8): `workflow_dispatch` only, `main` only, `DATABASE_URL_DIRECT` from secrets, one run at a time; verify it parses by running `gh workflow list` after the pull request is open and by reading it against `migrate.yml`
+- [x] 4.3 Add `.github/workflows/load-curated.yml` (D8): `workflow_dispatch` only, `main` only, `DATABASE_URL_DIRECT` from secrets, one run at a time; verify it parses by running `gh workflow list` after the pull request is open and by reading it against `migrate.yml`
 - [x] 4.4 Add `scripts/db/curated-shorts.json` with 24 real, public, embeddable English cooking Shorts that pass the checks, plus 3 that fail on purpose (one too long, two not embeddable), 27 in all, each with title, channel name and the four ING-2 facts, written and checked by the maintainer (no invented IDs); verify each ID plays at `https://www.youtube-nocookie.com/embed/<id>` and a dry run of the validation reports no skipped entries
 
 ## 5. Architecture docs and close-out
 
 - [x] 5.1 Update `docs/architecture/c4/02-containers.md` (the `s-maxage` "with revalidation" wording becomes a plain 1 hour cache; the batch path names the manual loader) and `docs/architecture/c4/03-components-web-app.md` (drop "fixture data until REC-002" and "light shuffle with REC-002"; "Reads (from REC-002)" becomes "Reads"); verify the diagrams render in the Mermaid preview and run the `doc-checker` agent on both files
 - [x] 5.2 Document the loader and the seed script in `docs/development.md` (how to run each locally and how to start the loader workflow); verify the documented commands run as written against a local database
-- [ ] 5.3 Run `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm build` and `pnpm test:e2e` together; verify all pass and the pull request's CI `check` is green
+- [x] 5.3 Run `pnpm typecheck`, `pnpm test`, `pnpm test:db`, `pnpm build` and `pnpm test:e2e` together; verify all pass and the pull request's CI `check` is green
 - [x] 5.4 Run the `doc-checker` agent on every doc file changed in groups 2 to 5; fix or explain each `problem` and `unsure` item
 
 ## Manual checks (E2E rule 13, to run after the first deploy)
 
-- [ ] M.1 A second request to `https://recipe-henna-pi.vercel.app/api/feed` shows a Vercel cache `HIT`; only the deployed CDN can show whether it keeps `s-maxage`
-- [ ] M.2 Recheck that the list's embeds still play (blocks can change by region or over time) and skim the language guesses noted for the list, then run the loader workflow once on `main` with the real list; verify the videos exist as `needs_recipe` in the production database and appear in the feed after the 1 hour cache
-- [ ] M.3 Real finger flick and real mouse-wheel wrap on the real feed (E2E rule 13), checking that the first video after the wrap is the first of the order just seen
+- [x] M.1 A second request to `https://recipe-henna-pi.vercel.app/api/feed` shows a Vercel cache `HIT`; only the deployed CDN can show whether it keeps `s-maxage` Done 2026-11-22: the second request showed `x-vercel-cache: HIT`; the browser-facing `cache-control` shows only `public` (Vercel removes `s-maxage`), and the CDN still caches.
+- [x] M.2 Recheck that the list's embeds still play (blocks can change by region or over time) and skim the language guesses noted for the list, then run the loader workflow once on `main` with the real list; verify the videos exist as `needs_recipe` in the production database and appear in the feed after the 1 hour cache Done 2026-11-22: the loader run stored 27 videos (24 `needs_recipe`, 3 `rejected`) and `/api/feed` returned 10 items with a next cursor; the production smoke re-run was green. The embeds were not rechecked before loading (the maintainer chose to run it at once); the maintainer checked the result by hand afterwards and it was successful.
 
 ## Scenarios covered by unit or database tests, not E2E (E2E rule 1)
 
@@ -58,5 +57,5 @@ to 2.3 and 3.1; the `video-catalog` loader scenarios by tasks 4.1 and 4.2.
 
 ## Workflow follow-up
 
-- The first production smoke run on the merge commit is expected to fail (production has no videos yet). After the loader workflow has run (M.2), re-run that smoke run (`gh run rerun <run-id>`) and check it is green.
-- After the merge and the deploy, run M.1 to M.3, then archive the change with `openspec-archive-change` and set REC-002 to `Status: done` once the Definition of Done is met.
+- Done by the maintainer, 2026-11-22: the manual checks (M.1 cache `HIT`, M.2 the loaded feed in production, and the real-device flick and wheel wrap, was M.3, E2E rule 13) were checked by hand and were successful. A real-phone look on an iPhone (outside the MVP) found the header-outside-the-video bug recorded as D-11 in `backlog/draft-backlog-list.md` with screenshots in `backlog/evidence/D-11-ios-landscape-header/`.
+- Done 2026-11-22: the first production smoke run on the merge commit failed as expected (production had no videos); after the loader workflow ran (M.2), the re-run (`gh run rerun`) was green. The change was then archived and REC-002 set to `Status: done`.

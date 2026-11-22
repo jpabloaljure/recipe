@@ -43,7 +43,7 @@ M (reasoning updated after the re-check, 2026-11-19): the scroll-snap feed with 
 AI estimate (2026-11-19): 5. Calibration: REC-020 and REC-021 (team 2 each) are documentation only and clearly smaller; REC-002's 5 is set aside while it is reopened, so there is no code story with a team estimate in force; the closest pattern is "a scrollable list view with paging, a small read-only API route and browser tests". The core mechanism is already proven by the technical check, and the test setup (`e2e/support/` with the gestures helper and three projects) exists, which keeps it from an 8. The re-check added the stub route, contract types, AC6 and the E2E tests on top of the earlier 3. Risks that move it: wrap-around without a visible jump or a double snap; synthetic swipes in Chromium over scroll-snap being flaky (rule 10 treats a flaky test as a bug), which could take more time; and (assumed) the stub YouTube embeds behave like real iframes for scrolling.
 
 ## REC-002 · Feed shows ready and title-only videos, newest first with variety
-- **Status:** in-progress
+- **Status:** done
 - **Labels:** module:feed, type:feature, size:L, layer:fullstack
 - **PRD:** 5.3, 6.4, 6.5, API-1, API-2, ING-2, ING-3, PERF-6
 - **Flags:** —
