@@ -1,3 +1,7 @@
 allowBuilds:
+  # drizzle-kit (dev) pulls in esbuild. Its install script only checks the
+  # binary, which comes from a prebuilt platform package, so it does not need to
+  # run. Without this decision pnpm fails `pnpm install` in CI.
+  esbuild: false
   sharp: false
   unrs-resolver: false
