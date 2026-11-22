@@ -24,10 +24,16 @@ section of `backlog/E01-browse-feed.md` (52 validator findings, all settled
   host, an owner role created with the project, roles made in the Console
   joining `neon_superuser`, roles made with SQL not, a compute that suspends
   when idle.
-- **Drizzle facts are inferred** and settled by the spike in task 1.1:
-  `drizzle-kit generate --custom` writes an empty SQL migration and updates
-  the journal; the migration history sits in a `drizzle` schema, not
-  `public`; statements are split on `--> statement-breakpoint` markers.
+- **Drizzle facts, confirmed by the spike (task 1.1, 2026-11-21, `drizzle-kit`
+  0.31 and `postgres:17`):** `generate` writes the table migration;
+  `generate --custom` writes an empty numbered SQL file and adds it to the
+  journal (and a snapshot); a `plpgsql` function body between `$$` marks stays
+  in one piece when statements are separated by `--> statement-breakpoint`
+  lines; a `DO` block with `format('%I', current_user)` runs and records its
+  default privileges; `drizzle-kit migrate` run twice leaves two rows in
+  `drizzle.__drizzle_migrations`, so the history sits in the `drizzle`
+  schema, outside `public`; a `timestamptz(3)` column is created as such; a
+  trigger set on insert overwrote a sent time. Design Decision 6 stands.
 
 ## Goals / Non-Goals
 
@@ -102,10 +108,12 @@ A `BEFORE INSERT OR UPDATE` trigger on `video` (hand-written SQL, `plpgsql`):
 ```
 in_feed(s) = s in ('ready', 'needs_recipe')
 
-INSERT:  entered_feed_at := now() if in_feed(status) else NULL
+feed_time = date_trunc('milliseconds', now())
+
+INSERT:  entered_feed_at := feed_time if in_feed(status) else NULL
          (any sent value is overwritten)
 UPDATE:  if not in_feed(OLD.status) and in_feed(NEW.status)
-              entered_feed_at := now()          (sent value ignored)
+              entered_feed_at := feed_time      (sent value ignored)
          elif entered_feed_at changed
               RAISE EXCEPTION                   (incl. clearing it)
          if (OLD.status = 'rejected') <> (NEW.status = 'rejected')
@@ -114,9 +122,11 @@ UPDATE:  if not in_feed(OLD.status) and in_feed(NEW.status)
 
 - A check constraint on the table requires `entered_feed_at` for `ready` and
   `needs_recipe`. It runs after the trigger, so the two never disagree.
-- The column is `timestamptz(3)`: the stored value rounds to the millisecond,
-  so it survives a JS `Date` round trip in REC-002's cursor; equal times are
-  ties broken by `id`.
+- The column is `timestamptz(3)` and the trigger truncates `now()` to the
+  millisecond (found while building: a bare `now()` is rounded by the column and
+  can land up to half a millisecond ahead of the clock). The stored value
+  survives a JS `Date` round trip in REC-002's cursor; equal times are ties
+  broken by `id`.
 - A second trigger on both tables sets `updated_at := now()` on update.
 - **Alternative:** an application helper. Rejected: a console edit or any
   other writer would bypass it (the point of REC-020 Rule 2).
@@ -168,11 +178,15 @@ teardown:    drop template_catalog
 
 ### 8. Local and CI Postgres
 
-`docker-compose.yml` runs `postgres:17` (port 5432, a volume, a healthcheck);
-`pnpm db:up` / `db:down`. Homebrew's `postgresql@17` also works; both are in
-`docs/development.md`. CI's `check` job gets `services: postgres:17` with a
-health check and runs `pnpm test:db` after `pnpm test`. Scripts load env with
-`node --env-file=.env.local`, so there is no `dotenv`; `.env.example` is
+`docker-compose.yml` runs `postgres:17` (host port 54329, a volume, a
+healthcheck); `pnpm db:up` / `db:down`. The port is not 5432 because another
+Postgres container on the same laptop already held it (found while building);
+CI's service container keeps 5432 on its own runner. Homebrew's
+`postgresql@17` also works; both are in `docs/development.md`. CI's `check`
+job gets `services: postgres:17` with a health check and runs `pnpm test:db`
+after `pnpm test`. Scripts and `drizzle.config.ts` load `.env.local` with
+Node's `process.loadEnvFile` when it exists (CI sets variables instead), so
+there is no `dotenv` and a missing file is not an error; `.env.example` is
 committed with local values and `docs/development.md` says to copy it.
 `docker compose` is a development tool, recorded in ADR 0007.
 

@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795308179430,
+      "tag": "0000_create_catalog",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795308282125,
+      "tag": "0001_feed_entry_time",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795308432799,
+      "tag": "0002_updated_at_triggers",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795308433356,
+      "tag": "0003_read_only_grants",
+      "breakpoints": true
+    }
+  ]
+}

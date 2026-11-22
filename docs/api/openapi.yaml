@@ -48,10 +48,10 @@ info:
     | `recipe.steps` | `recipe.steps` (list, in order) |
     | `recipe.source` | `recipe.source` |
 
-    Until E02 is built, REC-019 stores the recipe as one JSON value on the
-    videos table (data model, "Built now"); the JSON field names above do
-    not change. A change to the recipe structure (E02: REC-006, REC-008)
-    updates the data model document and this file in the same change.
+    The recipe is its own table, keyed by the video (data model, `recipe`,
+    built in REC-019); the JSON field names above do not change. A change
+    to the recipe structure (E02: REC-006, REC-008) updates the data model
+    document and this file in the same change.
 
     **Types.** The response types live in one TypeScript module,
     `src/lib/feed/types.ts`, used by the routes and the E2E stub data. It

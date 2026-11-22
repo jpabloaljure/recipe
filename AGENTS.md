@@ -19,7 +19,9 @@ backlog and docs.
 ### Stack
 
 Decided in the OpenSpec change `choose-tech-stack` (ADRs 0002–0004 in
-`docs/adr/`), plus Playwright in `add-e2e-testing` (ADR 0006):
+`docs/adr/`), plus Playwright in `add-e2e-testing` (ADR 0006) and the
+database connections, roles and migrations in `add-video-catalog-schema`
+(ADR 0007):
 
 | Layer | Choice |
 |---|---|
@@ -27,7 +29,7 @@ Decided in the OpenSpec change `choose-tech-stack` (ADRs 0002–0004 in
 | Web app + API | Next.js (App Router) with React 19 |
 | Styling | Plain CSS modules |
 | Database | Postgres on Neon |
-| Data access + migrations | Drizzle ORM |
+| Data access + migrations | Drizzle ORM with the `pg` driver (ADR 0007) |
 | Daily ingestion | Node TypeScript script on a GitHub Actions schedule |
 | Hosting + CDN | Vercel |
 | Package manager / tests | pnpm, Vitest (unit), Playwright (end-to-end, Chromium) |

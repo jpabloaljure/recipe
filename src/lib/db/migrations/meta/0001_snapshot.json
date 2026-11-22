@@ -1,0 +1,279 @@
+{
+  "id": "0781c682-ef2e-443f-a428-d84aec23b365",
+  "prevId": "154f0f97-9bbc-4517-b86a-f149520dd45a",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.recipe": {
+      "name": "recipe",
+      "schema": "",
+      "columns": {
+        "video_id": {
+          "name": "video_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "servings": {
+          "name": "servings",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ingredients": {
+          "name": "ingredients",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "steps": {
+          "name": "steps",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "recipe_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ingredient_count": {
+          "name": "ingredient_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "estimated_active_minutes": {
+          "name": "estimated_active_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "special_equipment": {
+          "name": "special_equipment",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recipe_video_id_video_id_fk": {
+          "name": "recipe_video_id_video_id_fk",
+          "tableFrom": "recipe",
+          "columnsFrom": [
+            "video_id"
+          ],
+          "tableTo": "video",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recipe_ingredients_is_list": {
+          "name": "recipe_ingredients_is_list",
+          "value": "jsonb_typeof(\"recipe\".\"ingredients\") = 'array'"
+        },
+        "recipe_steps_is_list": {
+          "name": "recipe_steps_is_list",
+          "value": "jsonb_typeof(\"recipe\".\"steps\") = 'array'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.video": {
+      "name": "video",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "name": "video_id_seq",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cache": "1",
+            "cycle": false,
+            "schema": "public",
+            "type": "byDefault"
+          }
+        },
+        "youtube_id": {
+          "name": "youtube_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "channel_id": {
+          "name": "channel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "channel_name": {
+          "name": "channel_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duration_seconds": {
+          "name": "duration_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "embeddable": {
+          "name": "embeddable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "language": {
+          "name": "language",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "video_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entered_feed_at": {
+          "name": "entered_feed_at",
+          "type": "timestamp (3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "video_feed_idx": {
+          "name": "video_feed_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entered_feed_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "video_youtube_id_unique": {
+          "name": "video_youtube_id_unique",
+          "columns": [
+            "youtube_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "video_candidate_facts_required": {
+          "name": "video_candidate_facts_required",
+          "value": "\"video\".\"status\" = 'rejected' or (\"video\".\"duration_seconds\" is not null and \"video\".\"embeddable\" is not null and \"video\".\"language\" is not null)"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.recipe_source": {
+      "name": "recipe_source",
+      "schema": "public",
+      "values": [
+        "description",
+        "comment",
+        "captions"
+      ]
+    },
+    "public.video_status": {
+      "name": "video_status",
+      "schema": "public",
+      "values": [
+        "ready",
+        "needs_recipe",
+        "not_easy",
+        "unavailable",
+        "rejected"
+      ]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
