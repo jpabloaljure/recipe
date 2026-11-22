@@ -20,15 +20,17 @@ C4Container
     Container(api, "API routes", "Next.js route handlers", "GET /api/feed, GET /api/videos/{youtubeId}")
     ContainerDb(db, "Database", "Postgres on Neon", "Videos, recipes, statuses")
     Container(ing, "Ingestion job", "Node TypeScript on GitHub Actions", "Daily discovery, extraction, easy check, availability")
+    Container(mig, "Migration workflow", "GitHub Actions, drizzle-kit", "Applies the schema migrations after a merge to main")
   }
 
   Rel(cook, web, "Uses", "HTTPS, via Vercel CDN")
   Rel(web, api, "Reads feed and videos", "JSON, CDN-cached")
   Rel(web, ytp, "Embeds")
-  Rel(api, db, "Reads", "SQL")
+  Rel(api, db, "Reads as app_readonly", "SQL, pooled connection")
   Rel(ing, yapi, "Discovers and checks videos")
   Rel(ing, llm, "Extracts recipes")
-  Rel(ing, db, "Writes", "SQL")
+  Rel(ing, db, "Writes as the owner", "SQL, direct connection")
+  Rel(mig, db, "Migrates as the owner", "SQL, direct connection")
   Rel(maint, db, "Fixes video statuses", "Neon console")
 ```
 
@@ -40,6 +42,18 @@ C4Container
 - **Batch path:** GitHub Actions runs the ingestion job daily. It writes
   videos, recipes and statuses to Postgres. It shares the Drizzle schema and
   types with the web app.
+- **Migration path:** a merge to `main` that changes `src/lib/db/migrations/`
+  starts the migration workflow, which applies the new migrations to the
+  production database as the owner role, one run at a time. Migrations are
+  additive only, so the app works whether the deploy or the migration finishes
+  first ([ADR 0007](../../adr/0007-database-connections-roles-and-migrations.md)).
+- **Roles:** the app reads as the read-only role `app_readonly` through the
+  pooled connection (`DATABASE_URL`, in Vercel); the ingestion job, the
+  migration workflow and the maintainer use the owner role through the direct
+  connection (`DATABASE_URL_DIRECT`, in GitHub Actions secrets only).
+- **Tooling, not part of the system:** CI runs the database tests in a
+  `postgres:17` service container, and local development uses `docker compose`
+  (`docs/development.md`); neither touches production.
 - **Favorites** live in the browser's localStorage, inside the web app
   container (PRD §5.4).
 
@@ -49,3 +63,4 @@ C4Container
 - [0003 Postgres on Neon with Drizzle](../../adr/0003-postgres-neon-drizzle.md)
 - [0004 Ingestion on GitHub Actions](../../adr/0004-ingestion-on-github-actions.md)
 - [0005 Single-package repository layout](../../adr/0005-single-package-repository-layout.md)
+- [0007 Database connections, roles and migrations](../../adr/0007-database-connections-roles-and-migrations.md)
