@@ -33,7 +33,7 @@ See [docs/process/definition-of-done.md](../blob/main/docs/process/definition-of
 - [ ] CI `check` green
 - [ ] Docs, ADRs and C4 diagrams updated if needed
 - [ ] Self-reviewed against this checklist
-- [ ] AI review run (`/code-review --comment <PR#>`), or docs-only PR
+- [ ] AI review run (`/code-review medium --comment <PR#>`), or docs-only PR
 - [ ] Every review conversation resolved
 
 ## Reviewer (optional)

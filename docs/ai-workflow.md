@@ -42,29 +42,33 @@ Agents in `.claude/agents/`:
 
 | Agent | Model | What it does |
 |---|---|---|
-| `story-validator` | Opus 5.5, effort high | Runs `validate-story` on one story for `validate-backlog`; read-only |
+| `story-validator` | Sonnet 5.5, effort medium | Runs `validate-story` on one story for `validate-backlog`; read-only |
 | `doc-checker` | Haiku 5.5, effort low | Checks links and that docs, ADRs, C4, data model, API spec and backlog agree; reports only |
 
 ## Models
 
-Opus 5.5 is the session model, and every step that makes a decision stays on
-it, with `high` effort for decisions (PRD → backlog, ADRs, validation).
-Cheaper models run only in forked, read-only agents whose reports the main
-session checks: Haiku 5.5 for `doc-checker`. Rules, effort per skill and the
-`/effort high` habit for multi-turn sessions:
+**The cap (2026-11-21): no model above Sonnet 5.5 and no effort above
+`medium`.** Sonnet 5.5 at `medium` runs every step, including the
+`story-validator` agent; Haiku 5.5 at `low` runs the read-only `doc-checker`.
+`.claude/settings.json` sets the defaults and an effort ceiling; the rules, and
+what the repo can and cannot enforce, are in
 [AGENTS.md › Model routing](../AGENTS.md#model-routing).
 
-**Sonnet trial for `story-validator`: failed (REC-019, 2026-11-21).** The
-first check ran on Opus 5.5 and on Sonnet 5.5. All 18 Opus findings led to
-changes in the story; Sonnet found 15 of them and missed three:
+**History.** From 2026-11-19 until the cap (change `add-model-routing`) decision
+steps ran on Opus 5.5 at `high` effort. That routing included a one-time trial
+of Sonnet 5.5 for `story-validator`, which **failed** on REC-019 (2026-11-21):
+the first check ran on both models, all 18 Opus findings led to changes in the
+story, and Sonnet found 15 of them and missed three:
 - a database constraint for a feed video with no feed-entry time;
 - the dependent stories not marked `blocked-by:REC-019`, and no owner for the
   curated-list loader;
 - most of "other updates and console edits keep the time".
 
-Sonnet raised one point Opus did not (AC1 bundling several checks). The rule
-was "every finding that changed the story", so `story-validator` stays on
-Opus 5.5. Details in REC-019's row of
+Sonnet raised one point Opus did not (AC1 bundling several checks). On
+2026-11-21, after that trial, the project owner capped everything at Sonnet 5.5 and `medium`
+anyway, accepting that trade-off. The validation flow still repeats the check
+until no finding is new, and the human reviews every story, which is where a
+missed finding can still be caught. Details in REC-019's row of
 [`backlog/validation-log.md`](../backlog/validation-log.md).
 
 ## Guardrails
