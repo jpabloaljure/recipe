@@ -247,34 +247,38 @@ E2E tests use Playwright in Chromium (ADR 0006). Run them with
 
 ## Model routing
 
-Pick the model by how much judgment a step needs and what a mistake would
-cost. Decided in the OpenSpec change `add-model-routing`.
+**The cap: no model above Sonnet 5.5 and no effort above `medium`, anywhere in
+this project** (decided by the project owner, 2026-11-21; it replaces the
+Opus-for-decisions routing of the archived change `add-model-routing`).
 
-| Tier | Model | Used for |
-|---|---|---|
-| Top | Opus 5.5, the session model | Every step that makes a decision: PRD → backlog, explore, propose and design, ADRs, validation with the human, estimates, applying changes, code review |
-| Mid | Sonnet 5.5 | Nothing yet (`story-validator` moves here only if its trial passes) |
-| Low | Haiku 5.5 | Forked, read-only checks the main session verifies: the `doc-checker` agent |
+| Tier | Model | Effort | Used for |
+|---|---|---|---|
+| Session | Sonnet 5.5 | `medium` | Every step: PRD → backlog, explore, propose and design, ADRs, validation with the human, estimates, applying changes, code review |
+| Low | Haiku 5.5 | `low` | Forked, read-only checks the main session verifies: the `doc-checker` agent |
 
-- **Effort first.** Raise effort on the top model before considering a
-  cheaper one. Project skills set it in their frontmatter: `decompose-prd`,
-  `write-adr` and `validate-backlog` at `high`, `estimate-story` at
-  `medium`. A skill's effort lasts only for the turn it runs in, so the
-  human runs `/effort high` at the start of a validation or explore session.
+- **Never above the cap.** No agent or skill sets or passes `opus`, `fable`,
+  `max` or `high`. If a step feels too hard for `medium`, split it into
+  smaller steps and check each one (run the tests, re-read the spec, run the
+  `doc-checker`), or ask the human. Do not raise the model or the effort.
+- **What enforces it.** `.claude/settings.json` sets `model: sonnet`,
+  `effortLevel: medium` and `maxEffortLevel: medium`. The ceiling clamps
+  `/effort`, `--effort`, `CLAUDE_CODE_EFFORT_LEVEL` and the `effort` of skills
+  and agents. The repo cannot stop a person choosing another model with
+  `/model` (only administrator-managed settings can), so the cap on the model
+  is these defaults, the `model` of the project agents, and this rule.
+- **Effort in frontmatter.** `decompose-prd`, `write-adr`, `validate-backlog`,
+  `estimate-story` and `story-validator` at `medium` (`story-validator` on
+  `sonnet`); `doc-checker` at `low` on `haiku`.
 - **Cheaper models only in forked, read-only agents.** They get tools
   `Read`, `Grep` and `Glob`, report facts with file and line, mark doubts as
   `unsure`, and never edit or decide; the caller checks every `problem` and
   `unsure` item itself.
 - **Never switch the main session's model mid-session** (prompt caches are
-  per model), and **never set `CLAUDE_CODE_EFFORT_LEVEL`** (it overrides
-  every skill and agent effort setting).
+  per model). Do not set `CLAUDE_CODE_SUBAGENT_MODEL_FORCE`: it overrides an
+  agent's own model and would move `doc-checker` off Haiku.
 - **Generated `openspec-*` skills** are not edited (`openspec update`
-  overwrites them): explore and propose run at `high` effort
-  (`/effort high`); `openspec-apply-change` runs at the session's effort,
-  raised to `high` for tasks that touch the database schema, the API
-  contract or a design decision, and the agent tells the human when those
-  tasks are done so effort can go back down; archive, sync and update at
-  the session's effort.
+  overwrites them); they run at the session's model and effort, which the
+  settings above cap at Sonnet 5.5 and `medium`.
 - **`doc-checker`** runs after `write-adr`, at the change close-out, after
   README or C4 updates, and before a `pend-` prompt-log commit.
 

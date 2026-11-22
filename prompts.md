@@ -25,14 +25,14 @@ conversation around it can be read.
 
 | Tool | Model | Effort | Phase | What it did |
 |---|---|---|---|---|
-| Claude Code (desktop app) | Opus 5.5 | session default; `high` in `decompose-prd`, `write-adr`, `validate-backlog` | Definition: PRD → backlog, story validation and estimation, architecture (ADRs, C4), data model, API spec, OpenSpec changes, scaffold, CI, PRs | Main agent for planning and building |
+| Claude Code (desktop app) | Opus 5.5 until the cap of 2026-11-21 (Sonnet 5.5 for some steps from 2026-11-20); Sonnet 5.5 from the cap | session default; `high` in `decompose-prd`, `write-adr`, `validate-backlog` until the cap; `medium` from the cap | Definition: PRD → backlog, story validation and estimation, architecture (ADRs, C4), data model, API spec, OpenSpec changes, scaffold, CI, PRs, the database schema | Main agent for planning and building |
 | Claude Code (desktop app) | Haiku 5.5 | session default | Some `openspec-explore` sessions | Quick exploration before a decision |
-| `story-validator` agent | Same as the session; Opus 5.5 from `add-model-routing` on | `high` | Backlog validation | Reviews one story at a time |
-| `doc-checker` agent | Haiku 5.5 (from `add-model-routing` on) | `low` | Docs checks | Checks links and that docs agree; reports only |
+| `story-validator` agent | Same as the session; Opus 5.5 at `high` from 2026-11-19 until the cap; Sonnet 5.5 at `medium` from the cap | see model | Backlog validation | Reviews one story at a time |
+| `doc-checker` agent | Haiku 5.5 (from 2026-11-19) | `low` | Docs checks | Checks links and that docs agree; reports only |
 
-From the change `add-model-routing` on, models are chosen by how much
-judgment a step needs ([AGENTS.md › Model routing](AGENTS.md#model-routing)),
-and each summary in the full log lists the models used and why.
+From the cap (2026-11-21) the project is capped at Sonnet 5.5 and `medium` effort
+([AGENTS.md › Model routing](AGENTS.md#model-routing)), and each summary in the
+full log lists the models used and why.
 
 **How the AI is set up.** `AGENTS.md` (linked as `CLAUDE.md`) holds the
 project rules every agent follows. Skills automate the repeatable steps:
@@ -376,7 +376,7 @@ C I acree and lets do the propouse
 lets do local.
 ```
 
-- **Result:** every code PR gets `/code-review --comment` from Claude Code
+- **Result:** every code PR gets `/code-review --comment` from Claude Code (`/code-review medium --comment` from the cap)
   before merge; on its first PR (#5) it posted 6 comments, all fixed or
   answered.
 
