@@ -178,9 +178,11 @@ teardown:    drop template_catalog
 
 ### 8. Local and CI Postgres
 
-`docker-compose.yml` runs `postgres:17` (host port 54329, a volume, a
-healthcheck); `pnpm db:up` / `db:down`. The port is not 5432 because another
-Postgres container on the same laptop already held it (found while building);
+`docker-compose.yml` runs `postgres:17` (host port 54329 on `127.0.0.1` only, a
+volume, a healthcheck); `pnpm db:up` / `db:down`. The port is not 5432 because
+another Postgres container on the same laptop already held it, and it is
+bound to loopback because the superuser password is the well-known `postgres`
+(both found while building and in the PR review);
 CI's service container keeps 5432 on its own runner. Homebrew's
 `postgresql@17` also works; both are in `docs/development.md`. CI's `check`
 job gets `services: postgres:17` with a health check and runs `pnpm test:db`
@@ -188,7 +190,11 @@ after `pnpm test`. Scripts and `drizzle.config.ts` load `.env.local` with
 Node's `process.loadEnvFile` when it exists (CI sets variables instead), so
 there is no `dotenv` and a missing file is not an error; `.env.example` is
 committed with local values and `docs/development.md` says to copy it.
-`docker compose` is a development tool, recorded in ADR 0007.
+`docker compose` is a development tool, recorded in ADR 0007. The steps that
+create the dev-password role or create and drop databases (`pnpm db:setup`, the
+test setup) refuse a host that is not this machine, so a Neon URL left in
+`.env.local` cannot be used by mistake; every test database is named
+`er_test_<run id>_…` and a run drops only its own.
 
 ### 9. Production migrations (PR 2)
 

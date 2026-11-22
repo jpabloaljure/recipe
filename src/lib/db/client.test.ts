@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createAppDb, createDirectDb } from "./client";
 
 // No database needed: these only check the settings are read and validated.
@@ -29,5 +29,19 @@ describe("database client settings", () => {
   test("an explicit URL is used instead of the environment", async () => {
     const client = createAppDb("postgres://app_readonly:x@localhost:1/none");
     await client.close();
+  });
+
+  test("getAppDb keeps one client across module reloads (hot reload in dev)", async () => {
+    process.env.DATABASE_URL = "postgres://app_readonly:x@localhost:1/none"; // the pool connects lazily
+    const global = globalThis as unknown as { appDbClient?: { close(): Promise<void> } };
+    try {
+      const first = (await import("./client")).getAppDb();
+      vi.resetModules(); // what Next.js does on every hot reload
+      const second = (await import("./client")).getAppDb();
+      expect(second).toBe(first);
+    } finally {
+      await global.appDbClient?.close();
+      delete global.appDbClient;
+    }
   });
 });

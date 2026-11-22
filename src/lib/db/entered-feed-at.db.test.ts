@@ -2,20 +2,15 @@
 // (spec video-catalog; migration 0001). One test per scenario, named
 // `video-catalog › <Requirement> › <Scenario>`.
 import type { Client } from "pg";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 import { PG, insertVideo, youtubeId } from "./test/fixtures";
-import { type TestDatabase, createTestDatabase } from "./test/test-database";
+import { useTestDatabase } from "./test/test-database";
 
-let db: TestDatabase;
+const database = useTestDatabase();
 let client: Client;
 
 beforeAll(async () => {
-  db = await createTestDatabase();
-  client = await db.connectOwner();
-});
-
-afterAll(async () => {
-  await db.drop();
+  client = await database().connectOwner();
 });
 
 const OLD = "2000-01-01T00:00:00Z";

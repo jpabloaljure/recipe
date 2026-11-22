@@ -47,7 +47,13 @@ docker compose down -v       # stop it and delete the data: start again from emp
   can only read. Migrations and scripts connect as the owner through
   `DATABASE_URL_DIRECT`. `.env.example` has both for the local database.
 - **Port 54329**, not 5432, so it does not clash with another Postgres on your
-  machine.
+  machine. It listens on `127.0.0.1` only: the superuser password is the
+  well-known `postgres`, so it is not reachable from your network.
+- **Local only.** `pnpm db:setup` and `pnpm test:db` create a role with a
+  dev-only password and create and drop databases, so they refuse to run
+  against a host that is not this machine (for example a Neon URL left in
+  `.env.local`). `ALLOW_NON_LOCAL_DATABASE=1` overrides it; use it only on a
+  throwaway Postgres.
 - **Never edit a migration that is merged**: production has already run it.
   Add a new one.
 - **Reset after changing an unmerged migration:** `docker compose down -v`, then
@@ -82,8 +88,11 @@ pnpm test:db      # database tests; needs `pnpm db:up`
 
 `pnpm test:db` builds a template database from the migrations once, gives every
 test file its own copy (so files run in parallel and cannot see each other) and
-drops the copies afterwards. It never touches `easy_recipes` or production. Each
-test is named after a scenario of
+drops the copies afterwards. Every database it creates is named
+`er_test_<run id>_…`, and at the end it drops only the ones of its own run, so
+it never touches `easy_recipes`, your other databases or production, and two
+runs at the same time do not disturb each other. Each test is named after a
+scenario of
 [`video-catalog`](../openspec/changes/add-video-catalog-schema/specs/video-catalog/spec.md).
 
 If the database is not running you will see `Cannot reach the test database.

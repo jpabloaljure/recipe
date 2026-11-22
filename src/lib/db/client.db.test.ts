@@ -1,26 +1,26 @@
 // The shared client against a real Postgres: the app's client reads as
 // `app_readonly` and cannot write; the direct client writes as the owner.
 import { sql } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { type DbClient, createAppDb, createDirectDb } from "./client";
 import { video } from "./schema";
-import { type TestDatabase, createTestDatabase } from "./test/test-database";
+import { useTestDatabase } from "./test/test-database";
 import { youtubeId } from "./test/fixtures";
 
-let testDb: TestDatabase;
+const database = useTestDatabase();
 let app: DbClient;
 let direct: DbClient;
 
-beforeAll(async () => {
-  testDb = await createTestDatabase();
-  app = createAppDb(testDb.readonlyUrl);
-  direct = createDirectDb(testDb.ownerUrl);
+beforeAll(() => {
+  app = createAppDb(database().readonlyUrl);
+  direct = createDirectDb(database().ownerUrl);
 });
 
+// Registered after the helper's hook, so it runs first (hooks run in reverse):
+// the pools are closed before the database is dropped.
 afterAll(async () => {
   await app.close();
   await direct.close();
-  await testDb.drop();
 });
 
 const newVideo = (status: "ready" | "not_easy") => ({
@@ -57,5 +57,27 @@ describe("shared database client", () => {
     await expect(app.db.insert(video).values(newVideo("not_easy"))).rejects.toThrow(/permission denied|Failed query/);
     const [{ count }] = await direct.db.select({ count: sql<number>`count(*)::int` }).from(video);
     expect(count).toBeGreaterThanOrEqual(2);
+  });
+
+  test("a connection closed by the server while idle does not crash the process", async () => {
+    // A suspended Neon compute or the pooler closes idle connections. node-pg
+    // reports that as an 'error' event on the pool, which kills the process
+    // unless the client handles it.
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = createDirectDb(database().ownerUrl);
+    try {
+      const { rows } = await client.db.execute<{ pid: number }>(sql`SELECT pg_backend_pid() AS pid`);
+      const admin = await database().connectOwner();
+      await admin.query("SELECT pg_terminate_backend($1)", [rows[0].pid]);
+
+      await vi.waitFor(() => expect(log).toHaveBeenCalledWith(expect.stringContaining("idle connection error")));
+
+      // The pool discards the broken connection and works on the next query.
+      const next = await client.db.execute<{ ok: number }>(sql`SELECT 1 AS ok`);
+      expect(next.rows[0].ok).toBe(1);
+    } finally {
+      await client.close();
+      log.mockRestore();
+    }
   });
 });

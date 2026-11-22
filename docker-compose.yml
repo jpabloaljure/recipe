@@ -5,7 +5,8 @@ services:
   db:
     image: postgres:17
     ports:
-      - "54329:5432"
+      # Loopback only: the superuser password is the well-known `postgres`.
+      - "127.0.0.1:54329:5432"
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: easy_recipes

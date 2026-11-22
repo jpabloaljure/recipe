@@ -12,7 +12,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
-    "db:setup": "node scripts/db/setup-roles.ts",
+    "db:setup": "node scripts/db/setup-roles.mts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

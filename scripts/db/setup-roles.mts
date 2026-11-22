@@ -2,12 +2,20 @@
 // Postgres; see docs/development.md). Usage: `pnpm db:setup`.
 import { existsSync, readFileSync } from "node:fs";
 import { Client } from "pg";
+import { assertLocalDatabase } from "./local-only.mts";
 
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
 const url = process.env.DATABASE_URL_DIRECT;
 if (!url) {
   console.error("DATABASE_URL_DIRECT is not set. Copy .env.example to .env.local.");
+  process.exit(1);
+}
+// The role below has a dev-only password: never create it on Neon (docs/development.md).
+try {
+  assertLocalDatabase(url, "DATABASE_URL_DIRECT");
+} catch (error) {
+  console.error((error as Error).message);
   process.exit(1);
 }
 

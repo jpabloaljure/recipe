@@ -2,20 +2,15 @@
 // One test per scenario, named `video-catalog › <Requirement> › <Scenario>`
 // (openspec/changes/add-video-catalog-schema/specs/video-catalog/spec.md).
 import type { Client } from "pg";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 import { PG, insertRecipe, insertVideo, youtubeId } from "./test/fixtures";
-import { type TestDatabase, createTestDatabase } from "./test/test-database";
+import { useTestDatabase } from "./test/test-database";
 
-let db: TestDatabase;
+const database = useTestDatabase();
 let client: Client;
 
 beforeAll(async () => {
-  db = await createTestDatabase();
-  client = await db.connectOwner();
-});
-
-afterAll(async () => {
-  await db.drop();
+  client = await database().connectOwner();
 });
 
 async function columns(table: string): Promise<string[]> {

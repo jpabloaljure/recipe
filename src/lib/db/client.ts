@@ -25,6 +25,13 @@ function requireUrl(name: string, value: string | undefined): string {
 
 function connect(url: string, max: number, idleTimeoutMillis: number): DbClient {
   const pool = new Pool({ connectionString: url, max, idleTimeoutMillis });
+  // An idle connection can be closed under us (a suspended Neon compute, the
+  // pooler). node-pg reports that as an 'error' event on the pool; with no
+  // listener it is an uncaught exception that kills the process. The pool
+  // discards the broken client and opens a new one on the next query.
+  pool.on("error", (error) => {
+    console.error(`Database pool: idle connection error: ${error.message}`);
+  });
   return { db: drizzle(pool, { schema }), close: () => pool.end() };
 }
 
@@ -42,10 +49,12 @@ export function createDirectDb(url: string | undefined = process.env.DATABASE_UR
   return connect(requireUrl("DATABASE_URL_DIRECT", url), 2, 10_000);
 }
 
-let appClient: DbClient | undefined;
+// Kept on globalThis, not in a module variable: Next.js re-evaluates modules on
+// every hot reload in `pnpm dev`, which would open a new pool each time.
+const globalForDb = globalThis as unknown as { appDbClient?: DbClient };
 
 /** One app client per server instance, created on first use. */
 export function getAppDb(): Db {
-  appClient ??= createAppDb();
-  return appClient.db;
+  globalForDb.appDbClient ??= createAppDb();
+  return globalForDb.appDbClient.db;
 }

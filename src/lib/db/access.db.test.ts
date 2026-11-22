@@ -5,24 +5,19 @@ import { fileURLToPath } from "node:url";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool, type Client } from "pg";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 import { PG, insertRecipe, insertVideo } from "./test/fixtures";
-import { type TestDatabase, createTestDatabase } from "./test/test-database";
+import { useTestDatabase } from "./test/test-database";
 
 const migrationsFolder = fileURLToPath(new URL("./migrations", import.meta.url));
 
-let db: TestDatabase;
+const database = useTestDatabase();
 let owner: Client;
 let readonly: Client;
 
 beforeAll(async () => {
-  db = await createTestDatabase();
-  owner = await db.connectOwner();
-  readonly = await db.connectReadonly();
-});
-
-afterAll(async () => {
-  await db.drop();
+  owner = await database().connectOwner();
+  readonly = await database().connectReadonly();
 });
 
 async function updatedAt(table: "video" | "recipe", key: number): Promise<string> {
@@ -102,7 +97,7 @@ describe("video-catalog › Migrations are repeatable", () => {
     const history = (await owner.query("SELECT 1 FROM drizzle.__drizzle_migrations")).rowCount;
     expect(history).toBeGreaterThanOrEqual(4);
 
-    const pool = new Pool({ connectionString: db.ownerUrl, max: 1 });
+    const pool = new Pool({ connectionString: database().ownerUrl, max: 1 });
     try {
       await migrate(drizzle(pool), { migrationsFolder });
     } finally {

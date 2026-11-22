@@ -1,17 +1,18 @@
 // A database of its own for one test file, copied from the template that the
 // global setup built (ADR 0007).
-import { randomBytes } from "node:crypto";
 import { Client } from "pg";
+import { afterAll, beforeAll, inject } from "vitest";
 import {
   READONLY_PASSWORD,
   READONLY_ROLE,
-  TEMPLATE_DB,
-  TEST_DB_PREFIX,
   UNREACHABLE_MESSAGE,
   adminUrl,
+  fileDbName,
+  templateName,
   urlAsRole,
   urlWithDatabase,
 } from "./config";
+import "./provided";
 
 export type TestDatabase = {
   name: string;
@@ -26,7 +27,8 @@ export type TestDatabase = {
 };
 
 export async function createTestDatabase(): Promise<TestDatabase> {
-  const name = `${TEST_DB_PREFIX}${randomBytes(6).toString("hex")}`;
+  const runId = inject("testRunId");
+  const name = fileDbName(runId);
   const admin = new Client({ connectionString: adminUrl() });
   try {
     await admin.connect();
@@ -34,7 +36,7 @@ export async function createTestDatabase(): Promise<TestDatabase> {
     throw new Error(UNREACHABLE_MESSAGE);
   }
   try {
-    await admin.query(`CREATE DATABASE "${name}" TEMPLATE ${TEMPLATE_DB}`);
+    await admin.query(`CREATE DATABASE "${name}" TEMPLATE "${templateName(runId)}"`);
   } finally {
     await admin.end();
   }
@@ -66,5 +68,27 @@ export async function createTestDatabase(): Promise<TestDatabase> {
         await cleaner.end();
       }
     },
+  };
+}
+
+/**
+ * Gives the calling test file a database of its own: created before its tests
+ * and dropped after them. Call it once at the top of the file and read the
+ * database through the returned function inside hooks and tests.
+ */
+export function useTestDatabase(): () => TestDatabase {
+  let current: TestDatabase | undefined;
+
+  beforeAll(async () => {
+    current = await createTestDatabase();
+  });
+
+  afterAll(async () => {
+    await current?.drop();
+  });
+
+  return () => {
+    if (!current) throw new Error("The test database is not ready yet: use it inside a hook or a test.");
+    return current;
   };
 }
