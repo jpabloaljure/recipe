@@ -28,7 +28,7 @@ erDiagram
     boolean embeddable "empty only when rejected"
     text language "empty only when rejected"
     video_status status "ready, needs_recipe, not_easy, unavailable, rejected"
-    timestamptz entered_feed_at "set by the database"
+    timestamptz(3) entered_feed_at "set by the database"
     timestamptz created_at
     timestamptz updated_at
   }
@@ -65,8 +65,8 @@ One row per YouTube video the ingestion job has processed.
 | `embeddable` | `boolean` | yes, except `rejected` | Candidate fact checked by ING-2. |
 | `language` | `text` | yes, except `rejected` | Candidate fact checked by ING-2 (English). A `rejected` video may have been rejected because a fact was missing. |
 | `status` | `video_status` | yes | See [Statuses](#statuses). |
-| `entered_feed_at` | `timestamptz` | no | When the video entered the feed. Set by the database (see [Rules](#rules)); empty for a video that has never been in the feed. The feed is ordered by it, newest first (API-2). |
-| `created_at`, `updated_at` | `timestamptz` | yes | Housekeeping. |
+| `entered_feed_at` | `timestamptz(3)` | no | When the video entered the feed, to the millisecond. Set by the database (see [Rules](#rules)); empty for a video that has never been in the feed. The feed is ordered by it, newest first (API-2). |
+| `created_at`, `updated_at` | `timestamptz` | yes | Housekeeping. `created_at` defaults to now; the database sets `updated_at` on every update. |
 
 ## Recipe
 
@@ -82,10 +82,15 @@ At most one per video, sharing its key.
 | `ingredient_count` | `integer` | yes | Raw "easy" fact from the LLM (EXT-4). |
 | `estimated_active_minutes` | `integer` | yes | Raw "easy" fact from the LLM (EXT-4). |
 | `special_equipment` | `text[]` | yes | Raw "easy" fact from the LLM (EXT-4); an empty list means common equipment only. |
-| `created_at`, `updated_at` | `timestamptz` | yes | Housekeeping. |
+| `created_at`, `updated_at` | `timestamptz` | yes | Housekeeping. `created_at` defaults to now; the database sets `updated_at` on every update. |
 
 The raw "easy" facts are kept so the thresholds (PRD §6.3) can change
 without running extraction again (REC-010).
+
+The database checks that the required columns are present and that
+`ingredients` and `steps` are JSON lists. The shape of each item and
+completeness are checked by extraction (REC-008). A recipe is deleted with its
+video.
 
 **Ingredient item:**
 
@@ -117,22 +122,33 @@ A `needs_recipe` video has no recipe panel (PRD §5.3, PERF-4).
    with its recipe in one step. There is no "pending" status: a failure
    before the write stores nothing, and the video is found and tried again
    the next day (ING-3 does not skip it).
-2. **Time the video entered the feed.** The database sets `entered_feed_at`
-   to the current time when a video is inserted as `ready` or
-   `needs_recipe`, or changes to one of them from a status outside the
-   feed. A change between `ready` and `needs_recipe` keeps the time. So the
-   time only grows for videos newly entering the feed, and the feed cursor
-   (REC-002) stays stable. How the database does this (for example a
-   trigger) is decided in REC-019.
+2. **Time the video entered the feed.** The database alone decides
+   `entered_feed_at`, with a trigger (REC-019, [ADR 0007](../adr/0007-database-connections-roles-and-migrations.md)),
+   for every writer, a maintainer's console edit included. It sets the current
+   time, to the millisecond, when a video is inserted as `ready` or
+   `needs_recipe`, or changes to one of them from a status outside the feed,
+   and ignores any time the writer sends with that insert or update. Any other
+   change to the time, including clearing it, is rejected. The time is kept
+   when the status changes between `ready` and `needs_recipe`, when the video
+   leaves the feed, and when any other field is updated; a video that comes
+   back gets a new time. A check constraint requires the time for `ready` and
+   `needs_recipe` videos. So the time only grows for videos newly entering the
+   feed, and the feed cursor (REC-002) stays stable; videos in the same
+   millisecond are ties, broken by `id`.
 3. **Recipe presence.** `ready` and `not_easy` videos always have a recipe;
    `needs_recipe` and `rejected` videos never do; an `unavailable` video
-   keeps whatever it had.
+   keeps whatever it had. The ingestion job (REC-008) owns this rule: it
+   spans two tables, so the database does not enforce it.
+4. **`rejected` is for first-time candidates.** A video can be inserted as
+   `rejected`, but no update may change a status to or from it.
 
 ## Notes
 
-- **Built now.** Until E02 (REC-006, REC-008) is built, REC-019 stores the
-  recipe as one JSON value on the videos table. This document stays the
-  target design and owns the recipe's logical structure.
+- **Enforced by the database.** A unique `youtube_id`; the required fields
+  (a duration, embeddable flag and language unless the video is `rejected`);
+  the status and source values; the recipe columns and lists; and Rules 2 and 4
+  above. The app connects as a read-only role and cannot write
+  ([ADR 0007](../adr/0007-database-connections-roles-and-migrations.md)).
 - **Completeness (EXT-5).** At least 2 ingredients and 2 steps is an
   extraction rule owned by REC-008, not a database constraint.
 - **Out of scope.** Favorites live in the browser (REC-011, REC-012) and

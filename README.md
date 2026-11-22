@@ -4,7 +4,8 @@ A mobile-first web app with a vertical, full-screen feed of short YouTube
 cooking videos (Shorts), each with an easy written recipe.
 
 > Status: **MVP in progress.** The vertical swipe feed is live with stub data
-> (7 fixture videos from `GET /api/feed`, title only); the database, the real
+> (7 fixture videos from `GET /api/feed`, title only). The database schema is
+> built and tested locally and in CI, but is not in production yet; the real
 > feed data and recipes are not built yet. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
@@ -66,16 +67,21 @@ Full requirements, scope and performance targets: [PRD](docs/PRD.md).
 
 ### 1.4. Installation
 
-Prerequisites: Node 26+ and pnpm.
+Prerequisites: Node 26+, pnpm, and Docker for the local database.
 
 ```bash
-pnpm install      # install dependencies
-pnpm dev          # dev server at http://localhost:3000
-pnpm test         # unit tests
-pnpm test:e2e     # end-to-end tests
+pnpm install                 # install dependencies
+cp .env.example .env.local   # local settings (git-ignored)
+pnpm db:up                   # local Postgres 17 in Docker
+pnpm db:setup                # the read-only role the app uses
+pnpm db:migrate              # create the tables
+pnpm dev                     # dev server at http://localhost:3000
+pnpm test                    # unit tests (no database needed)
+pnpm test:db                 # database tests
+pnpm test:e2e                # end-to-end tests
 ```
 
-Setup details, E2E tests and testing a deployed site:
+Setup details, the database, E2E tests and testing a deployed site:
 [docs/development.md](docs/development.md).
 
 ---
@@ -124,6 +130,10 @@ Vercel deploys `main` to production on every merge. `main` is protected:
 every change goes through a pull request with CI green. After each deploy, a
 smoke test runs against production. Flow:
 [CONTRIBUTING.md](CONTRIBUTING.md).
+
+The database is Postgres on Neon. The app reads it as a read-only role; schema
+changes are migrations in the repo, reviewed in a pull request
+([ADR 0007](docs/adr/0007-database-connections-roles-and-migrations.md)).
 
 ### 2.5. Security
 

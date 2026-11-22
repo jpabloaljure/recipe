@@ -13,6 +13,7 @@ folder. Diagrams live in [`../architecture/`](../architecture/README.md).
 | [0004](0004-ingestion-on-github-actions.md) | Daily ingestion as a TypeScript script on GitHub Actions | Accepted | 2026-11-15 |
 | [0005](0005-single-package-repository-layout.md) | Single-package repository layout | Accepted | 2026-11-16 |
 | [0006](0006-playwright-end-to-end-tests.md) | Playwright for end-to-end tests | Accepted | 2026-11-16 |
+| [0007](0007-database-connections-roles-and-migrations.md) | Database connections, roles and migrations (refines 0003) | Accepted | 2026-11-21 |
 
 ## Pending decisions
 
