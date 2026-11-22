@@ -1,6 +1,6 @@
 // Database tests for the `video-catalog` capability: tables and integrity rules.
 // One test per scenario, named `video-catalog › <Requirement> › <Scenario>`
-// (openspec/changes/add-video-catalog-schema/specs/video-catalog/spec.md).
+// (openspec/specs/video-catalog/spec.md).
 import type { Client } from "pg";
 import { beforeAll, describe, expect, test } from "vitest";
 import { PG, insertRecipe, insertVideo, youtubeId } from "./test/fixtures";

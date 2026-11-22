@@ -1,6 +1,6 @@
 // The video catalog schema (REC-019, ADR 0003 and 0007). The target design is
 // docs/architecture/data-model.md; the rules the database enforces are in
-// openspec/changes/add-video-catalog-schema/specs/video-catalog/spec.md.
+// openspec/specs/video-catalog/spec.md.
 //
 // Not declared here (Drizzle cannot express them), so they live in
 // hand-written SQL migrations: the feed-entry trigger and its check
