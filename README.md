@@ -3,9 +3,10 @@
 A mobile-first web app with a vertical, full-screen feed of short YouTube
 cooking videos (Shorts), each with an easy written recipe.
 
-> Status: **MVP in progress.** The vertical swipe feed is live with stub data
-> (7 fixture videos from `GET /api/feed`, title only). The database schema is
-> in production (still empty); the real feed data and recipes are not built yet. Delivery progress:
+> Status: **MVP in progress.** The vertical swipe feed reads its videos from
+> the database through `GET /api/feed` (newest first, shuffled within each
+> page). Production shows videos once the curated list is loaded; recipes are
+> not built yet, so every video is title only. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
 ## Index
@@ -74,6 +75,7 @@ cp .env.example .env.local   # local settings (git-ignored)
 pnpm db:up                   # local Postgres 17 in Docker
 pnpm db:setup                # the read-only role the app uses
 pnpm db:migrate              # create the tables
+pnpm db:seed                 # made-up videos for the feed
 pnpm dev                     # dev server at http://localhost:3000
 pnpm test                    # unit tests (no database needed)
 pnpm test:db                 # database tests
@@ -180,6 +182,10 @@ Validated stories (all stories: [backlog/](backlog/README.md)):
 - [**REC-001** · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe):
   as a home cook, I want to swipe through short recipe videos one at a time,
   so that I can quickly find something to cook today.
+- [**REC-002** · Feed shows ready and title-only videos, newest first with variety](backlog/E01-browse-feed.md#rec-002--feed-shows-ready-and-title-only-videos-newest-first-with-variety):
+  as a home cook, I want the feed to contain easy recipe videos, plus videos
+  whose recipe could not be found shown by their title, in a fresh order, so
+  that I always have something worth watching.
 - [**REC-019** · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog):
   as a maintainer, I want one versioned database schema for videos, their
   status and their recipe, so that the feed and the ingestion job read and write

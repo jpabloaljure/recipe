@@ -9,8 +9,9 @@ How to install, run and test Easy Recipes on your machine.
 - Docker, for the local database (or Homebrew's `postgresql@17`, see
   [Use Homebrew instead of Docker](#use-homebrew-instead-of-docker)).
 
-The page and the stub `GET /api/feed` need no database. The database setup
-below is for working on the schema and for `pnpm test:db`.
+The page loads without a database, but `GET /api/feed` reads one: without
+`DATABASE_URL` it answers 500 and the feed shows no videos. The database setup
+below serves that, the schema work and `pnpm test:db`.
 
 ## Run the app
 
@@ -32,7 +33,13 @@ cp .env.example .env.local   # once: local values, git-ignored
 pnpm db:up                   # start Postgres 17 in Docker (host port 54329)
 pnpm db:setup                # create the read-only role app_readonly (safe to repeat)
 pnpm db:migrate              # apply the migrations
+pnpm db:seed                 # add made-up fixture videos (safe to repeat)
 ```
+
+With the seed in place, `pnpm dev` or `pnpm build && pnpm start` serves a real
+`GET /api/feed`. Point the app at the local database with
+`DATABASE_URL=postgres://app_readonly:app_readonly@localhost:54329/easy_recipes`
+(the value in `.env.example`; Next.js reads `.env.local`).
 
 Other commands:
 
@@ -58,6 +65,31 @@ docker compose down -v       # stop it and delete the data: start again from emp
   Add a new one.
 - **Reset after changing an unmerged migration:** `docker compose down -v`, then
   `pnpm db:up`, `pnpm db:setup`, `pnpm db:migrate`.
+
+### Seed script and curated-list loader
+
+- **`pnpm db:seed`** (`scripts/db/seed.mts`) adds 14 made-up videos (11 in the
+  feed, 3 outside it) for local development and for CI's end-to-end step. A
+  video already stored is left as it is, so running it twice changes nothing.
+  It refuses a database that is not this machine.
+- **`pnpm db:load-curated [list.json]`** (`scripts/db/load-curated.mts`) loads the
+  curated list of real Shorts, `scripts/db/curated-shorts.json` by default. Each
+  entry has `youtube_id`, `title`, `channel_name`, `channel_id`,
+  `duration_seconds`, `embeddable` and `language`. A Short that is at most 3
+  minutes, embeddable and in English is stored as `needs_recipe`; one that
+  fails those checks is stored as `rejected` and never shows in the feed. An
+  entry with a missing field or a repeated ID is skipped and logged with its
+  YouTube ID. A missing or invalid file fails before anything is written, and
+  a video already stored is never changed. It uses `DATABASE_URL_DIRECT`, so
+  locally it writes to the local database.
+- **First deploy of the real feed:** the production smoke run on the merge
+  commit fails until the loader has run, because the `@smoke` test needs a
+  video. Run the loader workflow, then re-run that smoke run.
+- **In production** the loader runs as the manual workflow
+  `.github/workflows/load-curated.yml` (Actions tab, "Load curated Shorts", or
+  `gh workflow run load-curated.yml`). It runs only from `main` and uses the
+  `DATABASE_URL_DIRECT` secret. New videos can take up to an hour to show in the
+  feed because of the CDN cache.
 
 ### Reviewing a migration
 
@@ -116,6 +148,10 @@ pnpm test:e2e --grep @smoke             # smoke test only
 `pnpm test:e2e` reuses a server already running on port 3000; stop `pnpm dev`
 first so the tests run against the production build.
 
+The `@smoke` test does not stub `/api/feed`: it loads the real route and checks
+the feed shows a video, so it needs `DATABASE_URL` to point at a migrated,
+seeded database (`pnpm db:seed`). Every other test stubs the feed itself.
+
 ## Test a deployed site
 
 Set `BASE_URL` and Playwright tests that URL instead of starting a local
@@ -130,7 +166,8 @@ BASE_URL=https://recipe-henna-pi.vercel.app pnpm test:e2e --grep @smoke --projec
 
 `.github/workflows/ci.yml` runs typecheck, unit tests, database tests (against a
 `postgres:17` service container), build and E2E tests on every pull request and
-push to `main`; `main` is protected and needs it green.
+push to `main` (the E2E step migrates and seeds that container and starts the
+build against it as `app_readonly`); `main` is protected and needs it green.
 `.github/workflows/smoke-production.yml` runs the smoke test against
 production after each deploy.
 

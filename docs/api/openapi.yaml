@@ -6,9 +6,8 @@ info:
   description: |
     The contract between the Easy Recipes web app and its two read-only route
     handlers (ADR 0002). Owned by backlog story REC-021. Implemented by
-    REC-001 (the feed client and a stub feed route serving a title-only
-    fixture), REC-002 (the feed's data from the database) and REC-014 (the
-    deep link). When code and this file differ,
+    REC-001 (the feed client), REC-002 (the feed route and its data from the
+    database) and REC-014 (the deep link). When code and this file differ,
     this file is updated in the same change. The version follows the PRD
     version (v0.3).
 
@@ -26,8 +25,8 @@ info:
     response as a failed request (REC-018).
 
     **Caching.** Responses with at least one video send
-    `Cache-Control: public, s-maxage=3600` (PERF-6). Empty, 404 and error
-    responses send `Cache-Control: no-store`, so a video that enters the
+    `Cache-Control: public, s-maxage=3600` (PERF-6), for the first page and
+    for later pages. Empty, 404 and error responses send `Cache-Control: no-store`, so a video that enters the
     feed later is not hidden by a cached response.
 
     **Field mapping.** JSON names are camelCase, mapped from the snake_case
@@ -77,7 +76,7 @@ paths:
         '200':
           description: |
             A page of the feed. A page with items is cached
-            (`public, s-maxage=3600`); an empty feed is not (`no-store`).
+            (`public, s-maxage=3600`); an empty page is not (`no-store`).
           headers:
             Cache-Control:
               $ref: '#/components/headers/CacheControlFeed'
@@ -136,8 +135,10 @@ components:
       description: |
         Opaque value from a previous page's `nextCursor`, passed back
         unchanged. Leave it out to get the first page. A value that cannot be
-        decoded, the empty string included, or that points past the end of
-        the feed, returns 400 `invalid_cursor`.
+        decoded, the empty string included, returns 400 `invalid_cursor`. A
+        value that decodes but has no videos after it (they left the feed
+        while a cached page was served) returns an empty last page:
+        `items: []`, `nextCursor: null`, `no-store`.
       schema:
         type: string
     YoutubeId:
@@ -158,7 +159,7 @@ components:
     CacheControlFeed:
       description: |
         `public, s-maxage=3600` when the page has at least one item;
-        `no-store` for an empty feed.
+        `no-store` for an empty page.
       schema:
         type: string
         enum:
@@ -171,7 +172,7 @@ components:
         const: no-store
   responses:
     InvalidCursor:
-      description: The cursor cannot be decoded, or points past the end of the feed.
+      description: The cursor cannot be decoded.
       headers:
         Cache-Control:
           $ref: '#/components/headers/CacheControlNoStore'

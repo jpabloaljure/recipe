@@ -72,7 +72,22 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
+      # The production build reads this database through the read-only role,
+      # as it does on Vercel, so the @smoke test exercises the real
+      # /api/feed route (REC-002). The service container is created for this
+      # run only, so no shared database is used (E2E rule 5). The roles come
+      # first: a migration grants SELECT to app_readonly.
+      - name: Prepare the E2E database
+        env:
+          DATABASE_URL_DIRECT: postgres://postgres:postgres@localhost:5432/postgres
+        run: |
+          pnpm db:setup
+          pnpm db:migrate
+          pnpm db:seed
+
       - name: E2E tests
+        env:
+          DATABASE_URL: postgres://app_readonly:app_readonly@localhost:5432/postgres
         run: pnpm test:e2e
 
       - name: Upload E2E report

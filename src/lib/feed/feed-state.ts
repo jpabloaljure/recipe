@@ -34,6 +34,8 @@ export const initialFeedState: FeedState = {
 /**
  * Adds a received page to the visit order. A video already in the visit is
  * skipped, so each `youtubeId` appears once per cycle and slide keys stay unique.
+ * The page's videos are added in the order given: the caller shuffles the page
+ * once on arrival (`shuffleFeedPage`), so this stays a pure function of its inputs.
  */
 export function appendPage(state: FeedState, page: FeedPage): FeedState {
   const seen = new Set(state.visit.map((item) => item.youtubeId));

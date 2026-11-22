@@ -1,0 +1,67 @@
+name: Load curated Shorts
+
+# Loads the curated list of real Shorts (scripts/db/curated-shorts.json) into
+# the production Neon database (REC-002, change add-database-feed, design D8).
+#
+# - Manual only: start it from the Actions tab or `gh workflow run load-curated.yml`.
+#   It never runs on a push.
+# - Only from `main`, so an unmerged branch cannot write to production.
+# - Uses the owner role through the direct connection (DATABASE_URL_DIRECT, set
+#   only in GitHub Actions secrets, never in Vercel): the only write credential
+#   (ADR 0007).
+# - Safe to run again: a video already stored is never changed or duplicated
+#   (ING-3), so the retry below and a re-run after a failure only add what is
+#   missing. New videos can take up to an hour to show in the feed (the 1 hour
+#   CDN cache, PERF-6).
+# - The first production smoke run after REC-002 merges fails, because the @smoke
+#   test needs a video and production has none yet. Run this workflow, then
+#   re-run that smoke run (`gh run rerun <run-id>`).
+# - One run at a time; a later run waits, it never cancels one in progress.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-curated-production
+  cancel-in-progress: false
+
+jobs:
+  load:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          # v5 caches automatically when package.json has "packageManager",
+          # which needs pnpm before it is installed below.
+          package-manager-cache: false
+
+      # Node 25+ ships no Corepack: install the pnpm version pinned in
+      # package.json ("packageManager") with npm, as the CI workflow does.
+      - name: Install pnpm
+        run: npm install -g "$(node -p "require('./package.json').packageManager")"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Three attempts: the first connection after the database has been idle
+      # meets Neon's cold start (ADR 0003). A list file that is missing or not
+      # valid JSON fails before any write, so a retry cannot make it worse.
+      - name: Load the list
+        env:
+          DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: |
+          for attempt in 1 2 3; do
+            if pnpm db:load-curated; then
+              exit 0
+            fi
+            echo "::warning::Attempt $attempt failed; waiting for the database to wake up"
+            sleep 10
+          done
+          echo "::error::The load failed after 3 attempts"
+          exit 1

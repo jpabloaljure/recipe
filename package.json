@@ -13,6 +13,8 @@
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "db:setup": "node scripts/db/setup-roles.mts",
+    "db:seed": "node scripts/db/seed.mts",
+    "db:load-curated": "node scripts/db/load-curated.mts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

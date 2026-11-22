@@ -73,6 +73,20 @@ describe("appendPage", () => {
     expect(state.visit.map((i) => i.youtubeId)).toEqual(["a", "b", "c"]);
     expect(state.catalogEnded).toBe(true);
   });
+
+  it("adds a page's videos in the order given and keeps the pages already in the visit order", () => {
+    const first = appendPage(initialFeedState, pageOf(["c", "a", "b"], "c1"));
+    const second = appendPage(first, pageOf(["f", "d", "e"], "c2"));
+    const third = appendPage(second, pageOf(["h", "g"], null));
+    expect(third.visit.map((i) => i.youtubeId)).toEqual(["c", "a", "b", "f", "d", "e", "h", "g"]);
+    expect(third.visit.slice(0, 3)).toEqual(first.visit);
+    expect(third.visit.slice(0, 6)).toEqual(second.visit);
+  });
+
+  it("gives the same result when run twice (no randomness inside)", () => {
+    const page = pageOf(["a", "b", "c"], "c1");
+    expect(appendPage(initialFeedState, page)).toEqual(appendPage(initialFeedState, page));
+  });
 });
 
 describe("shouldRequestNextPage", () => {
