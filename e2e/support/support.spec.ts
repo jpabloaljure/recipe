@@ -7,7 +7,10 @@ test("feed stub › stubbed page › renders its slides", async ({ page }) => {
   const requested = await openFeed(page, catalog(videos(2), 2));
 
   await expect(slides(page)).toHaveCount(4); // two videos, then one wrap-around cycle
-  await expect(slides(page).first()).toHaveAttribute("data-youtube-id", "video1");
+  // The client shuffles each page (REC-002), so only the set of videos is fixed.
+  const ids = await slides(page).evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-youtube-id")));
+  expect([...ids.slice(0, 2)].sort()).toEqual(["video1", "video2"]);
+  expect(ids.slice(2)).toEqual(ids.slice(0, 2)); // the wrap-around cycle repeats the visit's order
   expect(requested).toEqual([null]);
 });
 

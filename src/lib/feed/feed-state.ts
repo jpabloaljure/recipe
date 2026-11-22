@@ -1,3 +1,4 @@
+import { type RandomSource, shufflePage } from "./shuffle";
 import type { FeedItem, FeedPage } from "./types";
 
 /**
@@ -34,8 +35,10 @@ export const initialFeedState: FeedState = {
 /**
  * Adds a received page to the visit order. A video already in the visit is
  * skipped, so each `youtubeId` appears once per cycle and slide keys stay unique.
+ * The page's videos are shuffled once, here (REC-002, API-2); videos already in
+ * the visit keep their place. `random` is injectable so tests can fix the order.
  */
-export function appendPage(state: FeedState, page: FeedPage): FeedState {
+export function appendPage(state: FeedState, page: FeedPage, random: RandomSource = Math.random): FeedState {
   const seen = new Set(state.visit.map((item) => item.youtubeId));
   const added = page.items.filter((item) => {
     if (seen.has(item.youtubeId)) return false;
@@ -44,7 +47,7 @@ export function appendPage(state: FeedState, page: FeedPage): FeedState {
   });
   return {
     ...state,
-    visit: [...state.visit, ...added],
+    visit: [...state.visit, ...shufflePage(added, random)],
     nextCursor: page.nextCursor,
     catalogEnded: page.nextCursor === null,
   };
