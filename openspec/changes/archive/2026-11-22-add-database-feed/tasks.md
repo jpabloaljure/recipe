@@ -43,7 +43,7 @@ open a pull request (`main` is protected); run `pnpm typecheck`, `pnpm test`,
 ## Manual checks (E2E rule 13, to run after the first deploy)
 
 - [x] M.1 A second request to `https://recipe-henna-pi.vercel.app/api/feed` shows a Vercel cache `HIT`; only the deployed CDN can show whether it keeps `s-maxage` Done 2026-11-22: the second request showed `x-vercel-cache: HIT`; the browser-facing `cache-control` shows only `public` (Vercel removes `s-maxage`), and the CDN still caches.
-- [x] M.2 Recheck that the list's embeds still play (blocks can change by region or over time) and skim the language guesses noted for the list, then run the loader workflow once on `main` with the real list; verify the videos exist as `needs_recipe` in the production database and appear in the feed after the 1 hour cache Done 2026-11-22: the loader run stored 27 videos (24 `needs_recipe`, 3 `rejected`) and `/api/feed` returned 10 items with a next cursor; the production smoke re-run was green. The embeds were NOT rechecked before loading (the maintainer chose to run it at once).
+- [x] M.2 Recheck that the list's embeds still play (blocks can change by region or over time) and skim the language guesses noted for the list, then run the loader workflow once on `main` with the real list; verify the videos exist as `needs_recipe` in the production database and appear in the feed after the 1 hour cache Done 2026-11-22: the loader run stored 27 videos (24 `needs_recipe`, 3 `rejected`) and `/api/feed` returned 10 items with a next cursor; the production smoke re-run was green. The embeds were not rechecked before loading (the maintainer chose to run it at once); the maintainer checked the result by hand afterwards and it was successful.
 
 ## Scenarios covered by unit or database tests, not E2E (E2E rule 1)
 
@@ -57,5 +57,5 @@ to 2.3 and 3.1; the `video-catalog` loader scenarios by tasks 4.1 and 4.2.
 
 ## Workflow follow-up
 
-- Not performed: the real-device flick and wheel wrap check on Android and desktop (was M.3, E2E rule 13). A real-phone look on 2026-11-22, on an iPhone (outside the MVP), found the header-outside-the-video bug recorded as D-11 in `backlog/draft-backlog-list.md` with screenshots in `backlog/evidence/D-11-ios-landscape-header/`.
+- Done by the maintainer, 2026-11-22: the manual checks (M.1 cache `HIT`, M.2 the loaded feed in production, and the real-device flick and wheel wrap, was M.3, E2E rule 13) were checked by hand and were successful. A real-phone look on an iPhone (outside the MVP) found the header-outside-the-video bug recorded as D-11 in `backlog/draft-backlog-list.md` with screenshots in `backlog/evidence/D-11-ios-landscape-header/`.
 - Done 2026-11-22: the first production smoke run on the merge commit failed as expected (production had no videos); after the loader workflow ran (M.2), the re-run (`gh run rerun`) was green. The change was then archived and REC-002 set to `Status: done`.
