@@ -38,3 +38,34 @@ test("network guard › outside request › fails the test", async ({ page, bloc
   expect(fetchFailed).toBe(true);
   expect(blockedRequests).toEqual(["https://example.com/data.json"]);
 });
+
+test("network guard › IFrame Player API › serves a fake player the tests can drive", async ({ page, blockedRequests }) => {
+  await page.setContent(
+    `<iframe id="v" src="https://www.youtube-nocookie.com/embed/abc123?enablejsapi=1"></iframe>
+     <script src="https://www.youtube.com/iframe_api"></script>`,
+  );
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { YT?: { Player?: unknown } }).YT?.Player)).toBe("function");
+
+  const result = await page.evaluate(
+    () =>
+      new Promise<{ ready: boolean; states: number[]; muted: boolean; id: string | null }>((resolve) => {
+        const states: number[] = [];
+        const w = window as unknown as {
+          YT: { Player: new (el: Element, o: unknown) => { mute(): void; playVideo(): void; youtubeId: string | null } };
+        };
+        const player = new w.YT.Player(document.getElementById("v") as Element, {
+          events: {
+            onReady: () => {
+              player.mute();
+              player.playVideo();
+              resolve({ ready: true, states, muted: true, id: player.youtubeId });
+            },
+            onStateChange: (e: { data: number }) => states.push(e.data),
+          },
+        });
+      }),
+  );
+
+  expect(result).toEqual({ ready: true, states: [1], muted: true, id: "abc123" });
+  expect(blockedRequests).toEqual([]);
+});

@@ -22,7 +22,8 @@ See proposal.md - Why. Current state, checked on 2026-11-23:
 - `next.config.ts` sets no Content-Security-Policy, so the script is not blocked.
 - REC-003's story (validated 2026-11-23) fixes the criteria and these
   decisions: session = the tab, in memory; one-way unmute button; loop mode
-  first with a seek fallback; blocked muted autoplay is REC-018's.
+  first with a seek fallback (the real-player check chose seek, Decision 5);
+  blocked muted autoplay is REC-018's.
 
 ## Goals / Non-Goals
 
@@ -72,6 +73,15 @@ after the first page arrives.
 Alternative: let the API create the iframe from an empty `<div>`. That moves
 iframe creation out of React and breaks `openFeed`'s wait.
 
+`player.destroy()` removes the iframe from the page (checked against the real
+API on 2026-11-23), so the player is destroyed only when its iframe is already
+out of the document: on a real unmount, not in React's development double mount.
+
+Checked on 2026-11-23 against the real player (task 1.1, built-in browser,
+Chromium 156): attaching right after the iframe is inserted and attaching after
+its `load` event both reach ready (579 ms and 256 ms). So the adapter attaches
+on mount, with no wait for `load`.
+
 ### 3. One player per mounted iframe, created once
 
 A player is created when its iframe mounts and destroyed when the iframe
@@ -119,18 +129,23 @@ own, `"swipe"` or `"hidden"`. A `paused` event with no mark is the user's. On
 plays again; a user's pause stays. Becoming active again clears the mark, seeks
 to 0 and plays.
 
-### 5. Loop and `ended`: one contract, two modes
+### 5. Loop and `ended`: seek mode
 
 The controller reports `onEnded(youtubeId)` on every end, including each loop.
-Two modes sit behind it:
+Two modes were possible behind that contract:
 - **loop:** the embed URL has `loop=1&playlist=<id>`, and the controller forwards
   the player's `ended` state if it arrives;
 - **seek:** no loop parameter; on `ended` the controller reports it, seeks to 0
   and plays.
 
-Task 1 is a manual check in real Chrome on Android and desktop: does loop mode
-report each end, and how long is the gap in seek mode? The result picks the
-mode and is written here. Nothing outside the controller depends on it.
+**Chosen: seek.** Checked on 2026-11-23 against the real player (desktop part
+of task 1.2, built-in browser, Chromium 156): with the video seeked 2 s before its end, loop
+mode never reported `ended` (the state stayed `playing`), so it cannot meet the
+contract; seek mode reported `ended`, and the player was `playing` again 28 ms
+later (the visible gap on a real device is still a manual check). Only seek mode
+is built, and the embed URL has no loop parameter. The Android and real-Chrome
+check of task 1.2 confirms it; if it showed loop mode reporting every end, the
+loop mode could be added behind the same contract.
 
 How the feed tells the app: the feed element dispatches a bubbling
 `CustomEvent("videoended", { detail: { youtubeId } })`. REC-007 can listen to it
@@ -149,8 +164,13 @@ type:
 - **no room** (tall phone): a transparent icon over the video's bottom-right
   corner, raised above YouTube's control bar, with a small hit area.
 
-The aspect-ratio threshold (about 3/4) is set and checked on the three E2E
-projects and on a tablet-shaped window in task 6 (`(assumed)`). The feed spec's
+The threshold is `max-aspect-ratio: 3/4`: at 3/4 or narrower the icon goes over
+the corner, which always fits; wider leaves at least about 75 px beside the
+video at 800 px of height. Checked on 412x915, 768x1024, 800x1000, 600x800,
+820x1180, 1024x768, 1280x800 and 915x412 (task 6.1): the button was always on
+screen, outside the video above 3/4 and over the corner at or below it. A window
+shorter than about 630 px with an aspect ratio just above 3/4 leaves less room
+than the button needs, an accepted edge case. The feed spec's
 "Taps reach the video player" requirement gets the narrow exception for this
 icon (specs/feed). A swipe that starts on the icon is not handled by the icon,
 so it scrolls the feed; this is checked in E2E and, on a real phone, manually.

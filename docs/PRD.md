@@ -50,7 +50,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 
 ### 5.2 Playback
 - **Autoplay** when a video becomes the active one in the feed.
-- **Starts muted** (a browser requirement). One tap unmutes, and the choice is remembered for the rest of the session (later videos play with sound).
+- **Starts muted** (a browser requirement). One tap unmutes, and the choice is remembered while the tab stays open (later videos play with sound; a reload starts muted again). If the browser refuses sound, the video plays muted and the unmute button comes back.
 - **Loops:** when the video ends it restarts automatically.
 - Videos that scroll out of view are paused.
 
