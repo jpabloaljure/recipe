@@ -2418,3 +2418,79 @@ Ask what prompt register from
 - **Result:** production serves 24 curated Shorts from the database (10 per page, a next cursor, CDN `HIT`) and the re-run production smoke is green. The AI review found seven issues: five fixed, two answered (the production smoke order, a partial index). The manual checks (cache `HIT`, the loaded feed, the real-device wrap) were done by the maintainer and were successful; the embeds were not rechecked before loading, only by hand afterwards. The iPhone landscape bug is recorded as D-11 with its cause still unconfirmed (Xcode is not installed for the simulator). PR #61 was waiting for CI at the time of this entry.
 - **Models:** Sonnet 5.5 (main session, all prompts) · Haiku 5.5, effort low (`doc-checker`, four runs: the OpenAPI file, the changed docs, the close-out files and this log) · a separate Sonnet 5.5 session produced the curated list (prompts 309–312).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent.
+
+## 336. Validate REC-003
+
+```
+/validate-backlog REC-003
+```
+
+## 337. Choose options and ask for a clearer explanation of the loop options
+
+```
+#2, #3 B. #7, #8, #10 · Loop signal, neighbours and the end screen Explain better the options Im not uderstunding, i will be able to loop every video with option A and display the recipe in the future after the first playback finich? All rest pick A.
+```
+
+## 338. Pick option A for the loop and confirm the one-way unmute
+
+```
+#7, #8, #10 lets do A. 1. #2/#3 B Te answer is yes.
+```
+
+## 339. Set option B as the fallback for the loop
+
+```
+If the loop check fails we move to "B: The app listens for "ended" itself and rewinds to 0. That makes the signal reliable, but a short gap before the restart is possible." But lets try A first
+```
+
+## 340. Ask for the re-check
+
+```
+done
+```
+
+## 341. Question the recommendation for finding #15
+
+```
+#15 · Unmuting through YouTube's controls, are you actually recomending B to have better stability?
+```
+
+## 342. Choose all options A for the new findings
+
+```
+#15 A, #16 A, #17 A, #18 A, #19 A, #20 A
+```
+
+## 343. Approve the acceptance criteria
+
+```
+AC approved
+```
+
+## 344. Give the team estimate
+
+```
+5
+```
+
+## 345. Validate the story
+
+```
+validated
+```
+
+## 346. Register from /validate-backlog (question dialog answer)
+
+```
+From /validate-backlog
+```
+
+### Summary (prompts 336–346)
+
+- **Goal:** validate REC-003 (autoplay muted, tap to unmute, loop) with the `validate-backlog` flow, from the first check to the team estimate.
+- **Changes:**
+  - **Backlog:** `backlog/E01-browse-feed.md`: REC-003 acceptance criteria rewritten (10 scenarios), Technical context filled (session = tab, one-way unmute button, loop mode first with fallback B, "ended" event contract, test plan, scope), AI estimate 5, team Estimate 5, flag `needs-human-validation` removed.
+  - **Log:** `backlog/validation-log.md`: REC-003 row set to `validated`.
+- **Result:** REC-003 is validated with no open findings (14 earlier findings and 6 new ones all resolved) and can become an OpenSpec change. The manual loop check is left to that change. Not yet committed: the two backlog files are uncommitted in the working tree.
+- **Models:** Sonnet 5.5 (main session, all prompts) · Sonnet 5.5 (`story-validator`, two runs) · `estimate-story` ran in the main session.
+- **Why:** the cap keeps validation and estimating on Sonnet at medium effort; the findings come from a read-only agent and the choices stay with the user.
