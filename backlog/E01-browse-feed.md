@@ -101,25 +101,40 @@ AI estimate (2026-11-22): 8. Calibration: REC-001 (team 5) is the nearest full s
 - **Status:** todo
 - **Labels:** module:playback, type:feature, size:M, layer:frontend
 - **PRD:** 5.2, 9 (YouTube ToS, autoplay rules)
-- **Flags:** needs-human-validation; (assumed) "session" means the current browser tab/visit
-- **AI estimate:** —
-- **Estimate:** —
+- **Flags:** —
+- **AI estimate:** 5
+- **Estimate:** 5
 
 As a home cook, I want videos to start playing on their own and keep looping, so that I can follow along without touching the screen.
 
 ### Acceptance criteria
-- Given a video becomes the active one, when it is shown, then it starts playing automatically and muted.
-- Given a video is playing muted, when I tap unmute once, then it plays with sound and every later video in the session also plays with sound.
-- Given a video is playing, when it reaches the end, then it restarts automatically.
+- Given a video becomes the active one and I have not turned sound on in this tab, when it is shown, then it starts playing automatically and muted.
+- Given a video is playing muted, when I tap the unmute button, then it plays with sound and the unmute button is no longer shown.
+- Given I turned sound on in this tab, when another video becomes active, then it plays with sound.
+- Given I turned sound on in this tab and the browser blocks unmuted autoplay, when another video becomes active, then it plays muted and the unmute button is shown.
+- Given a video is playing, when it reaches the end, then it restarts automatically and the app is told that it ended.
 - Given a video is playing, when I swipe it out of view, then it is paused.
-- Given any video in the feed, when it plays, then it plays inside the official YouTube embedded player and is never downloaded or re-hosted.
+- Given I swiped away from a video, when I swipe back to it, then it plays again from the beginning.
+- Given I paused the video with the player's own control, when I stay on that video, then it stays paused.
+- Given a video is playing, when the browser tab is hidden, then it is paused.
+- Given the tab was hidden while a video was playing, when I return to the tab, then the video plays again.
 
 ### Technical context
-—
+- "Session" means the current browser tab, kept in memory only: a reload starts muted again (decision 2026-11-23).
+- No overlay on the video: a tap on the video reaches YouTube's own controls (REC-001). The only app-owned control is a one-way unmute button outside the iframe: it disappears once sound is on, and muting again is left to YouTube's own controls (decision 2026-11-23). The app's sound state is set only by that button and applies to every newly active video, next, previous or returning. Unmuting through YouTube's own controls does not carry over: the app button stays visible, and the next video starts muted until it is tapped (decision 2026-11-23; the player has no volume-change event, `(inferred)`).
+- Neighbour players stay muted and paused until active; preloading belongs to REC-004 and error states to REC-018. Related: REC-001, REC-004, REC-007, REC-018.
+- Constraint: every video plays inside the official YouTube embedded player and is never downloaded or re-hosted (PRD §9).
+- Scope: Chrome on Android and desktop only (Decided 1).
+- Tests: stubbed-player E2E for mute/unmute, carry-over, pause on swipe, return and hidden tab. Manual (E2E rule 13): real autoplay, real loop and the end screen, and the YouTube player's own pause control.
+- Loop (decision 2026-11-23): the player's own loop mode restarts the video. This story raises an "ended" event on every end; REC-007 counts the first one and opens the panel. YouTube may flash its end screen, and whether the player reliably reports each end in loop mode is `(inferred)`: check manually. Try this first; if the check fails, switch to option B (the app listens for the ended state itself and seeks to 0), accepting a possible short gap before the restart (decision 2026-11-23). The manual loop check is a task of the OpenSpec change, not a gate on the estimate.
+- "Ended" event contract: fired on every end, including each loop, carrying the video ID. REC-007 decides how to count it (first end per view) when it is validated.
+- Out of scope: autoplay failing even when muted (data saver, browser policy) belongs to REC-018.
 
 ### Estimation notes
 M: behavior is clear, but the official embedded player limits customization (§9).
-Browser autoplay rules need testing across mobile browsers.
+Autoplay rules are checked manually on Chrome for Android and desktop.
+
+AI estimate (2026-11-23): 5. Calibration: REC-001 (team 5) is the nearest slice: a frontend feed with a stubbed source and E2E tests. REC-003 has no server side, but 10 criteria, each needing a stubbed-player E2E test, and it replaces the plain embed with the player's script API (autoplay, mute state, ended events, visibility handling), which REC-001 did not need. Risks that move it: the stubbed player in `e2e/support/` has to fake the player API (state changes, mute, blocked autoplay), which is new work (assumed: no stub exists yet); and whether the loop mode reports each end is `(inferred)`, where fallback B adds code and a possible gap. It would go to 8 if the player stub turns out to be large. Size check: 5 matches `size:M`, no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-004 · Instant transition to the next video
 - **Status:** todo
