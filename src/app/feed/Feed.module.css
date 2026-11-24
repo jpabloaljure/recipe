@@ -54,9 +54,13 @@
   border-radius: 50%;
   color: #fff;
   cursor: pointer;
-  /* Outside the video, at its bottom right, raised to sit level with YouTube's own side buttons. */
+  /*
+   * Outside the video, at its bottom right, 5px above YouTube's control area
+   * (measured on 2026-11-23: it is 120px tall on a 450x800 player, its top edge
+   * being the fullscreen button).
+   */
   left: calc(100% + 16px);
-  bottom: 96px;
+  bottom: 125px;
   background: rgba(255, 255, 255, 0.16);
 }
 
@@ -70,7 +74,8 @@
   .unmute {
     left: auto;
     right: 8px;
-    bottom: 64px;
+    /* 5px above YouTube's control area, which is 115px tall on a 375x812 phone. */
+    bottom: 120px;
     width: 44px;
     height: 44px;
     background: rgba(0, 0, 0, 0.18);
