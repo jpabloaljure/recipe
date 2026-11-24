@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { debugLog } from "../../lib/player/debug-log";
 import { embedUrl } from "../../lib/player/embed-url";
 import { SlidePlayback } from "../../lib/player/playback";
 import type { Timers } from "../../lib/player/types";
@@ -20,8 +19,6 @@ type Props = {
   onPlayback: (playback: SlidePlayback | null) => void;
   onEnded: (youtubeId: string) => void;
   onSoundBlocked: () => void;
-  /** The home cook muted or unmuted with the player's own control. */
-  onSoundChanged: (soundOn: boolean) => void;
 };
 
 /**
@@ -29,11 +26,11 @@ type Props = {
  * iframe; the player is attached to it when it mounts and lives as long as the
  * iframe does (add-autoplay-playback design Decisions 2 and 3).
  */
-export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlocked, onSoundChanged }: Props) {
+export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlocked }: Props) {
   const iframe = useRef<HTMLIFrameElement>(null);
   // The latest callbacks, so the player is created once and not on every render.
-  const callbacks = useRef({ onPlayback, onEnded, onSoundBlocked, onSoundChanged });
-  callbacks.current = { onPlayback, onEnded, onSoundBlocked, onSoundChanged };
+  const callbacks = useRef({ onPlayback, onEnded, onSoundBlocked });
+  callbacks.current = { onPlayback, onEnded, onSoundBlocked };
 
   useEffect(() => {
     const element = iframe.current;
@@ -45,35 +42,16 @@ export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlock
       .then((api) => {
         if (disposed) return;
         let playback: SlidePlayback | undefined;
-        const tag = youtubeId.slice(0, 4);
-        const log = (message: string) => debugLog(`${tag} ${message}`);
         const attached = attachPlayer(api, element, {
           onReady: () => playback?.markReady(),
-          onState: (state) => {
-            log(`state ${state}`);
-            playback?.handleState(state);
-          },
-          onError: (code) => log(`ERROR code ${code}`),
-          onAutoplayBlocked: () => log("AUTOPLAY BLOCKED by the browser"),
+          onState: (state) => playback?.handleState(state),
         });
-        const raw = attached.handle;
-        // Commands are logged so a real device's sequence can be read (`?debug`).
-        const player = {
-          play: () => (log("cmd play"), raw.play()),
-          pause: () => (log("cmd pause"), raw.pause()),
-          mute: () => (log("cmd mute"), raw.mute()),
-          unMute: () => (log("cmd unMute"), raw.unMute()),
-          isMuted: () => raw.isMuted(),
-          seekTo: (seconds: number) => (log("cmd seekTo"), raw.seekTo(seconds)),
-        };
         playback = new SlidePlayback({
           youtubeId,
-          log,
-          player,
+          player: attached.handle,
           timers: browserTimers,
           onEnded: (id) => callbacks.current.onEnded(id),
           onSoundBlocked: () => callbacks.current.onSoundBlocked(),
-          onSoundChanged: (soundOn) => callbacks.current.onSoundChanged(soundOn),
         });
         callbacks.current.onPlayback(playback);
         cleanup = () => {

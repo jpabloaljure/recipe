@@ -14,7 +14,6 @@ export type FakePlayerInfo = {
   youtubeId: string;
   state: string;
   muted: boolean;
-  volume: number;
   calls: string[];
 };
 
@@ -22,19 +21,11 @@ type FakePlayer = {
   youtubeId: string | null;
   state: number;
   muted: boolean;
-  volume: number;
-  mutedReads: number;
   calls: string[];
   destroyed: boolean;
   _set(state: number): void;
 };
-type FakeApi = {
-  players: FakePlayer[];
-  blockUnmutedAutoplay: boolean;
-  reportedMuted: boolean | null;
-  stallAfterUnmute: boolean;
-  stateName(code: number): string;
-};
+type FakeApi = { players: FakePlayer[]; blockUnmutedAutoplay: boolean; stateName(code: number): string };
 
 // Runs in the page; written inline because Playwright serializes the function.
 function liveInfo(youtubeId: string | null) {
@@ -46,7 +37,6 @@ function liveInfo(youtubeId: string | null) {
       youtubeId: p.youtubeId as string,
       state: fake.stateName(p.state),
       muted: p.muted,
-      volume: p.volume,
       calls: [...p.calls],
     }));
 }
@@ -91,33 +81,6 @@ export async function videoIdOfSlide(page: Page, index: number): Promise<string>
   return id;
 }
 
-/** How many times the app has read this video's muted state (it polls the active one). */
-export async function mutedReads(page: Page, youtubeId: string): Promise<number> {
-  return page.evaluate((id) => {
-    const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
-    return fake.players.find((p) => !p.destroyed && p.youtubeId === id)?.mutedReads ?? 0;
-  }, youtubeId);
-}
-
-/** From now on every player reports this muted state, whatever its real state (a wrong constant read). */
-export async function reportMutedAs(page: Page, muted: boolean): Promise<void> {
-  await page.evaluate((value) => {
-    (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.reportedMuted = value;
-  }, muted);
-}
-
-/** The player remembers this volume (0 to 100), as YouTube does from the home cook's earlier use. */
-export async function setPlayerVolume(page: Page, youtubeId: string, volume: number): Promise<void> {
-  await page.evaluate(
-    ({ id, value }) => {
-      const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
-      const player = fake.players.find((p) => !p.destroyed && p.youtubeId === id);
-      if (player) player.volume = value;
-    },
-    { id: youtubeId, value: volume },
-  );
-}
-
 /** The video reaches its end (the real player reports `ended`). */
 export async function emitEnded(page: Page, youtubeId: string): Promise<void> {
   await page.evaluate((id) => {
@@ -134,38 +97,10 @@ export async function emitUserPause(page: Page, youtubeId: string): Promise<void
   }, youtubeId);
 }
 
-/** The home cook turns sound on with the player's own control: the player's muted state changes, no app call. */
-export async function emitUserUnmute(page: Page, youtubeId: string): Promise<void> {
-  await setPlayerMuted(page, youtubeId, false);
-}
-
-/** The home cook mutes with the player's own control. */
-export async function emitUserMute(page: Page, youtubeId: string): Promise<void> {
-  await setPlayerMuted(page, youtubeId, true);
-}
-
-async function setPlayerMuted(page: Page, youtubeId: string, muted: boolean): Promise<void> {
-  await page.evaluate(
-    ({ id, value }) => {
-      const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
-      const player = fake.players.find((p) => !p.destroyed && p.youtubeId === id);
-      if (player) player.muted = value;
-    },
-    { id: youtubeId, value: muted },
-  );
-}
-
 /** From now on the browser refuses sound: unmuting a playing video pauses it. */
 export async function blockUnmutedAutoplay(page: Page): Promise<void> {
   await page.evaluate(() => {
     (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.blockUnmutedAutoplay = true;
-  });
-}
-
-/** From now on unmuting a playing video leaves it buffering for good, with no event (seen on Chrome). */
-export async function stallAfterUnmute(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.stallAfterUnmute = true;
   });
 }
 

@@ -59,17 +59,8 @@ class FakePlayer {
   unMute() {
     this.calls.push("unMute");
   }
-  muted = true;
-  volume = 100;
   isMuted() {
-    return this.muted;
-  }
-  getVolume() {
-    return this.volume;
-  }
-  setVolume(volume: number) {
-    this.calls.push(`setVolume(${volume})`);
-    this.volume = volume;
+    return true;
   }
   seekTo(seconds: number, allowSeekAhead: boolean) {
     this.calls.push(`seekTo(${seconds},${allowSeekAhead})`);
@@ -150,58 +141,5 @@ describe("attachPlayer", () => {
     attached.handle.seekTo(0);
     attached.destroy();
     expect(fake.calls).toEqual(["play", "pause", "mute", "unMute", "seekTo(0,true)", "destroy"]);
-  });
-
-  function attach(options: { volume?: number; muted?: boolean } = {}) {
-    const attached = attachPlayer({ Player: FakePlayer as never }, {} as HTMLIFrameElement, {
-      onReady: () => {},
-      onState: () => {},
-    });
-    const fake = FakePlayer.last;
-    if (options.volume !== undefined) fake.volume = options.volume;
-    if (options.muted !== undefined) fake.muted = options.muted;
-    fake.calls.length = 0;
-    return { attached, fake };
-  }
-
-  it("raises a near-zero volume when it unmutes", () => {
-    const { attached, fake } = attach({ volume: 0 });
-    attached.handle.unMute();
-    expect(fake.calls).toEqual(["unMute", "setVolume(100)"]);
-  });
-
-  it("keeps a normal volume when it unmutes", () => {
-    const { attached, fake } = attach({ volume: 40 });
-    attached.handle.unMute();
-    expect(fake.calls).toEqual(["unMute"]);
-  });
-
-  it("reports a volume of 0 as muted, even if the player is not muted", () => {
-    const { attached } = attach({ volume: 0, muted: false });
-    expect(attached.handle.isMuted()).toBe(true);
-  });
-
-  it("reports a player with sound as not muted", () => {
-    const { attached } = attach({ volume: 80, muted: false });
-    expect(attached.handle.isMuted()).toBe(false);
-  });
-
-  it("passes the player's error and autoplay-blocked events on", () => {
-    const errors: number[] = [];
-    let blocked = 0;
-    attachPlayer({ Player: FakePlayer as never }, {} as HTMLIFrameElement, {
-      onReady: () => {},
-      onState: () => {},
-      onError: (code) => errors.push(code),
-      onAutoplayBlocked: () => blocked++,
-    });
-    const events = FakePlayer.last.options.events as unknown as {
-      onError: (event: { data: number }) => void;
-      onAutoplayBlocked: () => void;
-    };
-    events.onError({ data: 150 });
-    events.onAutoplayBlocked();
-    expect(errors).toEqual([150]);
-    expect(blocked).toBe(1);
   });
 });

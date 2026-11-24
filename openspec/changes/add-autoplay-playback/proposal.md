@@ -14,12 +14,9 @@ it adds.
 
 - The active video starts playing by itself, muted, unless sound was turned on
   in this browser tab.
-- An unmute button, shown whenever the video is muted, turns sound on. Sound
-  then applies to every video that becomes active in the same tab (next,
-  previous or returning). A reload starts muted again, because the state is kept
-  in memory only.
-- The button follows the YouTube player's own mute control: muting or unmuting
-  there shows or hides the button and sets the tab's sound for later videos.
+- A one-way unmute button turns sound on. Sound then applies to every video
+  that becomes active in the same tab (next, previous or returning). A reload
+  starts muted again, because the state is kept in memory only.
 - If the browser blocks autoplay with sound, the video plays muted and the
   unmute button is shown again.
 - A video loops, and the app is told, with the video ID, every time it ends

@@ -11,36 +11,13 @@ import type { PlayerHandle, PlayerState, Timers, TimerHandle } from "./types";
  *   allow that (it pauses the video, or it stays muted) is caught quickly, and
  *   the video plays muted while `onSoundBlocked` tells the feed. Asking for sound
  *   in the first `play()` stalled for the whole window on real Chrome.
- * - The controller follows the player's own mute control: it reads the
- *   player's muted state a few times a second and reacts only to a change (the API has no event for
- *   it), so the feed's button and the tab's sound state match what the home
- *   cook set with YouTube's controls.
  * - The controller remembers why it paused. A pause it did not cause is the
  *   home cook's, and it survives hiding and showing the tab.
  * - Every end is reported, then the video restarts (seek mode, Decision 5).
  */
 
-/** How often the active video's real muted state is read. */
-export const SOUND_POLL_MS = 300;
-
-/**
- * Reads skipped after the controller itself mutes or unmutes: the player reports
- * its muted state late, so an early read still shows the old value and would look
- * like the home cook changed the sound.
- */
-export const POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE = 4;
-
-/**
- * After the controller unmutes a video, it watches for a stall: Chrome can accept
- * an unmute with no error and then leave the player buffering for good (seen on
- * the owner's Chrome, with no event at all). Polls to watch, and polls not playing
- * in a row that count as a stall.
- */
-export const STALL_WATCH_POLLS = 40;
-export const STALL_POLLS = 4;
-
 /** Time the browser gets to refuse an unmute, once the video is playing, before it counts as allowed. */
-export const BLOCKED_AUTOPLAY_WINDOW_MS = 1200;
+export const BLOCKED_AUTOPLAY_WINDOW_MS = 800;
 
 type PauseReason = "swipe" | "hidden" | "user";
 
@@ -52,11 +29,7 @@ export type SlidePlaybackDeps = {
   onEnded: (youtubeId: string) => void;
   /** Called when unmuted autoplay did not start and the video was muted instead. */
   onSoundBlocked: () => void;
-  /** Called when the home cook muted or unmuted the video with the player's own control. */
-  onSoundChanged: (soundOn: boolean) => void;
   blockedWindowMs?: number;
-  /** Optional diagnostics (`?debug`): what the controller decided and why. */
-  log?: (message: string) => void;
 };
 
 export class SlidePlayback {
@@ -69,17 +42,6 @@ export class SlidePlayback {
   private state: PlayerState = "unstarted";
   private pauseReason: PauseReason | null = null;
   private blockedTimer: TimerHandle | null = null;
-  private blockedRecheck = false;
-  /** Polls left to watch for a stall after the controller unmuted this video. */
-  private stallWatchPolls = 0;
-  private notPlayingPolls = 0;
-  private pollTimer: TimerHandle | null = null;
-  /** Reads still to skip after our own mute or unmute. */
-  private pollsToIgnore = 0;
-  /** The muted state read last, once the controller's own sound commands have settled. */
-  private lastRead: boolean | null = null;
-  /** A different muted state seen once; a second read in a row confirms the change. */
-  private candidate: boolean | null = null;
   /** Sound is on but the video has not played yet: unmute once it does. */
   private unmuteWhenPlaying = false;
 
@@ -89,9 +51,8 @@ export class SlidePlayback {
 
   /** The player reported ready: start muted and apply whatever was asked meanwhile. */
   markReady(): void {
-    this.deps.log?.("ready");
     this.ready = true;
-    this.muteNow();
+    this.deps.player.mute();
     if (this.active) this.start();
   }
 
@@ -134,20 +95,14 @@ export class SlidePlayback {
     if (next === "playing" || next === "buffering") {
       if (next === "playing" && this.pauseReason === "user") this.pauseReason = null;
       if (next === "playing" && this.unmuteWhenPlaying) {
-        this.deps.log?.("playing -> asking for sound");
         this.unmuteWhenPlaying = false;
-        this.unmuteNow();
-        this.armStallWatch();
+        this.deps.player.unMute();
         this.armBlockedTimer(); // the browser may pause or keep it muted
       }
     } else if (next === "paused") {
       if (this.pauseReason !== null) return; // a pause we caused
-      if (this.blockedTimer !== null) {
-        this.deps.log?.("paused during the sound check -> sound refused");
-        this.fallBackToMuted();
-      } else {
-        this.pauseReason = "user";
-      }
+      if (this.blockedTimer !== null) this.fallBackToMuted();
+      else this.pauseReason = "user";
     } else if (next === "ended") {
       this.clearBlockedTimer();
       this.deps.onEnded(this.deps.youtubeId);
@@ -158,16 +113,12 @@ export class SlidePlayback {
 
   dispose(): void {
     this.clearBlockedTimer();
-    this.stopPolling();
   }
 
   private start(): void {
-    this.deps.log?.(`start sound=${this.soundOn}`);
-    this.stallWatchPolls = 0;
     this.clearBlockedTimer();
     this.unmuteWhenPlaying = false;
     this.pauseReason = null;
-    this.startPolling();
     // Coming back to a video plays it from the beginning.
     if (this.hasPlayed) this.deps.player.seekTo(0);
     if (!this.tabVisible) {
@@ -181,169 +132,48 @@ export class SlidePlayback {
     const { player } = this.deps;
     // Set before `play()`: a player may report `playing` from inside the call.
     this.unmuteWhenPlaying = this.soundOn;
-    this.muteNow();
+    player.mute();
     player.play();
     this.hasPlayed = true;
   }
 
   private stop(): void {
-    this.deps.log?.("stop");
-    this.stallWatchPolls = 0;
     this.clearBlockedTimer();
-    this.stopPolling();
     this.unmuteWhenPlaying = false;
     this.pauseReason = "swipe";
     this.deps.player.pause();
-    this.muteNow();
-  }
-
-  /** Watches for a stall after the controller unmuted a video (see `watchForStall`). */
-  private armStallWatch(): void {
-    this.stallWatchPolls = STALL_WATCH_POLLS;
-    this.notPlayingPolls = 0;
+    this.deps.player.mute();
   }
 
   /** Sound changed for the active video (the unmute button, which is a tap, or the fallback). */
   private applySound(): void {
     if (!this.soundOn) {
       this.unmuteWhenPlaying = false;
-      this.muteNow();
+      this.deps.player.mute();
     } else if (this.state === "playing") {
-      this.unmuteNow();
-      // A tap on the page does not always let the video inside YouTube's frame play with
-      // sound: the same stall can follow the button, and it lasted 20 s on a real Chrome.
-      this.armStallWatch();
+      this.deps.player.unMute();
     } else {
       this.unmuteWhenPlaying = true; // unmute as soon as it plays
     }
   }
 
-  private armBlockedTimer(recheck = false): void {
+  private armBlockedTimer(): void {
     this.clearBlockedTimer();
-    this.blockedRecheck = recheck;
     const ms = this.deps.blockedWindowMs ?? BLOCKED_AUTOPLAY_WINDOW_MS;
     this.blockedTimer = this.deps.timers.set(() => {
       this.blockedTimer = null;
       const playing = this.state === "playing" || this.state === "buffering";
-      this.deps.log?.(`sound check: state=${this.state} muted=${this.deps.player.isMuted()} recheck=${this.blockedRecheck}`);
-      if (!playing) {
-        this.fallBackToMuted();
-      } else if (this.deps.player.isMuted()) {
-        // The player reports late: look once more before deciding the sound was refused.
-        if (this.blockedRecheck) this.fallBackToMuted();
-        else this.armBlockedTimer(true);
-      }
+      if (!playing || this.deps.player.isMuted()) this.fallBackToMuted();
     }, ms);
   }
 
-  private fallBackToMuted(forcePlay = false): void {
-    this.deps.log?.(`FALLBACK to muted (state=${this.state})`);
+  private fallBackToMuted(): void {
     this.clearBlockedTimer();
-    this.stallWatchPolls = 0;
     this.unmuteWhenPlaying = false;
     this.soundOn = false;
-    this.muteNow();
-    // A refused unmute usually paused the video; a video that kept playing muted needs no
-    // play(). A stalled video does (muting is what lets the browser play it again).
-    const running = this.state === "playing" || this.state === "buffering";
-    if (forcePlay || !running) this.deps.player.play();
-    this.deps.onSoundBlocked();
-  }
-
-  private muteNow(): void {
-    this.noteOwnSoundChange();
     this.deps.player.mute();
-  }
-
-  private unmuteNow(): void {
-    this.noteOwnSoundChange();
-    this.deps.player.unMute();
-  }
-
-  private noteOwnSoundChange(): void {
-    this.pollsToIgnore = POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE;
-    this.lastRead = null;
-    this.candidate = null;
-  }
-
-  /** Reads the player's real muted state while this slide is active (the API has no event for it). */
-  private startPolling(): void {
-    if (this.pollTimer !== null) return;
-    this.pollTimer = this.deps.timers.set(() => {
-      this.pollTimer = null;
-      this.followPlayerSound();
-      if (this.active) this.startPolling();
-    }, SOUND_POLL_MS);
-  }
-
-  private stopPolling(): void {
-    if (this.pollTimer === null) return;
-    this.deps.timers.clear(this.pollTimer);
-    this.pollTimer = null;
-  }
-
-  /**
-   * Chrome can accept an unmute and then leave the player buffering with no event,
-   * no error and no sound. While the watch is on, a video that stays buffering or
-   * unstarted for several polls in a row has had its sound refused: mute it and
-   * play. Returns true when it did, so the poll does nothing else this time.
-   */
-  private watchForStall(): boolean {
-    if (this.stallWatchPolls <= 0) return false;
-    this.stallWatchPolls--;
-    if (this.state === "buffering" || this.state === "unstarted") this.notPlayingPolls++;
-    else this.notPlayingPolls = 0;
-    if (this.notPlayingPolls < STALL_POLLS) return false;
-    this.deps.log?.("stalled after the unmute -> sound refused");
-    this.notPlayingPolls = 0;
-    this.fallBackToMuted(true);
-    return true;
-  }
-
-  /**
-   * A mute or unmute the home cook made with the player's own control. Skipped
-   * while the controller is changing the sound itself (the pending unmute and its
-   * check), and while the video is not playing or paused by the home cook.
-   */
-  private followPlayerSound(): void {
-    if (!this.ready || !this.active) return;
-    if (this.watchForStall()) return;
-    if (this.pollsToIgnore > 0) {
-      this.pollsToIgnore--;
-      // A player may apply the volume the home cook last used on YouTube when it
-      // starts, undoing our mute: the browser then refuses the sound, and the video
-      // looks unmuted but is silent. Mute it again.
-      const playing = this.state === "playing" || this.state === "buffering";
-      if (!this.soundOn && !this.unmuteWhenPlaying && playing && !this.deps.player.isMuted()) {
-        this.deps.log?.("player unmuted itself -> muting again");
-        this.deps.player.mute();
-      }
-      return;
-    }
-    if (this.unmuteWhenPlaying || this.blockedTimer !== null) return;
-    if (this.state !== "playing" && this.state !== "paused") return;
-    // Only a change in what the player reports counts, never its value alone: a
-    // late or wrong constant read must not look like the home cook's mute or unmute.
-    const muted = this.deps.player.isMuted();
-    if (this.lastRead === null) {
-      this.lastRead = muted;
-      return;
-    }
-    if (muted === this.lastRead) {
-      this.candidate = null;
-      return;
-    }
-    if (this.candidate !== muted) {
-      this.candidate = muted; // seen once: wait for a second read in a row
-      return;
-    }
-    this.candidate = null;
-    this.lastRead = muted;
-    const soundNow = !muted;
-    if (soundNow === this.soundOn) return;
-    this.soundOn = soundNow;
-    this.deps.log?.(`player changed the sound -> ${soundNow ? "on" : "off"}`);
-    this.deps.onSoundChanged(soundNow);
+    this.deps.player.play();
+    this.deps.onSoundBlocked();
   }
 
   private clearBlockedTimer(): void {

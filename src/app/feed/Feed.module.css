@@ -84,21 +84,3 @@
     background: rgba(0, 0, 0, 0.18);
   }
 }
-
-/* Player log for diagnosing playback on a real device; only shown with ?debug in the address. */
-.debug {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  max-height: 55vh;
-  margin: 0;
-  padding: 4px 6px;
-  overflow: hidden;
-  font: 10px/1.25 ui-monospace, monospace;
-  color: #7CFC00;
-  white-space: pre-wrap;
-  background: rgba(0, 0, 0, 0.7);
-  pointer-events: none;
-}

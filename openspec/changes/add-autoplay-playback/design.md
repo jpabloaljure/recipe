@@ -21,8 +21,7 @@ See proposal.md - Why. Current state, checked on 2026-11-23:
   `youtube.com`.
 - `next.config.ts` sets no Content-Security-Policy, so the script is not blocked.
 - REC-003's story (validated 2026-11-23) fixes the criteria and these
-  decisions: session = the tab, in memory; unmute button (one-way; it follows
-  the player's own mute control since 2026-11-23); loop mode
+  decisions: session = the tab, in memory; one-way unmute button; loop mode
   first with a seek fallback (the real-player check chose seek, Decision 5);
   blocked muted autoplay is REC-018's.
 
@@ -39,6 +38,8 @@ See proposal.md - Why. Current state, checked on 2026-11-23:
 - Preloading and measuring the three-player cap (REC-004).
 - Opening the recipe panel on `ended`, and counting a "view" (REC-006, REC-007).
 - Autoplay that fails even when muted, and player errors (REC-018).
+- Detecting that the user unmuted with YouTube's own controls (the player has
+  no volume-change event; the app button stays visible, `(inferred)`).
 
 ## Decisions
 
@@ -117,10 +118,9 @@ previous or returning.
 
 **Sound and blocked unmuted autoplay.** Every video starts muted and plays at
 once. With `soundOn`, the controller unmutes it as soon as the player reports
-`playing`, then gives the browser a short window (1.2 s) to refuse: a `paused`
-event, or a player that is no longer playing at the end of the window, means the
-sound was refused; one that still reports muted gets a second look a window later,
-because it reports late. The video then plays muted, `soundOn` goes
+`playing`, then gives the browser a short window (0.8 s) to refuse: a `paused`
+event, or a player that is still muted or no longer playing at the end of the
+window, means the sound was refused. The video then plays muted, `soundOn` goes
 back to `false` and the button returns (`onSoundBlocked`). The first version asked for
 sound in the first `play()`; measured on real Chrome on 2026-11-23, that start
 stalled with no player event, so the video appeared only after the whole 1.5 s
@@ -130,51 +130,6 @@ acts only when the slide or the sound changes. The timer is injected, so no
 test sleeps (E2E rule 6). The check page agrees on real Chrome (desktop 154, Android 10 Chrome 138):
 an unmuted `play()` with no tap produced no player event at all, not even
 `buffering`, so a refused unmuted start can only be told by waiting.
-
-**A stall after the unmute.** Found on the owner's Chrome with the `?debug` log: the
-browser accepted the unmute (`isMuted()` false, no error, no "autoplay blocked"
-event), and the player then went to `buffering` and never played again, silent and
-on its loading circle. This happened on a video whose unmute came a few seconds
-after the home cook's tap, and not on the one right after it, which fits Chrome
-honouring an unmute only shortly after a tap. The page gets no signal for it, so
-for 40 polls (12 s) after the controller unmutes a video it counts the polls in a
-row that the video is buffering or unstarted; four (1.2 s) mean the sound was
-refused. The watch also covers the unmute button: a second `?debug` log showed
-the same stall after a tap on the button, which lasted 21 s before the watch
-was armed for it, so a tap on the page does not always give the video inside
-YouTube's frame permission to play with sound. The video is then muted and played again (muting is what lets the
-browser play it), `soundOn` goes back to `false` and the button returns. The
-following videos start muted without asking for sound, until the home cook taps
-again, so the stall happens at most once per tap. Sound therefore carries over
-only while the browser allows it; a single reused player would keep it, and that
-belongs to REC-004's work.
-
-**Following the player's own mute control.** The IFrame API has no event for a
-mute or unmute made with YouTube's own control, so the controller reads
-`isMuted()` of the active player every 300 ms and reports a change through
-`onSoundChanged`; the feed sets `soundOn` to match, which shows or hides the
-button and carries the choice to later videos. The first version compared each
-read with the sound state the app believed, and on a real phone and Chrome a late
-or wrong read made the app hide the button while the video was muted ("starting
-unmuted but not sounding"), after which every later video tried to unmute without
-a tap, and the player could stall on its loading circle. Now:
-- only a **change** in what the player reports counts, never its value alone: a
-  baseline read is taken once the controller's own commands have settled, and a
-  different state must show on two reads in a row;
-- the first four reads (1.2 s) after the controller's own mute or unmute are
-  skipped, because the player reports late; during that window a video meant to be
-  muted is muted again if the player says it is not (a player may apply the volume
-  the home cook last used on YouTube when it starts);
-- a player whose volume is 0 counts as muted, and unmuting raises a volume below 10
-  to 100: YouTube remembers the volume last used, so `unMute()` alone can leave a
-  player "unmuted" at a volume of 0, which is silent. (`mute=1` in the embed URL
-  was tried and removed: it was unproven, and the symptom changed after adding it);
-- the read is skipped while the controller is changing the sound itself (the
-  pending unmute and its check), and while the video is neither playing nor paused
-  by the home cook.
-
-Alternative: keep the button one-way and leave the player's control out of sync,
-which the home cook saw as a bug.
 
 **Who paused.** Before the controller pauses a video it marks the pause as its
 own, `"swipe"` or `"hidden"`. A `paused` event with no mark is the user's. On
@@ -282,12 +237,6 @@ can drift from the real API; the manual checks against the real player in Chrome
   bar; re-check them before launch.
 - [Creating a player on an iframe that has not finished loading] -> `(assumed)`
   the API handles it; task 1 confirms it.
-
-- [The player or the browser stalls a later video on its loading circle after an
-  unmute, seen on the owner's Chrome and not reproduced elsewhere] -> A `?debug`
-  on-screen log (`debug-log.ts`, `DebugLog.tsx`) shows each command, player state,
-  player error and "autoplay blocked" event; it is meant to be removed, or kept
-  behind the flag, once the cause is known.
 
 ## Migration Plan
 

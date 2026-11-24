@@ -19,46 +19,15 @@ not turned sound on in this browser tab.
 - **AND** it is muted
 
 ### Requirement: Unmute button
-The feed SHALL show an unmute button whenever the active video is muted, and
-none while it has sound. Tapping it SHALL turn sound on for the active video.
-The button never turns sound off. A player whose own volume is 0 counts as muted,
-and unmuting raises that volume, because YouTube remembers the volume last used.
+The feed SHALL show an unmute button while sound is off. Tapping it SHALL turn
+sound on for the active video and remove the button. The button never turns
+sound off: muting again is left to the YouTube player's own controls.
 
 #### Scenario: Tap the unmute button
 - **GIVEN** a video is playing muted and the unmute button is shown
 - **WHEN** I tap the unmute button
 - **THEN** the video plays with sound
 - **AND** the unmute button is no longer shown
-
-#### Scenario: Tap the unmute button when the player's volume is 0
-- **GIVEN** a video is playing muted and the player's own volume is at 0
-- **WHEN** I tap the unmute button
-- **THEN** the video plays with sound
-- **AND** the unmute button is no longer shown
-
-### Requirement: The unmute button follows the player's own sound control
-When the home cook mutes or unmutes the video with the YouTube player's own
-control, the unmute button SHALL show or hide to match, and the sound state of
-this tab SHALL follow, so later videos play with or without sound accordingly.
-Only a change the player reports counts: a wrong or late report must not.
-
-#### Scenario: Unmute with the player's control
-- **GIVEN** a video is playing muted and the unmute button is shown
-- **WHEN** I unmute with the player's own control
-- **THEN** the unmute button is no longer shown
-- **AND** later videos in this tab play with sound
-
-#### Scenario: Mute with the player's control
-- **GIVEN** I turned sound on in this tab
-- **WHEN** I mute the video with the player's own control
-- **THEN** the unmute button is shown
-- **AND** later videos in this tab start muted
-
-#### Scenario: A wrong report of the player's state
-- **GIVEN** a video is playing muted and the unmute button is shown
-- **WHEN** the player keeps reporting that it is not muted
-- **THEN** the unmute button stays shown
-- **AND** the video stays muted
 
 ### Requirement: Sound carries over in this tab
 Once sound is on in a tab, every video that becomes active in the same tab
@@ -78,26 +47,13 @@ one. The state is kept in memory only: a reload SHALL start muted again.
 - **AND** the unmute button is shown
 
 ### Requirement: Blocked unmuted autoplay falls back to muted
-When sound is on in this tab and the browser does not let the video play with
-sound, whether it pauses the video, refuses the unmute or accepts it and leaves the
-video buffering, the video SHALL play muted and the unmute button SHALL be shown again.
+When sound is on in this tab and the browser does not let the video start with
+sound, the video SHALL play muted and the unmute button SHALL be shown again.
 
 #### Scenario: Browser blocks unmuted autoplay
 - **GIVEN** I turned sound on in this tab and the browser blocks unmuted autoplay
 - **WHEN** another video becomes active
 - **THEN** it plays muted
-- **AND** the unmute button is shown
-
-#### Scenario: The video stalls after the unmute
-- **GIVEN** I turned sound on in this tab and the browser accepts the unmute but leaves the video buffering
-- **WHEN** another video becomes active
-- **THEN** it plays muted
-- **AND** the unmute button is shown
-
-#### Scenario: The video stalls after I tap the unmute button
-- **GIVEN** a video is playing muted and the browser will accept an unmute but leave the video buffering
-- **WHEN** I tap the unmute button
-- **THEN** the video plays muted again
 - **AND** the unmute button is shown
 
 ### Requirement: Loop and end event

@@ -15,9 +15,7 @@ import {
 import { createHttpFeedSource } from "../../lib/feed/http-source";
 import { PageRequests } from "../../lib/feed/page-requests";
 import { shuffleFeedPage } from "../../lib/feed/shuffle";
-import { debugLog } from "../../lib/player/debug-log";
 import { type SlidePlayback, syncActive } from "../../lib/player/playback";
-import { DebugLog } from "./DebugLog";
 import styles from "./Feed.module.css";
 import { SlideVideo } from "./SlideVideo";
 
@@ -107,7 +105,6 @@ export function Feed() {
 
   // The active slide and the sound state reach every player; the others stop first.
   useEffect(() => {
-    debugLog(`feed: active=${activeKey} soundOn=${soundOn}`);
     syncActive(controllers.current, activeKey, soundOn);
   }, [activeKey, soundOn]);
 
@@ -137,14 +134,10 @@ export function Feed() {
   }, []);
 
   // Unmuted autoplay was refused, so the video plays muted and the button comes back.
-  const soundBlocked = useCallback(() => {
-    debugLog("feed: sound refused -> button back");
-    setSoundOn(false);
-  }, []);
+  const soundBlocked = useCallback(() => setSoundOn(false), []);
 
   return (
     <div ref={scroller} className={styles.feed} data-testid="feed">
-      <DebugLog />
       {slides.map((slide, index) => (
         <section
           key={slide.key}
@@ -162,7 +155,6 @@ export function Feed() {
                 onPlayback={(playback) => registerPlayback(slide.key, playback)}
                 onEnded={announceEnded}
                 onSoundBlocked={soundBlocked}
-                onSoundChanged={setSoundOn}
               />
             )}
             {index === activeIndex && !soundOn && (
