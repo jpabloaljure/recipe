@@ -117,9 +117,10 @@ previous or returning.
 
 **Sound and blocked unmuted autoplay.** Every video starts muted and plays at
 once. With `soundOn`, the controller unmutes it as soon as the player reports
-`playing`, then gives the browser a short window (0.8 s) to refuse: a `paused`
-event, or a player that is still muted or no longer playing at the end of the
-window, means the sound was refused. The video then plays muted, `soundOn` goes
+`playing`, then gives the browser a short window (1.2 s) to refuse: a `paused`
+event, or a player that is no longer playing at the end of the window, means the
+sound was refused; one that still reports muted gets a second look a window later,
+because it reports late. The video then plays muted, `soundOn` goes
 back to `false` and the button returns (`onSoundBlocked`). The first version asked for
 sound in the first `play()`; measured on real Chrome on 2026-11-23, that start
 stalled with no player event, so the video appeared only after the whole 1.5 s
@@ -132,14 +133,27 @@ an unmuted `play()` with no tap produced no player event at all, not even
 
 **Following the player's own mute control.** The IFrame API has no event for a
 mute or unmute made with YouTube's own control, so the controller reads
-`isMuted()` of the active player every 300 ms and, when it differs from the sound
-state the feed believes, calls `onSoundChanged`. The feed sets `soundOn` to match,
-which shows or hides the button and carries the choice to later videos. The read
-is skipped while the controller is changing the sound itself (the pending unmute
-and its check) and while the video is neither playing nor paused by the home
-cook. Added after real use showed the button staying visible after unmuting with
-the player's control. Alternative: keep the button one-way and leave the player's
-control out of sync, which the home cook saw as a bug.
+`isMuted()` of the active player every 300 ms and reports a change through
+`onSoundChanged`; the feed sets `soundOn` to match, which shows or hides the
+button and carries the choice to later videos. The first version compared each
+read with the sound state the app believed, and on a real phone and Chrome a late
+or wrong read made the app hide the button while the video was muted ("starting
+unmuted but not sounding"), after which every later video tried to unmute without
+a tap, and the player could stall on its loading circle. Now:
+- only a **change** in what the player reports counts, never its value alone: a
+  baseline read is taken once the controller's own commands have settled, and a
+  different state must show on two reads in a row;
+- the first four reads (1.2 s) after the controller's own mute or unmute are
+  skipped, because the player reports late; during that window a video meant to be
+  muted is muted again if the player says it is not (a player may apply the volume
+  the home cook last used on YouTube when it starts);
+- the embed URL has `mute=1`, so a new player starts muted whatever it remembers;
+- the read is skipped while the controller is changing the sound itself (the
+  pending unmute and its check), and while the video is neither playing nor paused
+  by the home cook.
+
+Alternative: keep the button one-way and leave the player's control out of sync,
+which the home cook saw as a bug.
 
 **Who paused.** Before the controller pauses a video it marks the pause as its
 own, `"swipe"` or `"hidden"`. A `paused` event with no mark is the user's. On

@@ -21,11 +21,17 @@ type FakePlayer = {
   youtubeId: string | null;
   state: number;
   muted: boolean;
+  mutedReads: number;
   calls: string[];
   destroyed: boolean;
   _set(state: number): void;
 };
-type FakeApi = { players: FakePlayer[]; blockUnmutedAutoplay: boolean; stateName(code: number): string };
+type FakeApi = {
+  players: FakePlayer[];
+  blockUnmutedAutoplay: boolean;
+  reportedMuted: boolean | null;
+  stateName(code: number): string;
+};
 
 // Runs in the page; written inline because Playwright serializes the function.
 function liveInfo(youtubeId: string | null) {
@@ -79,6 +85,21 @@ export async function videoIdOfSlide(page: Page, index: number): Promise<string>
   const id = await page.getByTestId("feed-slide").nth(index).getAttribute("data-youtube-id");
   if (!id) throw new Error(`Slide ${index} has no video id`);
   return id;
+}
+
+/** How many times the app has read this video's muted state (it polls the active one). */
+export async function mutedReads(page: Page, youtubeId: string): Promise<number> {
+  return page.evaluate((id) => {
+    const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
+    return fake.players.find((p) => !p.destroyed && p.youtubeId === id)?.mutedReads ?? 0;
+  }, youtubeId);
+}
+
+/** From now on every player reports this muted state, whatever its real state (a wrong constant read). */
+export async function reportMutedAs(page: Page, muted: boolean): Promise<void> {
+  await page.evaluate((value) => {
+    (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.reportedMuted = value;
+  }, muted);
 }
 
 /** The video reaches its end (the real player reports `ended`). */

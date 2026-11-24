@@ -33,6 +33,7 @@ The button never turns sound off.
 When the home cook mutes or unmutes the video with the YouTube player's own
 control, the unmute button SHALL show or hide to match, and the sound state of
 this tab SHALL follow, so later videos play with or without sound accordingly.
+Only a change the player reports counts: a wrong or late report must not.
 
 #### Scenario: Unmute with the player's control
 - **GIVEN** a video is playing muted and the unmute button is shown
@@ -45,6 +46,12 @@ this tab SHALL follow, so later videos play with or without sound accordingly.
 - **WHEN** I mute the video with the player's own control
 - **THEN** the unmute button is shown
 - **AND** later videos in this tab start muted
+
+#### Scenario: A wrong report of the player's state
+- **GIVEN** a video is playing muted and the unmute button is shown
+- **WHEN** the player keeps reporting that it is not muted
+- **THEN** the unmute button stays shown
+- **AND** the video stays muted
 
 ### Requirement: Sound carries over in this tab
 Once sound is on in a tab, every video that becomes active in the same tab

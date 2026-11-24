@@ -6,7 +6,9 @@
  * the production build holds no test code. The fake keeps one object per
  * `YT.Player`, moves between states as the real player does (without its
  * timing) and registers everything in `window.__youTubeFake`, which
- * `player.ts` reads and drives from tests. With `blockUnmutedAutoplay` set, an
+ * `player.ts` reads and drives from tests. Like the real player, `isMuted()` is
+ * late: it shows the old value for 600 ms after an app mute or unmute. With
+ * `blockUnmutedAutoplay` set, an
  * unmuted start does nothing and unmuting a playing video pauses it, as Chrome
  * does without permission.
  *
@@ -17,7 +19,9 @@ export const FAKE_IFRAME_API = `
 (function () {
   var STATE = { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
   var NAMES = { "-1": "unstarted", "0": "ended", "1": "playing", "2": "paused", "3": "buffering", "5": "cued" };
-  var fake = { players: [], blockUnmutedAutoplay: false };
+  // isMutedLagMs: the real player reports its muted state late, so isMuted() shows the old
+  // value for this long after an app call to mute() or unMute().
+  var fake = { players: [], blockUnmutedAutoplay: false, isMutedLagMs: 600, reportedMuted: null };
   window.__youTubeFake = fake;
 
   function Player(iframe, options) {
@@ -26,6 +30,9 @@ export const FAKE_IFRAME_API = `
     this.iframe = iframe;
     this.events = (options && options.events) || {};
     this.muted = false;
+    this.shownMuted = false;
+    this.mutedChangedAt = 0;
+    this.mutedReads = 0;
     this.state = STATE.UNSTARTED;
     this.calls = [];
     this.destroyed = false;
@@ -49,17 +56,29 @@ export const FAKE_IFRAME_API = `
     this.calls.push("pause");
     this._set(STATE.PAUSED);
   };
-  Player.prototype.mute = function () { this.calls.push("mute"); this.muted = true; };
+  Player.prototype._setMuted = function (value) {
+    // The reported value is only replaced once the report has caught up with the last change.
+    var catchingUp = fake.isMutedLagMs && Date.now() - this.mutedChangedAt < fake.isMutedLagMs;
+    if (!catchingUp) this.shownMuted = this.muted;
+    this.mutedChangedAt = Date.now();
+    this.muted = value;
+  };
+  Player.prototype.mute = function () { this.calls.push("mute"); this._setMuted(true); };
   Player.prototype.unMute = function () {
     this.calls.push("unMute");
-    this.muted = false;
+    this._setMuted(false);
     // Chrome pauses a playing video that is unmuted without permission.
     if (fake.blockUnmutedAutoplay && this.state === STATE.PLAYING) this._set(STATE.PAUSED);
   };
   Player.prototype.seekTo = function (seconds) { this.calls.push("seekTo(" + seconds + ")"); };
   Player.prototype.destroy = function () { this.calls.push("destroy"); this.destroyed = true; };
   Player.prototype.getPlayerState = function () { return this.state; };
-  Player.prototype.isMuted = function () { return this.muted; };
+  Player.prototype.isMuted = function () {
+    this.mutedReads += 1;
+    if (fake.reportedMuted !== null) return fake.reportedMuted; // a test makes the player report a fixed value
+    if (fake.isMutedLagMs && Date.now() - this.mutedChangedAt < fake.isMutedLagMs) return this.shownMuted;
+    return this.muted;
+  };
 
   window.YT = { Player: Player, PlayerState: STATE };
   fake.stateName = function (code) { return NAMES[String(code)]; };

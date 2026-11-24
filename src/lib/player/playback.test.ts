@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { BLOCKED_AUTOPLAY_WINDOW_MS, SOUND_POLL_MS, SlidePlayback, syncActive } from "./playback";
+import {
+  BLOCKED_AUTOPLAY_WINDOW_MS,
+  POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE,
+  SOUND_POLL_MS,
+  SlidePlayback,
+  syncActive,
+} from "./playback";
 import type { PlayerHandle, TimerHandle, Timers } from "./types";
 
 type Call = "play" | "pause" | "mute" | "unMute" | "seekTo(0)";
@@ -199,11 +205,22 @@ describe("blocked unmuted autoplay", () => {
     expect(blockedCount()).toBe(1);
   });
 
-  it("falls back to muted when the player is still muted at the end of the window", () => {
+  it("falls back to muted, without a new play(), when the player is still muted after looking twice", () => {
     const { player, timers, blockedCount } = unmuted();
     player.muted = true; // the browser refused the unmute
-    expect(since(player, () => timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS))).toEqual(["mute", "play"]);
+    expect(since(player, () => timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS))).toEqual([]);
+    expect(blockedCount()).toBe(0);
+    expect(since(player, () => timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS))).toEqual(["mute"]);
     expect(blockedCount()).toBe(1);
+  });
+
+  it("keeps the sound when a late report of the muted state catches up on the second look", () => {
+    const { player, timers, blockedCount } = unmuted();
+    player.muted = true; // still reported as muted
+    timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS);
+    player.muted = false; // the report catches up
+    timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS);
+    expect(blockedCount()).toBe(0);
   });
 
   it("falls back when the video is no longer playing at the end of the window", () => {
@@ -251,8 +268,8 @@ describe("blocked unmuted autoplay", () => {
     expect(blockedCount()).toBe(0);
   });
 
-  it("uses a window of 0.8 seconds by default", () => {
-    expect(BLOCKED_AUTOPLAY_WINDOW_MS).toBe(800);
+  it("uses a window of 1.2 seconds by default", () => {
+    expect(BLOCKED_AUTOPLAY_WINDOW_MS).toBe(1200);
   });
 });
 
@@ -330,11 +347,18 @@ describe("pause reasons", () => {
 });
 
 describe("following the player's own sound control", () => {
+  const poll = (timers: { fire: (ms?: number) => void }, times = 1) => {
+    for (let i = 0; i < times; i++) timers.fire(SOUND_POLL_MS);
+  };
+  /** The reads skipped after the controller's own mute or unmute, then one read that sets the baseline. */
+  const settle = (timers: { fire: (ms?: number) => void }) => poll(timers, POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE + 1);
+
   function playingMuted() {
     const ctx = setup();
     ctx.playback.markReady();
     ctx.playback.setActive(true, false);
     ctx.playback.handleState("playing");
+    settle(ctx.timers);
     return ctx;
   }
 
@@ -344,35 +368,106 @@ describe("following the player's own sound control", () => {
     ctx.playback.setActive(true, true);
     ctx.playback.handleState("playing"); // the unmute is asked for here
     ctx.timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS); // the browser allowed it
+    settle(ctx.timers);
     return ctx;
   }
 
-  it("reports an unmute made with the player's own control", () => {
+  it("reports an unmute made with the player's own control, once two reads in a row show it", () => {
     const { player, timers, soundChanges } = playingMuted();
     player.muted = false;
-    timers.fire(SOUND_POLL_MS);
+    poll(timers);
+    expect(soundChanges).toEqual([]);
+    poll(timers);
     expect(soundChanges).toEqual([true]);
   });
 
   it("reports a mute made with the player's own control", () => {
     const { player, timers, soundChanges } = playingWithSound();
     player.muted = true;
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 2);
     expect(soundChanges).toEqual([false]);
   });
 
-  it("reports nothing while the sound matches", () => {
+  it("reports later changes too, in both directions", () => {
+    const { player, timers, soundChanges } = playingMuted();
+    player.muted = false;
+    poll(timers, 2);
+    player.muted = true;
+    poll(timers, 2);
+    expect(soundChanges).toEqual([true, false]);
+  });
+
+  it("does not report a change seen on only one read", () => {
+    const { player, timers, soundChanges } = playingMuted();
+    player.muted = false;
+    poll(timers);
+    player.muted = true;
+    poll(timers, 3);
+    expect(soundChanges).toEqual([]);
+  });
+
+  it("does not take a wrong constant read for the home cook's unmute", () => {
+    // The player keeps saying "not muted" although the controller muted it.
+    const { player, timers, playback, soundChanges } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.handleState("playing");
+    player.muted = false;
+    poll(timers, 20);
+    expect(soundChanges).toEqual([]);
+  });
+
+  it("does not report a late read that catches up after the controller's own mute", () => {
+    const { player, timers, playback, soundChanges } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.handleState("playing");
+    player.muted = false; // still reported as "not muted"
+    settle(timers);
+    player.muted = true; // the report catches up with the mute
+    poll(timers, 4);
+    expect(soundChanges).toEqual([]);
+  });
+
+  it("ignores the reads right after its own unmute for the button", () => {
+    const { player, timers, playback, soundChanges } = playingMuted();
+    playback.setActive(true, true); // the unmute button: unMute()
+    player.muted = true; // still reported as muted for a moment
+    settle(timers);
+    player.muted = false; // the report catches up with the unmute
+    poll(timers, 4);
+    expect(soundChanges).toEqual([]);
+  });
+
+  it("mutes again a video that the player unmuted by itself right after it started", () => {
+    const { player, timers, playback, soundChanges } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.handleState("playing");
+    player.muted = false; // the player applied the volume the home cook last used on YouTube
+    expect(since(player, () => poll(timers))).toEqual(["mute"]);
+    expect(player.muted).toBe(true);
+    expect(soundChanges).toEqual([]);
+  });
+
+  it("does not mute again a video that is meant to have sound", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, true);
+    playback.handleState("playing"); // unmute asked
+    expect(since(player, () => poll(timers))).toEqual([]);
+  });
+
+  it("reports nothing while the player's state does not change", () => {
     const { timers, soundChanges } = playingMuted();
-    timers.fire(SOUND_POLL_MS);
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 8);
     expect(soundChanges).toEqual([]);
   });
 
   it("reports a change once, and the feed's repeated request then does nothing", () => {
     const { player, timers, playback, soundChanges } = playingMuted();
     player.muted = false;
-    timers.fire(SOUND_POLL_MS);
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 4);
     expect(soundChanges).toEqual([true]);
     expect(since(player, () => playback.setActive(true, true))).toEqual([]);
   });
@@ -381,7 +476,7 @@ describe("following the player's own sound control", () => {
     const { player, timers, playback, soundChanges } = playingMuted();
     playback.handleState("paused");
     player.muted = false;
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 2);
     expect(soundChanges).toEqual([true]);
   });
 
@@ -389,9 +484,11 @@ describe("following the player's own sound control", () => {
     const { player, timers, playback, soundChanges } = setup();
     playback.markReady();
     playback.setActive(true, true);
+    poll(timers, POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE);
     playback.handleState("playing"); // unmute asked, check pending
+    poll(timers, POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE + 2);
     player.muted = true; // looks like a mute, but it is the check's to decide
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 4);
     expect(soundChanges).toEqual([]);
   });
 
@@ -399,17 +496,18 @@ describe("following the player's own sound control", () => {
     const { player, timers, playback, soundChanges } = setup();
     playback.markReady();
     playback.setActive(true, true);
+    poll(timers, POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE + 1);
     player.muted = false;
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 3);
     playback.handleState("buffering");
-    timers.fire(SOUND_POLL_MS);
+    poll(timers, 3);
     expect(soundChanges).toEqual([]);
   });
 
   it("keeps polling while the slide is active", () => {
     const { timers } = playingMuted();
     expect(timers.pending(SOUND_POLL_MS)).toBe(1);
-    timers.fire(SOUND_POLL_MS);
+    poll(timers);
     expect(timers.pending(SOUND_POLL_MS)).toBe(1);
   });
 

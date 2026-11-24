@@ -8,7 +8,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 
 - [x] 1.1 In a throwaway page (not committed), load the real IFrame API on desktop Chrome and attach `new YT.Player` to an iframe that already has `enablejsapi=1`, both right after the iframe is inserted and after its `load` event; verify the player becomes ready in both cases and record which was needed in `design.md` Decision 2
 - [x] 1.2 On desktop Chrome and on Android Chrome (human check), play a Short in loop mode (`loop=1&playlist=<id>`) and in seek mode; verify whether loop mode reports an end every time, how long the gap is in seek mode and whether YouTube's end screen flashes, then write the chosen mode in `design.md` Decision 5
-- [ ] 1.3 On the same two browsers, ask for sound before any tap and verify how a refused unmute shows (the player pauses, or stays muted) and whether the 0.8 s window is long enough on a slow connection; write the value in `design.md` Decision 4
+- [ ] 1.3 On the same two browsers, ask for sound before any tap and verify how a refused unmute shows (the player pauses, or stays muted) and whether the 1.2 s window is long enough on a slow connection; write the value in `design.md` Decision 4
 
 ## 2. ADR 0008 and architecture records
 
@@ -24,7 +24,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 - [x] 3.4 Add tests for pause reasons: a pause the controller did not cause is the user's and survives hide and show, a `"hidden"` pause resumes on visible, and a `"swipe"` pause does not; verify `pnpm test` passes
 - [x] 3.5 Add tests for the `ended` contract in both modes (report on every end, including each loop; seek mode also seeks to 0 and plays), that commands sent before ready are applied once on ready, and that at most one player is asked to play; verify `pnpm test` passes
 - [x] 3.6 Add `src/lib/player/youtube-player.ts`: the script loader (one `<script>`, one ready promise) and the `YT.Player` wrapper that maps API states to the player interface; verify `pnpm typecheck` passes and a Vitest test covers the state mapping with a fake `YT`
-- [x] 3.7 Add tests in `playback.test.ts` for following the player's own sound control with a fake timer: an unmute or a mute made with the player's control is reported once, nothing is reported while the controller's own unmute is being checked or before the video plays, polling runs only while the slide is active; verify `pnpm test` passes
+- [x] 3.7 Add tests in `playback.test.ts` for following the player's own sound control with a fake timer: a change the player reports on two reads in a row is reported once, a wrong constant read, a late read and a single read are not, the first reads after the controller's own mute or unmute are skipped, a video the player unmuted by itself is muted again, nothing is reported while the controller's own unmute is being checked or before the video plays, polling runs only while the slide is active; verify `pnpm test` passes
 
 ## 4. E2E fake player
 
@@ -39,7 +39,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 - [x] 5.4 Wire loop, seek mode (design Decision 5) and the bubbling `videoended` event on the feed element; verify the E2E test for "Loop and end event › Video reaches the end" passes
 - [x] 5.5 Wire pause and resume on swipe, user pause and tab visibility; verify the E2E tests for "Pause when swiped out of view" (both scenarios), "A pause made with the player's own control is kept" (both scenarios) and "Pause when the tab is hidden" (both scenarios) pass
 - [x] 5.6 Verify the existing `e2e/feed/` tests (including "Taps reach the video player") still pass, and note any that the new per-slide players change
-- [x] 5.7 Feed: pass `onSoundChanged` so the button and the tab's sound follow the player's own mute control; verify the E2E tests for "The unmute button follows the player's own sound control" (both scenarios) pass using `emitUserUnmute` and `emitUserMute`
+- [x] 5.7 Feed: pass `onSoundChanged` so the button and the tab's sound follow the player's own mute control, and add `mute=1` to the embed URL; make the E2E fake report its muted state late; verify the E2E tests for "The unmute button follows the player's own sound control" (all three scenarios) pass using `emitUserUnmute`, `emitUserMute` and `reportMutedAs`
 
 ## 6. Unmute button placement and the feed exception
 
