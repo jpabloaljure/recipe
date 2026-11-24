@@ -7,7 +7,7 @@ browser's `localStorage`, PRD §5.4). So the main risks are a leaked write
 credential, a change that reaches production without review, and bad input on
 the one public endpoint. The practices below follow from that.
 
-Last reviewed: 2026-11-22. When code, workflows or settings change a practice,
+Last reviewed: 2026-11-24. When code, workflows or settings change a practice,
 update this file in the same pull request.
 
 ## Practices in place

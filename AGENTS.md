@@ -19,9 +19,10 @@ backlog and docs.
 ### Stack
 
 Decided in the OpenSpec change `choose-tech-stack` (ADRs 0002–0004 in
-`docs/adr/`), plus Playwright in `add-e2e-testing` (ADR 0006) and the
+`docs/adr/`), plus Playwright in `add-e2e-testing` (ADR 0006), the
 database connections, roles and migrations in `add-video-catalog-schema`
-(ADR 0007):
+(ADR 0007) and the YouTube IFrame Player API in `add-autoplay-playback`
+(ADR 0008):
 
 | Layer | Choice |
 |---|---|
@@ -32,6 +33,7 @@ database connections, roles and migrations in `add-video-catalog-schema`
 | Data access + migrations | Drizzle ORM with the `pg` driver (ADR 0007) |
 | Daily ingestion | Node TypeScript script on a GitHub Actions schedule |
 | Hosting + CDN | Vercel |
+| Video playback control | YouTube IFrame Player API: an external script loaded from youtube.com behind one adapter, no npm dependency (ADR 0008) |
 | Package manager / tests | pnpm, Vitest (unit), Playwright (end-to-end, Chromium) |
 | LLM provider | TBD (pending decision in `docs/adr/README.md`) |
 

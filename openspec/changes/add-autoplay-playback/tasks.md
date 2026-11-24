@@ -8,13 +8,13 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 
 - [x] 1.1 In a throwaway page (not committed), load the real IFrame API on desktop Chrome and attach `new YT.Player` to an iframe that already has `enablejsapi=1`, both right after the iframe is inserted and after its `load` event; verify the player becomes ready in both cases and record which was needed in `design.md` Decision 2
 - [x] 1.2 On desktop Chrome and on Android Chrome (human check), play a Short in loop mode (`loop=1&playlist=<id>`) and in seek mode; verify whether loop mode reports an end every time, how long the gap is in seek mode and whether YouTube's end screen flashes, then write the chosen mode in `design.md` Decision 5
-- [ ] 1.3 On the same two browsers, ask for sound before any tap and verify how a refused unmute shows (the player pauses, or stays muted) and whether the 0.8 s window is long enough on a slow connection; write the value in `design.md` Decision 4
+- [x] 1.3 On the same two browsers, ask for sound before any tap and verify how a refused unmute shows (the player pauses, or stays muted) and whether the 0.8 s window is long enough on a slow connection; write the value in `design.md` Decision 4 (answered 2026-11-24 on desktop Chrome 154 and Android Chrome 138: an unmuted `play()` with no tap gives no player event at all; see design Decision 4; the stall that can follow an unmute on a later video is draft backlog D-12)
 
 ## 2. ADR 0008 and architecture records
 
 - [x] 2.1 Write ADR 0008, "YouTube IFrame Player API for playback control", with the `write-adr` skill (alternatives: raw `postMessage`, a wrapper library, URL parameters only), add it to the ADR index in `docs/adr/README.md` and verify the index links resolve
 - [x] 2.2 Update `docs/architecture/c4/03-components-web-app.md`: the Player controller is built for autoplay, unmute, loop and pause (preload stays REC-004), and the relation to the YouTube IFrame Player says it is controlled through the API; verify the Mermaid diagram renders and the Notes name this change
-- [ ] 2.3 Add the ADR to the "Stack" note in `AGENTS.md` only if the loaded script counts as a service there; verify with the human, and make no change otherwise (`AGENTS.md` lists ADRs 0002-0004, 0006 and 0007 for the stack)
+- [x] 2.3 Add the ADR to the "Stack" note in `AGENTS.md` only if the loaded script counts as a service there; verify with the human, and make no change otherwise (`AGENTS.md` lists ADRs 0002-0004, 0006 and 0007 for the stack) (decided 2026-11-24 by the owner: yes, `AGENTS.md` Stack and the README tech stack now name the YouTube IFrame Player API and ADR 0008)
 
 ## 3. Playback logic (Vitest, no browser)
 
@@ -48,7 +48,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 ## 7. Integration and manual checks
 
 - [x] 7.1 Run `pnpm typecheck`, `pnpm test`, `pnpm build` and `pnpm test:e2e`; verify all pass, then run `openspec validate add-autoplay-playback --strict`
-- [ ] 7.2 Manual checks on the real player, in Chrome on desktop and on Android, listed in the PR and done before merge: real autoplay and sound carry-over, the real loop and end screen, YouTube's own pause control (the user's pause is kept and survives hiding the tab), blocked unmuted autoplay, the unmute icon on a real phone covers no YouTube control or logo, and a real swipe that starts on the icon moves one video; these stay manual because the E2E fake cannot show them (E2E rule 13)
+- [x] 7.2 Manual checks on the real player, in Chrome on desktop and on Android, listed in the PR and done before merge: real autoplay and sound carry-over, the real loop and end screen, YouTube's own pause control (the user's pause is kept and survives hiding the tab), blocked unmuted autoplay, the unmute icon on a real phone covers no YouTube control or logo, and a real swipe that starts on the icon moves one video; these stay manual because the E2E fake cannot show them (E2E rule 13) (checked and validated by the owner on the Vercel preview, 2026-11-24; the known stall after an unmute is draft backlog D-12)
 - [x] 7.3 Update REC-003's Technical context in `backlog/E01-browse-feed.md` if the loop mode, the window or the placement threshold differs from the story; verify it matches `design.md`, and check the README and PRD §5.2 still agree with the built behavior
 
 ## Workflow follow-up

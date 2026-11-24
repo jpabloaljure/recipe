@@ -150,23 +150,23 @@ stalls after a start with sound off):
 
 ## Options for the next attempt
 
-| | What | Trade-off |
+| Option | What | Trade-off |
 |---|---|---|
-| A | Keep v5: every video tries sound once after a tap; a refused sound is caught in about 1.2 s and the video plays muted with the button back. | Works with a short hiccup after a tap; sound carries over only while Chrome allows it. |
-| B | No automatic sound: every video starts muted, and sound is turned on per video, with our button or YouTube's own control. | No stalls, but sound never carries over, and it contradicts the approved criterion "later videos play with sound" (REC-003, PRD §5.2). Needs the story and PRD updated and human validation. |
-| C | One reused player (`loadVideoById`) so the iframe keeps its permission and its unmuted state. | The likely way to carry sound reliably, but a large change: it conflicts with one iframe per slide inside the scroll-snap list (REC-001), and belongs with REC-004. Spike first. |
+| 1 | Keep v5: every video tries sound once after a tap; a refused sound is caught in about 1.2 s and the video plays muted with the button back. | Works with a short hiccup after a tap; sound carries over only while Chrome allows it. |
+| 2 | No automatic sound: every video starts muted, and sound is turned on per video, with our button or YouTube's own control. | No stalls, but sound never carries over, and it contradicts the approved criterion "later videos play with sound" (REC-003, PRD §5.2). Needs the story and PRD updated and human validation. |
+| 3 | One reused player (`loadVideoById`) so the iframe keeps its permission and its unmuted state. | The likely way to carry sound reliably, but a large change: it conflicts with one iframe per slide inside the scroll-snap list (REC-001), and belongs with REC-004. Spike first. |
 
-Suggested order: a spike for C with `yt-check.html` extended (one iframe, switch
-videos, unmute once with a tap inside the iframe, then wait more than 5 s and
-switch again; Android and desktop), then decide between A and C. Take B only if C
-does not hold.
+Suggested order: a spike for option 3 with `yt-check.html` extended (one iframe,
+switch videos, unmute once with a tap inside the iframe, then wait more than 5 s and
+switch again; Android and desktop), then decide between options 1 and 3. Take
+option 2 only if option 3 does not hold.
 
 ## How to resume
 
 1. `git fetch --tags` and read the code at the tag
    (`git checkout -b spike/sound archive/rec-003-follow-player-sound`), or
    cherry-pick `72af07b` to `d79f526` onto the new work.
-2. Decide A, B or C (above), and update the REC-003 Technical context, the
+2. Decide option 1, 2 or 3 (above), and update the REC-003 Technical context, the
    `playback` spec and PRD §5.2 if the behavior changes.
 3. Keep the tests that match the decision: the E2E fake options (`isMutedLagMs`,
    `reportedMuted`, `blockUnmutedAutoplay`, `stallAfterUnmute`) and the unit tests of
