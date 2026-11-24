@@ -127,7 +127,9 @@ stalled with no player event, so the video appeared only after the whole 1.5 s
 window and then without sound. Starting muted shows the video after about
 0.5 to 0.75 s (the stream start). The feed repeats its request, so the controller
 acts only when the slide or the sound changes. The timer is injected, so no
-test sleeps (E2E rule 6).
+test sleeps (E2E rule 6). The check page agrees on real Chrome (desktop 154, Android 10 Chrome 138):
+an unmuted `play()` with no tap produced no player event at all, not even
+`buffering`, so a refused unmuted start can only be told by waiting.
 
 **Who paused.** Before the controller pauses a video it marks the pause as its
 own, `"swipe"` or `"hidden"`. A `paused` event with no mark is the user's. On
@@ -149,9 +151,11 @@ of task 1.2, built-in browser, Chromium 156): with the video seeked 2 s before i
 mode never reported `ended` (the state stayed `playing`), so it cannot meet the
 contract; seek mode reported `ended`, and the player was `playing` again 28 ms
 later (the visible gap on a real device is still a manual check). Only seek mode
-is built, and the embed URL has no loop parameter. The Android and real-Chrome
-check of task 1.2 confirms it; if it showed loop mode reporting every end, the
-loop mode could be added behind the same contract.
+is built, and the embed URL has no loop parameter. Confirmed on real Chrome the
+same day: desktop Chrome 154 and Android 10 Chrome 138 both showed loop mode never
+reporting `ended` and seek mode reporting it, with 5 ms (desktop) and 57 ms
+(Android) between the `ended` and `playing` events. The visible gap and YouTube's
+end screen are still a manual check (task 7.2).
 
 How the feed tells the app: the feed element dispatches a bubbling
 `CustomEvent("videoended", { detail: { youtubeId } })`. REC-007 can listen to it
