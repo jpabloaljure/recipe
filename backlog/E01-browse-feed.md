@@ -138,25 +138,40 @@ AI estimate (2026-11-23): 5. Calibration: REC-001 (team 5) is the nearest slice:
 
 ## REC-004 · Instant transition to the next video
 - **Status:** todo
-- **Labels:** module:playback, type:feature, size:L, layer:frontend
+- **Labels:** module:playback, type:feature, size:M, layer:frontend
 - **PRD:** PERF-3, PERF-5
-- **Flags:** needs-human-validation
-- **AI estimate:** —
-- **Estimate:** —
+- **Flags:** —
+- **AI estimate:** 3
+- **Estimate:** 3
 
 As a home cook, I want the next video to start almost instantly when I swipe, so that browsing never feels slow.
 
 ### Acceptance criteria
-- Given a video is active, when I swipe to the next one, then it starts playing in < 500 ms (PERF-3).
-- Given a video is active, when the feed is idle, then the next 1–2 videos and their recipes are already preloaded.
-- Given I keep swiping through many videos, when I check the page, then at most three video players (previous, current, next) are alive at once (PERF-5).
+- Given a video is active, when I swipe to the next one, then it is playing within 500 ms of the end of the gesture (PERF-3).
+- Given I swiped to a video, when it becomes the active one, then its player was already ready before the swipe ended.
+- Given I keep swiping through many videos, when I swipe to another one, then at most three video players (previous, current, next) are alive (PERF-5).
 
 ### Technical context
 From REC-001 validation (#29, recorded 2026-11-19 after its re-check #32): REC-001's feed already renders an iframe only for the active slide and its two neighbours. This story owns the PERF-5 limit and preloading, and re-checks on a real Android phone that a hard flick still moves exactly one video with three live players (also in REC-015).
 
+Decisions 2026-11-23:
+- "Preloaded" means the previous and next neighbours have their iframe loaded and paused, inside the three-player cap. There is no second video ahead: PERF-3's "1–2 videos" is read as the next one plus the previous (PRD PERF-3 updated in the same change). REC-003's change (`add-autoplay-playback`) already creates one player per mounted iframe, paused and muted, for the active slide and its two neighbours, and has the scenario "Only the active video plays › Neighbour videos are idle". This story does not repeat it: it adds that the player of the video I swipe to was already ready (it was the neighbour a moment earlier), the 500 ms start and the cap on live players. The new next neighbour's player is created when its slide enters the window, so its readiness is not checked at the instant of the swipe (Decision 3 of REC-003's design).
+- The risk is narrower than first thought: REC-003's task 1.1 shows a real player becomes ready without playing. What stays open is whether a paused, never-started neighbour starts within 500 ms. Accepted as a known risk; the first task of this story's change measures the start time of a paused neighbour on the real player (as REC-003's task 1.1 did). No fallback is designed before that data.
+- Update 2026-11-24, after REC-003 shipped (PR #70, archived as `2026-11-24-add-autoplay-playback`): the blocker is gone and what this story relies on exists on main: one `YT.Player` per mounted iframe (`src/lib/player/`, `src/app/feed/SlideVideo.tsx`), the fake `iframe_api` and `livePlayers` in `e2e/support/`, and the `playback` spec ("Only the active video plays › Neighbour videos are idle"). Real-Chrome facts to design with: an unmuted `play()` with no tap gives no player event (desktop Chrome 154, Android Chrome 138), so a neighbour must stay muted until it becomes active; the production smoke check never loads the real YouTube script (draft D-14), so the 500 ms start is only checked by hand. Draft D-12 option 3 (one reused player) would replace per-slide players and change this story's cap and preloading; if it is chosen, revisit this story first. Size label re-set from L to M to match the 3 points (the team's estimate was given for the narrower scope).
+- Counting live players uses the helper `livePlayers` that REC-003's change already adds in `e2e/support/player.ts`; this story does not build it. "Alive" means created and not destroyed. The cap is checked after the swipe settles; whether four players exist for an instant during a swipe is left to the manual flick check.
+- Done: AC1 (500 ms) is a manual criterion (rule 13), recorded in the PR and in REC-015's launch check, not an E2E test. The story is `done` when AC2 and AC3 have passing E2E tests and the manual result is on record.
+- Recipes are not preloaded here: they arrive with the feed payload (PERF-4), so they are already in the page.
+- The 500 ms is measured from the end of the swipe gesture to the player's playing state, manually on a real mid-range phone (REC-015, rule 13). The player count (AC3) is an automated E2E test with the stub player from REC-003.
+- Preloaded neighbours never play and never raise the "ended" event: a player that never started cannot end, and REC-003's "Neighbour videos are idle" scenario covers that they are paused and muted, so there is no extra scenario here. Blocked by REC-003 for the player's script API and the stub.
+- The cap at the first video (no previous), across the wrap and under rapid swiping is not a separate scenario; the manual real-device flick check covers it, together with the one-video-per-gesture re-check (also REC-015).
+- Failing to load, slow or offline states belong to REC-018.
+- Scope: Chrome on Android and desktop only (Decided 1).
+
 ### Estimation notes
 L: tight latency target combined with a hard cap on live players.
 Highest technical risk in E01; validated on device by REC-015.
+
+AI estimate (2026-11-23): 3. Calibration: REC-003 (team 5, AI 5) is the nearest story and builds the part REC-004 used to own: one player per mounted iframe, paused and muted, the fake `iframe_api` and the `livePlayers` helper. What is left here is two E2E tests (AC2: the swiped-to player was already ready; AC3: at most three live players after a swipe, using `livePlayers`), a manual 500 ms measurement on a real mid-range phone, and a first task that measures a paused neighbour's start time on the real player. Risks that move it: if that measurement shows a paused, never-started neighbour does not start within 500 ms, the story needs real preloading work (for example loading the neighbour's data through the player API) and could be 5 or 8 (this is the open risk, `(inferred)` from how embeds buffer); and the story waits on REC-003's code, so its estimate assumes REC-003's player, fake and helper land as designed (assumed). Size check: warning, 3 does not match `size:L` (8); the label is not changed. The L label was set before REC-003's change took over per-slide players, so the team may want to re-size it to M. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-005 · Daily discovery of new candidate videos
 - **Status:** todo
