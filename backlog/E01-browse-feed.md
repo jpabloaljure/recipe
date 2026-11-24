@@ -98,7 +98,7 @@ AI estimate (2026-11-16, superseded): 5. Calibration: REC-001 (team estimate 3) 
 AI estimate (2026-11-22): 8. Calibration: REC-001 (team 5) is the nearest full slice (client, stub route, E2E tests) and REC-019 (team 8) is the nearest backend-heavy one. REC-002 has a server side like REC-019's (keyset cursor query, cache headers by response type, empty-page and 5xx handling), the client shuffle and the rework of three REC-001 E2E tests and one `feed` spec scenario like REC-001's, plus two pieces neither had: CI that migrates and seeds a database for the E2E step, and the curated-list loader as a manual workflow with its own criteria. Risks that move it: the CI seeding and `app_readonly` setup is new ground (it could add a day if the service container fights the production build) (assumed); the Vercel CDN may strip `s-maxage`, which only the post-deploy manual check shows; and the loader's list file has to be written and checked by the maintainer, which is human time not in the code estimate. It would drop to 5 if the loader were split out. Size check: 8 matches `size:L`, no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-003 · Autoplay muted, tap to unmute, loop
-- **Status:** todo
+- **Status:** done
 - **Labels:** module:playback, type:feature, size:M, layer:frontend
 - **PRD:** 5.2, 9 (YouTube ToS, autoplay rules)
 - **Flags:** —
