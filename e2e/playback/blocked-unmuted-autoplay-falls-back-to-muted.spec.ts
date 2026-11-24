@@ -24,3 +24,15 @@ test("playback › Blocked unmuted autoplay falls back to muted › The video st
   await expectPlayer(page, await videoIdOfSlide(page, 1), { state: "playing", muted: true });
   await expect(page.getByTestId("unmute-button")).toBeVisible();
 });
+
+test("playback › Blocked unmuted autoplay falls back to muted › The video stalls after I tap the unmute button", async ({ page }) => {
+  await openFeed(page, catalog(videos(3), 3));
+  const id = await videoIdOfSlide(page, 0);
+  await expectPlayer(page, id, { state: "playing", muted: true });
+  await stallAfterUnmute(page);
+
+  await page.getByTestId("unmute-button").click();
+
+  await expectPlayer(page, id, { state: "playing", muted: true });
+  await expect(page.getByTestId("unmute-button")).toBeVisible();
+});

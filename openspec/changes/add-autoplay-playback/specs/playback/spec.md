@@ -94,6 +94,12 @@ video buffering, the video SHALL play muted and the unmute button SHALL be shown
 - **THEN** it plays muted
 - **AND** the unmute button is shown
 
+#### Scenario: The video stalls after I tap the unmute button
+- **GIVEN** a video is playing muted and the browser will accept an unmute but leave the video buffering
+- **WHEN** I tap the unmute button
+- **THEN** the video plays muted again
+- **AND** the unmute button is shown
+
 ### Requirement: Loop and end event
 A video that reaches its end SHALL restart by itself, and the app SHALL be
 told, with the video's ID, every time a video ends, including each loop.

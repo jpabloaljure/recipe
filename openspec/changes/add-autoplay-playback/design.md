@@ -138,8 +138,11 @@ on its loading circle. This happened on a video whose unmute came a few seconds
 after the home cook's tap, and not on the one right after it, which fits Chrome
 honouring an unmute only shortly after a tap. The page gets no signal for it, so
 for 40 polls (12 s) after the controller unmutes a video it counts the polls in a
-row that the video is buffering or unstarted; five (1.5 s) mean the sound was
-refused. The video is then muted and played again (muting is what lets the
+row that the video is buffering or unstarted; four (1.2 s) mean the sound was
+refused. The watch also covers the unmute button: a second `?debug` log showed
+the same stall after a tap on the button, which lasted 21 s before the watch
+was armed for it, so a tap on the page does not always give the video inside
+YouTube's frame permission to play with sound. The video is then muted and played again (muting is what lets the
 browser play it), `soundOn` goes back to `false` and the button returns. The
 following videos start muted without asking for sound, until the home cook taps
 again, so the stall happens at most once per tap. Sound therefore carries over

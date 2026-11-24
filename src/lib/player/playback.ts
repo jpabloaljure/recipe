@@ -37,7 +37,7 @@ export const POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE = 4;
  * in a row that count as a stall.
  */
 export const STALL_WATCH_POLLS = 40;
-export const STALL_POLLS = 5;
+export const STALL_POLLS = 4;
 
 /** Time the browser gets to refuse an unmute, once the video is playing, before it counts as allowed. */
 export const BLOCKED_AUTOPLAY_WINDOW_MS = 1200;
@@ -137,8 +137,7 @@ export class SlidePlayback {
         this.deps.log?.("playing -> asking for sound");
         this.unmuteWhenPlaying = false;
         this.unmuteNow();
-        this.stallWatchPolls = STALL_WATCH_POLLS;
-        this.notPlayingPolls = 0;
+        this.armStallWatch();
         this.armBlockedTimer(); // the browser may pause or keep it muted
       }
     } else if (next === "paused") {
@@ -198,6 +197,12 @@ export class SlidePlayback {
     this.muteNow();
   }
 
+  /** Watches for a stall after the controller unmuted a video (see `watchForStall`). */
+  private armStallWatch(): void {
+    this.stallWatchPolls = STALL_WATCH_POLLS;
+    this.notPlayingPolls = 0;
+  }
+
   /** Sound changed for the active video (the unmute button, which is a tap, or the fallback). */
   private applySound(): void {
     if (!this.soundOn) {
@@ -205,6 +210,9 @@ export class SlidePlayback {
       this.muteNow();
     } else if (this.state === "playing") {
       this.unmuteNow();
+      // A tap on the page does not always let the video inside YouTube's frame play with
+      // sound: the same stall can follow the button, and it lasted 20 s on a real Chrome.
+      this.armStallWatch();
     } else {
       this.unmuteWhenPlaying = true; // unmute as soon as it plays
     }

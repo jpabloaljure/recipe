@@ -553,6 +553,19 @@ describe("a stall after the unmute", () => {
     expect(blockedCount()).toBe(1);
   });
 
+  it("watches for a stall after the unmute button too", () => {
+    const { player, timers, playback, blockedCount } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.handleState("playing");
+    playback.setActive(true, true); // the home cook taps the unmute button: unMute()
+    playback.handleState("buffering"); // the video then stalls
+    poll(timers, STALL_POLLS - 1);
+    expect(blockedCount()).toBe(0);
+    expect(since(player, () => poll(timers))).toEqual(["mute", "play"]);
+    expect(blockedCount()).toBe(1);
+  });
+
   it("treats a video that goes back to unstarted as stalled too", () => {
     const { timers, playback, blockedCount } = unmutedAndChecked();
     playback.handleState("unstarted");
