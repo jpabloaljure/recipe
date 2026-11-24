@@ -21,7 +21,8 @@ See proposal.md - Why. Current state, checked on 2026-11-23:
   `youtube.com`.
 - `next.config.ts` sets no Content-Security-Policy, so the script is not blocked.
 - REC-003's story (validated 2026-11-23) fixes the criteria and these
-  decisions: session = the tab, in memory; one-way unmute button; loop mode
+  decisions: session = the tab, in memory; unmute button (one-way; it follows
+  the player's own mute control since 2026-11-23); loop mode
   first with a seek fallback (the real-player check chose seek, Decision 5);
   blocked muted autoplay is REC-018's.
 
@@ -38,8 +39,6 @@ See proposal.md - Why. Current state, checked on 2026-11-23:
 - Preloading and measuring the three-player cap (REC-004).
 - Opening the recipe panel on `ended`, and counting a "view" (REC-006, REC-007).
 - Autoplay that fails even when muted, and player errors (REC-018).
-- Detecting that the user unmuted with YouTube's own controls (the player has
-  no volume-change event; the app button stays visible, `(inferred)`).
 
 ## Decisions
 
@@ -130,6 +129,17 @@ acts only when the slide or the sound changes. The timer is injected, so no
 test sleeps (E2E rule 6). The check page agrees on real Chrome (desktop 154, Android 10 Chrome 138):
 an unmuted `play()` with no tap produced no player event at all, not even
 `buffering`, so a refused unmuted start can only be told by waiting.
+
+**Following the player's own mute control.** The IFrame API has no event for a
+mute or unmute made with YouTube's own control, so the controller reads
+`isMuted()` of the active player every 300 ms and, when it differs from the sound
+state the feed believes, calls `onSoundChanged`. The feed sets `soundOn` to match,
+which shows or hides the button and carries the choice to later videos. The read
+is skipped while the controller is changing the sound itself (the pending unmute
+and its check) and while the video is neither playing nor paused by the home
+cook. Added after real use showed the button staying visible after unmuting with
+the player's control. Alternative: keep the button one-way and leave the player's
+control out of sync, which the home cook saw as a bug.
 
 **Who paused.** Before the controller pauses a video it marks the pause as its
 own, `"swipe"` or `"hidden"`. A `paused` event with no mark is the user's. On

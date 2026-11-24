@@ -19,15 +19,32 @@ not turned sound on in this browser tab.
 - **AND** it is muted
 
 ### Requirement: Unmute button
-The feed SHALL show an unmute button while sound is off. Tapping it SHALL turn
-sound on for the active video and remove the button. The button never turns
-sound off: muting again is left to the YouTube player's own controls.
+The feed SHALL show an unmute button whenever the active video is muted, and
+none while it has sound. Tapping it SHALL turn sound on for the active video.
+The button never turns sound off.
 
 #### Scenario: Tap the unmute button
 - **GIVEN** a video is playing muted and the unmute button is shown
 - **WHEN** I tap the unmute button
 - **THEN** the video plays with sound
 - **AND** the unmute button is no longer shown
+
+### Requirement: The unmute button follows the player's own sound control
+When the home cook mutes or unmutes the video with the YouTube player's own
+control, the unmute button SHALL show or hide to match, and the sound state of
+this tab SHALL follow, so later videos play with or without sound accordingly.
+
+#### Scenario: Unmute with the player's control
+- **GIVEN** a video is playing muted and the unmute button is shown
+- **WHEN** I unmute with the player's own control
+- **THEN** the unmute button is no longer shown
+- **AND** later videos in this tab play with sound
+
+#### Scenario: Mute with the player's control
+- **GIVEN** I turned sound on in this tab
+- **WHEN** I mute the video with the player's own control
+- **THEN** the unmute button is shown
+- **AND** later videos in this tab start muted
 
 ### Requirement: Sound carries over in this tab
 Once sound is on in a tab, every video that becomes active in the same tab

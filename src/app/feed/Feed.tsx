@@ -155,6 +155,7 @@ export function Feed() {
                 onPlayback={(playback) => registerPlayback(slide.key, playback)}
                 onEnded={announceEnded}
                 onSoundBlocked={soundBlocked}
+                onSoundChanged={setSoundOn}
               />
             )}
             {index === activeIndex && !soundOn && (

@@ -11,10 +11,17 @@ import type { PlayerHandle, PlayerState, Timers, TimerHandle } from "./types";
  *   allow that (it pauses the video, or it stays muted) is caught quickly, and
  *   the video plays muted while `onSoundBlocked` tells the feed. Asking for sound
  *   in the first `play()` stalled for the whole window on real Chrome.
+ * - The controller follows the player's own mute control: it reads the
+ *   player's real muted state a few times a second (the API has no event for
+ *   it), so the feed's button and the tab's sound state match what the home
+ *   cook set with YouTube's controls.
  * - The controller remembers why it paused. A pause it did not cause is the
  *   home cook's, and it survives hiding and showing the tab.
  * - Every end is reported, then the video restarts (seek mode, Decision 5).
  */
+
+/** How often the active video's real muted state is read. */
+export const SOUND_POLL_MS = 300;
 
 /** Time the browser gets to refuse an unmute, once the video is playing, before it counts as allowed. */
 export const BLOCKED_AUTOPLAY_WINDOW_MS = 800;
@@ -29,6 +36,8 @@ export type SlidePlaybackDeps = {
   onEnded: (youtubeId: string) => void;
   /** Called when unmuted autoplay did not start and the video was muted instead. */
   onSoundBlocked: () => void;
+  /** Called when the home cook muted or unmuted the video with the player's own control. */
+  onSoundChanged: (soundOn: boolean) => void;
   blockedWindowMs?: number;
 };
 
@@ -42,6 +51,7 @@ export class SlidePlayback {
   private state: PlayerState = "unstarted";
   private pauseReason: PauseReason | null = null;
   private blockedTimer: TimerHandle | null = null;
+  private pollTimer: TimerHandle | null = null;
   /** Sound is on but the video has not played yet: unmute once it does. */
   private unmuteWhenPlaying = false;
 
@@ -113,12 +123,14 @@ export class SlidePlayback {
 
   dispose(): void {
     this.clearBlockedTimer();
+    this.stopPolling();
   }
 
   private start(): void {
     this.clearBlockedTimer();
     this.unmuteWhenPlaying = false;
     this.pauseReason = null;
+    this.startPolling();
     // Coming back to a video plays it from the beginning.
     if (this.hasPlayed) this.deps.player.seekTo(0);
     if (!this.tabVisible) {
@@ -139,6 +151,7 @@ export class SlidePlayback {
 
   private stop(): void {
     this.clearBlockedTimer();
+    this.stopPolling();
     this.unmuteWhenPlaying = false;
     this.pauseReason = "swipe";
     this.deps.player.pause();
@@ -174,6 +187,37 @@ export class SlidePlayback {
     this.deps.player.mute();
     this.deps.player.play();
     this.deps.onSoundBlocked();
+  }
+
+  /** Reads the player's real muted state while this slide is active (the API has no event for it). */
+  private startPolling(): void {
+    if (this.pollTimer !== null) return;
+    this.pollTimer = this.deps.timers.set(() => {
+      this.pollTimer = null;
+      this.followPlayerSound();
+      if (this.active) this.startPolling();
+    }, SOUND_POLL_MS);
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer === null) return;
+    this.deps.timers.clear(this.pollTimer);
+    this.pollTimer = null;
+  }
+
+  /**
+   * A mute or unmute the home cook made with the player's own control. Skipped
+   * while the controller is changing the sound itself (the pending unmute and its
+   * check), and while the video is not playing or paused by the home cook.
+   */
+  private followPlayerSound(): void {
+    if (!this.ready || !this.active) return;
+    if (this.unmuteWhenPlaying || this.blockedTimer !== null) return;
+    if (this.state !== "playing" && this.state !== "paused") return;
+    const soundNow = !this.deps.player.isMuted();
+    if (soundNow === this.soundOn) return;
+    this.soundOn = soundNow;
+    this.deps.onSoundChanged(soundNow);
   }
 
   private clearBlockedTimer(): void {

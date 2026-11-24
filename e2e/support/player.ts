@@ -97,6 +97,27 @@ export async function emitUserPause(page: Page, youtubeId: string): Promise<void
   }, youtubeId);
 }
 
+/** The home cook turns sound on with the player's own control: the player's muted state changes, no app call. */
+export async function emitUserUnmute(page: Page, youtubeId: string): Promise<void> {
+  await setPlayerMuted(page, youtubeId, false);
+}
+
+/** The home cook mutes with the player's own control. */
+export async function emitUserMute(page: Page, youtubeId: string): Promise<void> {
+  await setPlayerMuted(page, youtubeId, true);
+}
+
+async function setPlayerMuted(page: Page, youtubeId: string, muted: boolean): Promise<void> {
+  await page.evaluate(
+    ({ id, value }) => {
+      const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
+      const player = fake.players.find((p) => !p.destroyed && p.youtubeId === id);
+      if (player) player.muted = value;
+    },
+    { id: youtubeId, value: muted },
+  );
+}
+
 /** From now on the browser refuses sound: unmuting a playing video pauses it. */
 export async function blockUnmutedAutoplay(page: Page): Promise<void> {
   await page.evaluate(() => {
