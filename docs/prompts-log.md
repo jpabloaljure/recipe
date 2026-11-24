@@ -2494,3 +2494,74 @@ From /validate-backlog
 - **Result:** REC-003 is validated with no open findings (14 earlier findings and 6 new ones all resolved) and can become an OpenSpec change. The manual loop check is left to that change. Not yet committed: the two backlog files are uncommitted in the working tree.
 - **Models:** Sonnet 5.5 (main session, all prompts) · Sonnet 5.5 (`story-validator`, two runs) · `estimate-story` ran in the main session.
 - **Why:** the cap keeps validation and estimating on Sonnet at medium effort; the findings come from a read-only agent and the choices stay with the user.
+
+## 347. Validate REC-004
+
+```
+/validate-backlog REC-004
+```
+
+## 348. Choose options for the first REC-004 findings
+
+```
+#5, #6 B rest A
+```
+
+## 349. Ask for the re-check
+
+```
+done
+```
+
+## 350. Review the REC-003 change before building the new options
+
+```
+/validate-backlog REC-004 Read open specs for Rec-003 to review and create the options
+```
+
+## 351. Choose all options A
+
+```
+All A
+```
+
+## 352. Ask for the second re-check
+
+```
+done
+```
+
+## 353. Choose all options A for the new findings
+
+```
+All A
+```
+
+## 354. Approve the acceptance criteria
+
+```
+AC approved
+```
+
+## 355. Give the team estimate
+
+```
+3
+```
+
+## 356. Validate the story
+
+```
+validated
+```
+
+### Summary (prompts 347–356)
+
+- **Goal:** validate REC-004 (instant transition to the next video) with the `validate-backlog` flow, from the first check to the team estimate, taking REC-003's open OpenSpec change into account.
+- **Changes:**
+  - **Backlog:** `backlog/E01-browse-feed.md`: REC-004 acceptance criteria rewritten (3 scenarios), Technical context filled with the decisions (preloaded = neighbours ready and paused inside the three-player cap, recipes not preloaded, 500 ms measured manually, `livePlayers` helper from REC-003, done rule), flag `blocked-by:REC-003`, AI estimate 3, team Estimate 3, `needs-human-validation` removed.
+  - **Log:** `backlog/validation-log.md`: REC-004 row set to `validated`.
+  - **PRD:** `docs/PRD.md`: PERF-3 reworded (previous and next videos loaded and paused; recipes arrive with the feed).
+- **Result:** REC-004 is validated with no open findings (13 first findings, 4 from the first re-check and 4 from the second all resolved). A size warning is recorded: 3 points against `size:L`, label unchanged. The backlog, log and PRD edits are uncommitted on the branch `feat/rec-003-autoplay-playback`, with the REC-003 implementation.
+- **Models:** Sonnet 5.5 (main session, all prompts) · Sonnet 5.5 (`story-validator`, three runs) · `estimate-story` ran in the main session.
+- **Why:** the cap keeps validation and estimating on Sonnet at medium effort; the findings come from a read-only agent and the choices stay with the user.
