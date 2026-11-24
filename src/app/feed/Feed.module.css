@@ -74,8 +74,11 @@
   .unmute {
     left: auto;
     right: 8px;
-    /* 5px above YouTube's control area, which is 115px tall on a 375x812 phone. */
-    bottom: 120px;
+    /*
+     * Above YouTube's control area: 115px tall on an emulated 375x812 phone, and
+     * 10px more was needed on the owner's real Android phone (2026-11-23).
+     */
+    bottom: 130px;
     width: 44px;
     height: 44px;
     background: rgba(0, 0, 0, 0.18);

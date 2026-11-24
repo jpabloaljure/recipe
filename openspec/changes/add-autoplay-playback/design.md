@@ -172,9 +172,11 @@ type:
 
 Both sit 5 px above the top of YouTube's own control area, measured on the real
 embed on 2026-11-23: that area is about 120 px tall on a 450x800 player (outside
-layout, `bottom: 125px`) and about 115 px tall on a 375x812 phone (overlay,
-`bottom: 120px`); its top edge is the fullscreen button. If YouTube changes its
-controls, the two numbers in `Feed.module.css` are the ones to re-measure.
+layout, `bottom: 125px`) and about 115 px tall on an emulated 375x812 phone. On
+the owner's real Android phone the overlay needed 10 px more than the emulation
+gave, so it is `bottom: 130px`; its top edge is the fullscreen button. If YouTube
+changes its controls, the two numbers in `Feed.module.css` are the ones to
+re-measure, on a real phone.
 
 The threshold is `max-aspect-ratio: 3/4`: at 3/4 or narrower the icon goes over
 the corner, which always fits; wider leaves at least about 75 px beside the
