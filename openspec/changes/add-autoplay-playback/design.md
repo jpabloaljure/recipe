@@ -170,6 +170,12 @@ type:
 - **no room** (tall phone): a transparent icon over the video's bottom-right
   corner, raised above YouTube's control bar, with a small hit area.
 
+Both sit 5 px above the top of YouTube's own control area, measured on the real
+embed on 2026-11-23: that area is about 120 px tall on a 450x800 player (outside
+layout, `bottom: 125px`) and about 115 px tall on a 375x812 phone (overlay,
+`bottom: 120px`); its top edge is the fullscreen button. If YouTube changes its
+controls, the two numbers in `Feed.module.css` are the ones to re-measure.
+
 The threshold is `max-aspect-ratio: 3/4`: at 3/4 or narrower the icon goes over
 the corner, which always fits; wider leaves at least about 75 px beside the
 video at 800 px of height. Checked on 412x915, 768x1024, 800x1000, 600x800,
