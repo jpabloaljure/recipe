@@ -56,7 +56,7 @@
   cursor: pointer;
   /* Outside the video, at its bottom right, raised to sit level with YouTube's own side buttons. */
   left: calc(100% + 16px);
-  bottom: 48px;
+  bottom: 96px;
   background: rgba(255, 255, 255, 0.16);
 }
 
