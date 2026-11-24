@@ -97,7 +97,7 @@ export async function emitUserPause(page: Page, youtubeId: string): Promise<void
   }, youtubeId);
 }
 
-/** From now on a play request with sound on does nothing, as when the browser blocks it. */
+/** From now on the browser refuses sound: unmuting a playing video pauses it. */
 export async function blockUnmutedAutoplay(page: Page): Promise<void> {
   await page.evaluate(() => {
     (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.blockUnmutedAutoplay = true;

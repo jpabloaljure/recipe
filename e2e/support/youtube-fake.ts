@@ -6,7 +6,9 @@
  * the production build holds no test code. The fake keeps one object per
  * `YT.Player`, moves between states as the real player does (without its
  * timing) and registers everything in `window.__youTubeFake`, which
- * `player.ts` reads and drives from tests.
+ * `player.ts` reads and drives from tests. With `blockUnmutedAutoplay` set, an
+ * unmuted start does nothing and unmuting a playing video pauses it, as Chrome
+ * does without permission.
  *
  * It can drift from the real API: real autoplay, loop, the player's own pause
  * control and blocked unmuted autoplay stay manual checks (AGENTS.md E2E rule 13).
@@ -40,7 +42,7 @@ export const FAKE_IFRAME_API = `
   };
   Player.prototype.playVideo = function () {
     this.calls.push("play");
-    if (fake.blockUnmutedAutoplay && !this.muted) return; // the browser refuses: nothing starts
+    if (fake.blockUnmutedAutoplay && !this.muted) return; // an unmuted start is refused: nothing starts
     this._set(STATE.PLAYING);
   };
   Player.prototype.pauseVideo = function () {
@@ -48,7 +50,12 @@ export const FAKE_IFRAME_API = `
     this._set(STATE.PAUSED);
   };
   Player.prototype.mute = function () { this.calls.push("mute"); this.muted = true; };
-  Player.prototype.unMute = function () { this.calls.push("unMute"); this.muted = false; };
+  Player.prototype.unMute = function () {
+    this.calls.push("unMute");
+    this.muted = false;
+    // Chrome pauses a playing video that is unmuted without permission.
+    if (fake.blockUnmutedAutoplay && this.state === STATE.PLAYING) this._set(STATE.PAUSED);
+  };
   Player.prototype.seekTo = function (seconds) { this.calls.push("seekTo(" + seconds + ")"); };
   Player.prototype.destroy = function () { this.calls.push("destroy"); this.destroyed = true; };
   Player.prototype.getPlayerState = function () { return this.state; };

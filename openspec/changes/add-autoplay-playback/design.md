@@ -116,12 +116,18 @@ unmute button. It starts `false` on every page load, which gives "a reload
 starts muted" with no storage. It applies to every newly active video, next,
 previous or returning.
 
-**Blocked unmuted autoplay.** With `soundOn`, the controller unmutes and plays.
-If the player does not report `playing` or `buffering` within a short window
-(1.5 s to start; tuned in the manual check, `(assumed)`), or drops back to
-`paused`, it mutes, plays and shows the button again by setting `soundOn` back
-to `false`. `buffering` counts as started, so a slow network is not taken for a
-block. The timer is injected, so no test sleeps (E2E rule 6).
+**Sound and blocked unmuted autoplay.** Every video starts muted and plays at
+once. With `soundOn`, the controller unmutes it as soon as the player reports
+`playing`, then gives the browser a short window (0.8 s) to refuse: a `paused`
+event, or a player that is still muted or no longer playing at the end of the
+window, means the sound was refused. The video then plays muted, `soundOn` goes
+back to `false` and the button returns (`onSoundBlocked`). The first version asked for
+sound in the first `play()`; measured on real Chrome on 2026-11-23, that start
+stalled with no player event, so the video appeared only after the whole 1.5 s
+window and then without sound. Starting muted shows the video after about
+0.5 to 0.75 s (the stream start). The feed repeats its request, so the controller
+acts only when the slide or the sound changes. The timer is injected, so no
+test sleeps (E2E rule 6).
 
 **Who paused.** Before the controller pauses a video it marks the pause as its
 own, `"swipe"` or `"hidden"`. A `paused` event with no mark is the user's. On
@@ -207,8 +213,9 @@ can drift from the real API; the manual checks against the real player in Chrome
 - [Loop mode may not report each end] -> The seek mode is built behind the same
   contract; task 1 picks the mode before the rest of the playback tasks are
   closed. A short gap before the restart is accepted in seek mode.
-- [The blocked-autoplay window wrongly mutes a slow video] -> `buffering`
-  counts as started; the window is tuned in the manual check.
+- [The unmute is refused after the video appears] -> The window is short and
+  the fallback leaves the video playing muted with the button back; the length is
+  tuned in the manual check.
 - [The fake player drifts from the real one] -> Manual checks on the real
   player: real autoplay, loop and end screen, the player's own pause, blocked
   unmuted autoplay, and the icon on a real phone.

@@ -59,6 +59,9 @@ class FakePlayer {
   unMute() {
     this.calls.push("unMute");
   }
+  isMuted() {
+    return true;
+  }
   seekTo(seconds: number, allowSeekAhead: boolean) {
     this.calls.push(`seekTo(${seconds},${allowSeekAhead})`);
   }
@@ -134,6 +137,7 @@ describe("attachPlayer", () => {
     attached.handle.pause();
     attached.handle.mute();
     attached.handle.unMute();
+    expect(attached.handle.isMuted()).toBe(true);
     attached.handle.seekTo(0);
     attached.destroy();
     expect(fake.calls).toEqual(["play", "pause", "mute", "unMute", "seekTo(0,true)", "destroy"]);

@@ -54,9 +54,9 @@
   border-radius: 50%;
   color: #fff;
   cursor: pointer;
-  /* Outside the video, at its bottom right. */
+  /* Outside the video, at its bottom right, raised to sit level with YouTube's own side buttons. */
   left: calc(100% + 16px);
-  bottom: 16px;
+  bottom: 48px;
   background: rgba(255, 255, 255, 0.16);
 }
 

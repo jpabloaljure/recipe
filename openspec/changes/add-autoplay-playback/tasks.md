@@ -8,7 +8,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 
 - [x] 1.1 In a throwaway page (not committed), load the real IFrame API on desktop Chrome and attach `new YT.Player` to an iframe that already has `enablejsapi=1`, both right after the iframe is inserted and after its `load` event; verify the player becomes ready in both cases and record which was needed in `design.md` Decision 2
 - [ ] 1.2 On desktop Chrome and on Android Chrome (human check), play a Short in loop mode (`loop=1&playlist=<id>`) and in seek mode; verify whether loop mode reports an end every time, how long the gap is in seek mode and whether YouTube's end screen flashes, then write the chosen mode in `design.md` Decision 5
-- [ ] 1.3 On the same two browsers, ask for sound before any tap and verify how a blocked start shows (no `playing` state within the window) and what window length avoids false blocks on a slow connection; write the value in `design.md` Decision 4
+- [ ] 1.3 On the same two browsers, ask for sound before any tap and verify how a refused unmute shows (the player pauses, or stays muted) and whether the 0.8 s window is long enough on a slow connection; write the value in `design.md` Decision 4
 
 ## 2. ADR 0008 and architecture records
 
@@ -20,7 +20,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 
 - [x] 3.1 Add `src/lib/player/types.ts` with the player interface and states, and `src/lib/player/playback.ts` with the controller (player, timer and `onEnded` injected); verify `pnpm typecheck` passes
 - [x] 3.2 Add tests for sound and activation in `playback.test.ts`: an active video plays muted when sound is off, plays with sound when it is on, a swiped-away video is paused, and coming back seeks to 0 and plays; verify `pnpm test` passes
-- [x] 3.3 Add tests for the blocked-autoplay fallback with a fake timer: no `playing` within the window, or a drop to `paused`, mutes, plays and clears the sound state; `buffering` is not a block; verify `pnpm test` passes
+- [x] 3.3 Add tests for the blocked-autoplay fallback with a fake timer: after the unmute, a drop to `paused`, or a player still muted or not playing at the end of the window, mutes, plays and clears the sound state; `buffering` is not a block; verify `pnpm test` passes
 - [x] 3.4 Add tests for pause reasons: a pause the controller did not cause is the user's and survives hide and show, a `"hidden"` pause resumes on visible, and a `"swipe"` pause does not; verify `pnpm test` passes
 - [x] 3.5 Add tests for the `ended` contract in both modes (report on every end, including each loop; seek mode also seeks to 0 and plays), that commands sent before ready are applied once on ready, and that at most one player is asked to play; verify `pnpm test` passes
 - [x] 3.6 Add `src/lib/player/youtube-player.ts`: the script loader (one `<script>`, one ready promise) and the `YT.Player` wrapper that maps API states to the player interface; verify `pnpm typecheck` passes and a Vitest test covers the state mapping with a fake `YT`

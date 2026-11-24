@@ -10,6 +10,8 @@ export interface PlayerHandle {
   pause(): void;
   mute(): void;
   unMute(): void;
+  /** Whether the player is muted right now. */
+  isMuted(): boolean;
   /** Moves to a time in seconds; the controller only ever asks for 0. */
   seekTo(seconds: number): void;
 }

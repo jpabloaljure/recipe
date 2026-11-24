@@ -14,6 +14,7 @@ type YouTubePlayer = {
   pauseVideo(): void;
   mute(): void;
   unMute(): void;
+  isMuted(): boolean;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 };
@@ -115,6 +116,7 @@ export function attachPlayer(
       pause: () => player.pauseVideo(),
       mute: () => player.mute(),
       unMute: () => player.unMute(),
+      isMuted: () => player.isMuted(),
       seekTo: (seconds) => player.seekTo(seconds, true),
     },
     destroy: () => player.destroy(),

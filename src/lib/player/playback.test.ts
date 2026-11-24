@@ -4,16 +4,27 @@ import type { PlayerHandle, TimerHandle, Timers } from "./types";
 
 type Call = "play" | "pause" | "mute" | "unMute" | "seekTo(0)";
 
-function fakePlayer(): PlayerHandle & { calls: Call[] } {
+type FakePlayer = PlayerHandle & { calls: Call[]; muted: boolean };
+
+function fakePlayer(): FakePlayer {
   const calls: Call[] = [];
-  return {
+  const player: FakePlayer = {
     calls,
+    muted: false,
     play: () => calls.push("play"),
     pause: () => calls.push("pause"),
-    mute: () => calls.push("mute"),
-    unMute: () => calls.push("unMute"),
+    mute: () => {
+      calls.push("mute");
+      player.muted = true;
+    },
+    unMute: () => {
+      calls.push("unMute");
+      player.muted = false;
+    },
+    isMuted: () => player.muted,
     seekTo: (seconds) => calls.push(`seekTo(${seconds})` as Call),
   };
+  return player;
 }
 
 /** Timers that only run when the test says so. */
@@ -68,10 +79,38 @@ describe("sound and activation", () => {
     expect(since(player, () => playback.setActive(true, false))).toEqual(["mute", "play"]);
   });
 
-  it("plays with sound when sound is on", () => {
+  it("never unmutes a video when sound is off", () => {
     const { player, playback } = setup();
     playback.markReady();
-    expect(since(player, () => playback.setActive(true, true))).toEqual(["unMute", "play"]);
+    playback.setActive(true, false);
+    expect(since(player, () => playback.handleState("playing"))).toEqual([]);
+  });
+
+  it("starts muted at once when sound is on, and unmutes once the video is playing", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    expect(since(player, () => playback.setActive(true, true))).toEqual(["mute", "play"]);
+    expect(since(player, () => playback.handleState("buffering"))).toEqual([]);
+    expect(since(player, () => playback.handleState("playing"))).toEqual(["unMute"]);
+  });
+
+  it("unmutes when the player reports playing from inside play()", () => {
+    const ctx = setup();
+    const play = ctx.player.play;
+    ctx.player.play = () => {
+      play();
+      ctx.playback.handleState("playing");
+    };
+    ctx.playback.markReady();
+    expect(since(ctx.player, () => ctx.playback.setActive(true, true))).toEqual(["mute", "play", "unMute"]);
+  });
+
+  it("unmutes only once for one start", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, true);
+    playback.handleState("playing");
+    expect(since(player, () => playback.handleState("playing"))).toEqual([]);
   });
 
   it("starts muted and paused before it is active", () => {
@@ -83,7 +122,8 @@ describe("sound and activation", () => {
     const { player, playback } = setup();
     playback.setActive(true, true);
     expect(player.calls).toEqual([]);
-    expect(since(player, () => playback.markReady())).toEqual(["mute", "unMute", "play"]);
+    expect(since(player, () => playback.markReady())).toEqual(["mute", "mute", "play"]);
+    expect(since(player, () => playback.handleState("playing"))).toEqual(["unMute"]);
   });
 
   it("pauses and mutes a video that leaves the screen", () => {
@@ -111,42 +151,73 @@ describe("sound and activation", () => {
     const { player, playback } = setup();
     playback.markReady();
     playback.setActive(true, false);
+    playback.handleState("playing");
     expect(since(player, () => playback.setActive(true, true))).toEqual(["unMute"]);
+  });
+
+  it("waits for the video to play when sound is turned on before it does", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    expect(since(player, () => playback.setActive(true, true))).toEqual([]);
+    expect(since(player, () => playback.handleState("playing"))).toEqual(["unMute"]);
+  });
+
+  it("does nothing when the feed repeats the same request", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, true);
+    expect(since(player, () => playback.setActive(true, true))).toEqual([]);
+    playback.handleState("playing");
+    expect(since(player, () => playback.setActive(true, true))).toEqual([]);
+  });
+
+  it("does not unmute a video that left the screen before it played", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, true);
+    playback.setActive(false, true);
+    expect(since(player, () => playback.handleState("playing"))).toEqual([]);
   });
 });
 
 describe("blocked unmuted autoplay", () => {
-  it("falls back to muted when the player does not start within the window", () => {
-    const { player, timers, playback, blockedCount } = setup();
-    playback.markReady();
-    playback.setActive(true, true);
-    expect(timers.pending()).toBe(1);
-    expect(since(player, () => timers.fire())).toEqual(["mute", "play"]);
-    expect(blockedCount()).toBe(1);
-  });
+  function unmuted() {
+    const ctx = setup();
+    ctx.playback.markReady();
+    ctx.playback.setActive(true, true);
+    ctx.playback.handleState("playing"); // the unmute is asked for here
+    return ctx;
+  }
 
-  it("falls back when the player drops back to paused inside the window", () => {
-    const { player, playback, blockedCount } = setup();
-    playback.markReady();
-    playback.setActive(true, true);
+  it("falls back to muted when the browser pauses the video after the unmute", () => {
+    const { player, playback, blockedCount } = unmuted();
     expect(since(player, () => playback.handleState("paused"))).toEqual(["mute", "play"]);
     expect(blockedCount()).toBe(1);
   });
 
-  it("does not fall back when the player reaches playing", () => {
-    const { timers, playback, blockedCount } = setup();
-    playback.markReady();
-    playback.setActive(true, true);
-    playback.handleState("playing");
-    expect(timers.pending()).toBe(0);
-    timers.fire();
+  it("falls back to muted when the player is still muted at the end of the window", () => {
+    const { player, timers, blockedCount } = unmuted();
+    player.muted = true; // the browser refused the unmute
+    expect(since(player, () => timers.fire())).toEqual(["mute", "play"]);
+    expect(blockedCount()).toBe(1);
+  });
+
+  it("falls back when the video is no longer playing at the end of the window", () => {
+    const { player, timers, playback, blockedCount } = unmuted();
+    playback.handleState("unstarted");
+    expect(since(player, () => timers.fire())).toEqual(["mute", "play"]);
+    expect(blockedCount()).toBe(1);
+  });
+
+  it("keeps the sound when the video is still playing and unmuted at the end of the window", () => {
+    const { player, timers, blockedCount } = unmuted();
+    expect(since(player, () => timers.fire())).toEqual([]);
     expect(blockedCount()).toBe(0);
   });
 
-  it("counts buffering as started, so a slow network is not a block", () => {
-    const { timers, playback, blockedCount } = setup();
-    playback.markReady();
-    playback.setActive(true, true);
+  it("counts buffering after the unmute as started", () => {
+    const { timers, playback, blockedCount } = unmuted();
     playback.handleState("buffering");
     timers.fire();
     expect(blockedCount()).toBe(0);
@@ -156,20 +227,29 @@ describe("blocked unmuted autoplay", () => {
     const { timers, playback } = setup();
     playback.markReady();
     playback.setActive(true, false);
+    playback.handleState("playing");
     expect(timers.pending()).toBe(0);
   });
 
-  it("drops the window when the video leaves the screen", () => {
-    const { timers, playback, blockedCount } = setup();
+  it("arms the window only after the video is playing", () => {
+    const { timers, playback } = setup();
     playback.markReady();
     playback.setActive(true, true);
+    expect(timers.pending()).toBe(0);
+    playback.handleState("playing");
+    expect(timers.pending()).toBe(1);
+  });
+
+  it("drops the window when the video leaves the screen", () => {
+    const { player, timers, playback, blockedCount } = unmuted();
     playback.setActive(false, true);
+    player.muted = true;
     timers.fire();
     expect(blockedCount()).toBe(0);
   });
 
-  it("uses a window of 1.5 seconds by default", () => {
-    expect(BLOCKED_AUTOPLAY_WINDOW_MS).toBe(1500);
+  it("uses a window of 0.8 seconds by default", () => {
+    expect(BLOCKED_AUTOPLAY_WINDOW_MS).toBe(800);
   });
 });
 
@@ -203,6 +283,17 @@ describe("pause reasons", () => {
     playback.setTabVisible(true);
     playback.handleState("playing");
     expect(player.calls.filter((call) => call === "play")).toHaveLength(2);
+  });
+
+  it("asks for sound again after a hidden tab, once the video plays", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, true);
+    playback.handleState("playing");
+    playback.setTabVisible(false);
+    playback.handleState("paused");
+    expect(since(player, () => playback.setTabVisible(true))).toEqual(["mute", "play"]);
+    expect(since(player, () => playback.handleState("playing"))).toEqual(["unMute"]);
   });
 
   it("does not resume a swipe pause when the tab becomes visible", () => {
@@ -247,11 +338,12 @@ describe("ended contract", () => {
   });
 
   it("reports the end of an unmuted video without falling back", () => {
-    const { timers, ended, playback, blockedCount } = setup();
+    const { player, timers, ended, playback, blockedCount } = setup();
     playback.markReady();
     playback.setActive(true, true);
     playback.handleState("playing");
     playback.handleState("ended");
+    player.muted = false;
     timers.fire();
     expect(ended).toHaveLength(1);
     expect(blockedCount()).toBe(0);
@@ -260,7 +352,7 @@ describe("ended contract", () => {
 
 describe("one player at a time", () => {
   it("asks at most one controller to play as the active slide changes", () => {
-    const players = new Map<string, ReturnType<typeof fakePlayer>>();
+    const players = new Map<string, FakePlayer>();
     const controllers = new Map<string, SlidePlayback>();
     for (const key of ["a", "b", "c"]) {
       const player = fakePlayer();
