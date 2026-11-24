@@ -15,7 +15,9 @@ import {
 import { createHttpFeedSource } from "../../lib/feed/http-source";
 import { PageRequests } from "../../lib/feed/page-requests";
 import { shuffleFeedPage } from "../../lib/feed/shuffle";
+import { type SlidePlayback, syncActive } from "../../lib/player/playback";
 import styles from "./Feed.module.css";
+import { SlideVideo } from "./SlideVideo";
 
 /**
  * The vertical swipe feed (REC-001). Native CSS scroll-snap moves one video
@@ -23,14 +25,21 @@ import styles from "./Feed.module.css";
  * `GET /api/feed`; after the last page the visit order is appended again, so
  * the feed wraps to the first video with an ordinary snap.
  *
- * Out of scope here: the player API, autoplay and loop (REC-003), preloading
- * (REC-004), and loading, empty and error states (REC-018).
+ * Each mounted slide has a player (REC-003): the active one plays, sound is
+ * on or off for the whole tab, and every end of a video is announced with a
+ * bubbling `videoended` event on the feed element (`detail.youtubeId`).
+ *
+ * Out of scope here: preloading (REC-004), and loading, empty and error
+ * states (REC-018).
  */
 export function Feed() {
   const source = useMemo(() => createHttpFeedSource(), []);
   const [state, setState] = useState<FeedState>(initialFeedState);
   const [activeIndex, setActiveIndex] = useState(0);
+  // Sound is on or off for this tab only, in memory: a reload starts muted (REC-003).
+  const [soundOn, setSoundOn] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
+  const controllers = useRef(new Map<string, SlidePlayback>());
   // Each page is requested once at a time; the next cursor is only known after
   // the current page arrives, so requests never overlap.
   const requests = useRef(new PageRequests());
@@ -90,6 +99,42 @@ export function Feed() {
   }, []);
 
   const slides = buildSlides(state);
+  const activeKey = slides[activeIndex]?.key ?? null;
+  const latest = useRef({ activeKey, soundOn });
+  latest.current = { activeKey, soundOn };
+
+  // The active slide and the sound state reach every player; the others stop first.
+  useEffect(() => {
+    syncActive(controllers.current, activeKey, soundOn);
+  }, [activeKey, soundOn]);
+
+  // A hidden tab pauses the playing video; a visible one resumes it if the app paused it.
+  useEffect(() => {
+    const apply = () => {
+      const visible = document.visibilityState === "visible";
+      for (const playback of controllers.current.values()) playback.setTabVisible(visible);
+    };
+    document.addEventListener("visibilitychange", apply);
+    return () => document.removeEventListener("visibilitychange", apply);
+  }, []);
+
+  const registerPlayback = useCallback((key: string, playback: SlidePlayback | null) => {
+    if (playback === null) {
+      controllers.current.delete(key);
+      return;
+    }
+    controllers.current.set(key, playback);
+    playback.setTabVisible(document.visibilityState === "visible");
+    syncActive(controllers.current, latest.current.activeKey, latest.current.soundOn);
+  }, []);
+
+  // REC-007 listens to this: every end of a video, including each loop.
+  const announceEnded = useCallback((youtubeId: string) => {
+    scroller.current?.dispatchEvent(new CustomEvent("videoended", { bubbles: true, detail: { youtubeId } }));
+  }, []);
+
+  // Unmuted autoplay was refused, so the video plays muted and the button comes back.
+  const soundBlocked = useCallback(() => setSoundOn(false), []);
 
   return (
     <div ref={scroller} className={styles.feed} data-testid="feed">
@@ -104,14 +149,29 @@ export function Feed() {
         >
           <div className={styles.frame} data-testid="feed-frame">
             {inPlayerWindow(index, activeIndex) && (
-              <iframe
-                className={styles.player}
-                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(slide.item.youtubeId)}?playsinline=1&rel=0`}
+              <SlideVideo
+                youtubeId={slide.item.youtubeId}
                 title={slide.item.title}
-                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                // YouTube refuses embeds sent with no referrer (player error 153).
-                referrerPolicy="strict-origin-when-cross-origin"
+                onPlayback={(playback) => registerPlayback(slide.key, playback)}
+                onEnded={announceEnded}
+                onSoundBlocked={soundBlocked}
               />
+            )}
+            {index === activeIndex && !soundOn && (
+              <button
+                type="button"
+                className={styles.unmute}
+                data-testid="unmute-button"
+                aria-label="Turn sound on"
+                onClick={() => setSoundOn(true)}
+              >
+                <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+                  <path
+                    fill="currentColor"
+                    d="M3 9v6h4l5 5V4L7 9H3zm13.6 3 2.7-2.7-1.4-1.4L15.2 10.6l-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4L16.6 12z"
+                  />
+                </svg>
+              </button>
             )}
           </div>
         </section>

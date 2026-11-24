@@ -14,6 +14,7 @@ folder. Diagrams live in [`../architecture/`](../architecture/README.md).
 | [0005](0005-single-package-repository-layout.md) | Single-package repository layout | Accepted | 2026-11-16 |
 | [0006](0006-playwright-end-to-end-tests.md) | Playwright for end-to-end tests | Accepted | 2026-11-16 |
 | [0007](0007-database-connections-roles-and-migrations.md) | Database connections, roles and migrations (refines 0003) | Accepted | 2026-11-21 |
+| [0008](0008-youtube-iframe-player-api.md) | YouTube IFrame Player API for playback control | Accepted | 2026-11-23 |
 
 ## Pending decisions
 

@@ -7,7 +7,7 @@ browser's `localStorage`, PRD §5.4). So the main risks are a leaked write
 credential, a change that reaches production without review, and bad input on
 the one public endpoint. The practices below follow from that.
 
-Last reviewed: 2026-11-22. When code, workflows or settings change a practice,
+Last reviewed: 2026-11-24. When code, workflows or settings change a practice,
 update this file in the same pull request.
 
 ## Practices in place
@@ -36,8 +36,9 @@ update this file in the same pull request.
 
 | Practice | Example | Where |
 |---|---|---|
-| **Privacy-enhanced player.** The embed uses `youtube-nocookie.com`, an explicit `allow` list and a `strict-origin-when-cross-origin` referrer policy. | The iframe's `allow` names only the features the player needs. | [`Feed.tsx`](../src/app/feed/Feed.tsx) |
-| **The video ID is escaped** in the embed URL, and only the active video and its two neighbours render an iframe. | `encodeURIComponent(youtubeId)`. | [`Feed.tsx`](../src/app/feed/Feed.tsx) |
+| **Privacy-enhanced player.** The embed uses `youtube-nocookie.com`, an explicit `allow` list and a `strict-origin-when-cross-origin` referrer policy. | The iframe's `allow` names only the features the player needs, including `autoplay` (REC-003). | [`SlideVideo.tsx`](../src/app/feed/SlideVideo.tsx) |
+| **The video ID and the page origin are escaped** in the embed URL, and only the active video and its two neighbours render an iframe. | `encodeURIComponent(youtubeId)` and `encodeURIComponent(origin)`. | [`embed-url.ts`](../src/lib/player/embed-url.ts), [`Feed.tsx`](../src/app/feed/Feed.tsx) |
+| **The only third-party script is YouTube's own IFrame Player API.** It is loaded once from `www.youtube.com`, behind one adapter, with no npm dependency; the player is destroyed only after its iframe is gone. | No other outside script runs on the page. | [ADR 0008](adr/0008-youtube-iframe-player-api.md), [`youtube-player.ts`](../src/lib/player/youtube-player.ts) |
 
 ### Secrets and configuration
 

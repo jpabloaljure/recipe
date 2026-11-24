@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>yt check (throwaway)</title></head>
+<body style="font:12px monospace;background:#fff;color:#000">
+<h3>REC-003 task 1 real-player check (throwaway, not committed)</h3>
+<div id="summary" style="font:16px/1.4 sans-serif;border:2px solid #333;padding:8px;margin:8px 0">Running the automatic checks (about 40 s)...</div>
+<button id="tap" style="font:18px sans-serif;padding:12px;margin:4px 0" disabled>Tap test: play WITH sound after a tap</button>
+<div id="tapresult" style="font:16px/1.4 sans-serif;margin:4px 0"></div>
+<pre id="out">running...</pre>
+<div id="host" style="width:270px;height:480px"></div>
+<script>
+const ID = "G7D983zlGFc";
+const out = document.getElementById("out");
+const results = { ua: navigator.userAgent, steps: [] };
+window.__results = results;
+const t0 = performance.now();
+const now = () => Math.round(performance.now() - t0);
+const log = (s) => { results.steps.push(now() + "ms " + s); out.textContent = results.steps.join("\n"); };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const STATE = { "-1": "unstarted", 0: "ended", 1: "playing", 2: "paused", 3: "buffering", 5: "cued" };
+
+function mkIframe(extra) {
+  const f = document.createElement("iframe");
+  f.width = 270; f.height = 480;
+  f.allow = "autoplay; encrypted-media";
+  f.referrerPolicy = "strict-origin-when-cross-origin";
+  f.src = `https://www.youtube-nocookie.com/embed/${ID}?playsinline=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}${extra || ""}`;
+  return f;
+}
+function replaceHost(f) { const h = document.getElementById("host"); h.innerHTML = ""; h.appendChild(f); }
+
+function whenApi() {
+  return new Promise((res, rej) => {
+    window.onYouTubeIframeAPIReady = () => res();
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    s.onerror = () => rej(new Error("iframe_api failed to load"));
+    document.head.appendChild(s);
+  });
+}
+
+function makePlayer(f, label) {
+  return new Promise((res) => {
+    const states = [];
+    const p = new YT.Player(f, { events: {
+      onReady: () => { log(label + ": onReady"); res({ p, states }); },
+      onStateChange: (e) => { const s = STATE[e.data] || e.data; states.push({ at: now(), s }); log(label + ": state " + s); },
+      onError: (e) => log(label + ": ERROR " + e.data),
+    } });
+  });
+}
+const timeout = (ms, v) => new Promise((r) => setTimeout(() => r(v), ms));
+
+document.getElementById("tap").addEventListener("click", async () => {
+  const el = document.getElementById("tapresult");
+  el.textContent = "tap test running...";
+  const f = mkIframe(); replaceHost(f);
+  const c = await Promise.race([makePlayer(f, "T(tap)"), timeout(15000, null)]);
+  if (!c) { el.textContent = "tap test: player not ready"; return; }
+  const t = now();
+  c.p.unMute(); c.p.playVideo();
+  await sleep(3000);
+  results.tapTest = { states: c.states.map((x) => ({ ms: x.at - t, s: x.s })), final: STATE[c.p.getPlayerState()], isMuted: c.p.isMuted() };
+  el.textContent = "Tap test: " + (results.tapTest.final === "playing" && !results.tapTest.isMuted ? "PLAYS WITH SOUND" : "NOT playing with sound (final=" + results.tapTest.final + ", muted=" + results.tapTest.isMuted + ")") + " - " + JSON.stringify(results.tapTest.states);
+});
+
+(async () => {
+  try {
+    await whenApi();
+    log("api loaded");
+
+    // 1.1 A: attach right after the iframe is inserted
+    let f = mkIframe(); replaceHost(f);
+    let tA = now();
+    let a = await Promise.race([makePlayer(f, "A(immediate)"), timeout(15000, null)]);
+    results.attachImmediate = a ? { ready: true, ms: now() - tA } : { ready: false };
+    if (a) { try { a.p.destroy(); } catch {} }
+
+    // 1.1 B: attach after the iframe's load event
+    f = mkIframe(); replaceHost(f);
+    await new Promise((r) => f.addEventListener("load", r, { once: true }));
+    let tB = now();
+    let b = await Promise.race([makePlayer(f, "B(afterload)"), timeout(15000, null)]);
+    results.attachAfterLoad = b ? { ready: true, ms: now() - tB } : { ready: false };
+    if (b) { try { b.p.destroy(); } catch {} }
+
+    // 1.3: muted autoplay, then unmuted autoplay with no user gesture
+    f = mkIframe(); replaceHost(f);
+    let c = await Promise.race([makePlayer(f, "C(autoplay)"), timeout(15000, null)]);
+    if (c) {
+      c.p.mute(); c.p.playVideo();
+      await Promise.race([sleep(4000)]);
+      const mutedStates = c.states.map((x) => x.s);
+      results.mutedAutoplay = { states: mutedStates, final: STATE[c.p.getPlayerState()], muted: c.p.isMuted() };
+      c.p.pauseVideo(); await sleep(500);
+      c.states.length = 0;
+      c.p.unMute(); const tu = now(); c.p.playVideo();
+      await sleep(3000);
+      results.unmutedAutoplayNoGesture = { states: c.states.map((x) => ({ ms: x.at - tu, s: x.s })), final: STATE[c.p.getPlayerState()], isMuted: c.p.isMuted() };
+      results.duration = c.p.getDuration();
+      try { c.p.destroy(); } catch {}
+    }
+
+    // 1.2 loop mode: loop=1&playlist=ID, seek near the end, watch states
+    f = mkIframe(`&loop=1&playlist=${ID}`); replaceHost(f);
+    let d = await Promise.race([makePlayer(f, "D(loop)"), timeout(15000, null)]);
+    if (d) {
+      d.p.mute(); d.p.playVideo(); await sleep(2500);
+      const dur = d.p.getDuration(); d.states.length = 0;
+      const ts = now(); d.p.seekTo(dur - 2, true);
+      await sleep(8000);
+      results.loopMode = { duration: dur, states: d.states.map((x) => ({ ms: x.at - ts, s: x.s })) };
+      try { d.p.destroy(); } catch {}
+    }
+
+    // 1.2 seek mode: no loop param; on ended -> seekTo(0)+play, measure the gap
+    f = mkIframe(); replaceHost(f);
+    let e = await Promise.race([makePlayer(f, "E(seek)"), timeout(15000, null)]);
+    if (e) {
+      let endedAt = null, resumedAt = null;
+      e.p.addEventListener("onStateChange", (ev) => {
+        if (ev.data === 0 && endedAt === null) { endedAt = now(); e.p.seekTo(0, true); e.p.playVideo(); }
+        else if (ev.data === 1 && endedAt !== null && resumedAt === null) { resumedAt = now(); }
+      });
+      e.p.mute(); e.p.playVideo(); await sleep(2500);
+      const dur = e.p.getDuration(); e.states.length = 0;
+      const ts = now(); e.p.seekTo(dur - 2, true);
+      await sleep(8000);
+      results.seekMode = { duration: dur, gapMs: endedAt && resumedAt ? resumedAt - endedAt : null, states: e.states.map((x) => ({ ms: x.at - ts, s: x.s })) };
+      try { e.p.destroy(); } catch {}
+    }
+    results.done = true;
+    log("DONE");
+    const r = results;
+    const loopEnded = (r.loopMode && r.loopMode.states || []).some((x) => x.s === "ended");
+    const seekEnded = (r.seekMode && r.seekMode.states || []).some((x) => x.s === "ended");
+    const un = r.unmutedAutoplayNoGesture;
+    const unPlayed = un && un.states.some((x) => x.s === "playing");
+    const mutedPlaying = (r.mutedAutoplay && r.mutedAutoplay.states || []).find((x) => x === "playing");
+    document.getElementById("summary").innerHTML =
+      "<b>Attach right after insert:</b> " + (r.attachImmediate && r.attachImmediate.ready ? "ready" : "FAILED") + "<br>" +
+      "<b>Attach after load:</b> " + (r.attachAfterLoad && r.attachAfterLoad.ready ? "ready" : "FAILED") + "<br>" +
+      "<b>Muted autoplay:</b> " + (mutedPlaying ? "plays" : "DID NOT PLAY") + "<br>" +
+      "<b>Unmuted play with no tap:</b> " + (unPlayed ? "PLAYED (not blocked, final muted=" + un.isMuted + ")" : "BLOCKED (no playing state) states=" + JSON.stringify(un && un.states)) + "<br>" +
+      "<b>Loop mode reports ended:</b> " + (loopEnded ? "YES" : "NO") + "<br>" +
+      "<b>Seek mode reports ended:</b> " + (seekEnded ? "YES, gap " + (r.seekMode && r.seekMode.gapMs) + " ms" : "NO") + "<br>" +
+      "<small>" + navigator.userAgent + "</small>";
+    document.getElementById("tap").disabled = false;
+  } catch (err) {
+    results.error = String(err);
+    log("ERROR " + err);
+  }
+})();
+</script>
+</body>
+</html>

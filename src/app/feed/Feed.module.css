@@ -20,6 +20,7 @@
 
 /* Full height and centered on wide screens; full width on a tall phone (Decision 6). */
 .frame {
+  position: relative;
   height: 100%;
   aspect-ratio: 9 / 16;
   max-width: 100%;
@@ -31,4 +32,55 @@
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+/*
+ * Unmute button (REC-003, specs/playback "Unmute button placement"). The frame
+ * is the positioning parent. With room beside the video it sits outside, at the
+ * video's bottom right; on a tall screen (aspect ratio 3/4 or narrower) it is a
+ * transparent icon over the video's bottom-right corner, above the player's
+ * control bar. The threshold was checked on 412x915, 768x1024, 800x1000,
+ * 600x800, 820x1180, 1024x768, 1280x800 and 915x412: the button always fits.
+ */
+.unmute {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  /*
+   * Outside the video, at its bottom right, 5px above YouTube's control area
+   * (measured on 2026-11-23: it is 120px tall on a 450x800 player, its top edge
+   * being the fullscreen button).
+   */
+  left: calc(100% + 16px);
+  bottom: 125px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.unmute:hover,
+.unmute:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* No room beside the video (a tall phone): transparent icon over the corner. */
+@media (max-aspect-ratio: 3/4) {
+  .unmute {
+    left: auto;
+    right: 8px;
+    /*
+     * Above YouTube's control area: 115px tall on an emulated 375x812 phone, and
+     * 10px more was needed on the owner's real Android phone (2026-11-23).
+     */
+    bottom: 130px;
+    width: 44px;
+    height: 44px;
+    background: rgba(0, 0, 0, 0.18);
+  }
 }

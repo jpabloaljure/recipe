@@ -107,6 +107,7 @@ Diagrams (C4 model, Mermaid): [docs/architecture/](docs/architecture/README.md)
 | Database | Postgres on Neon, Drizzle ORM | [ADR 0003](docs/adr/0003-postgres-neon-drizzle.md) |
 | Ingestion job | Node TypeScript script on a GitHub Actions schedule | [ADR 0004](docs/adr/0004-ingestion-on-github-actions.md) |
 | Hosting + CDN | Vercel | [ADR 0002](docs/adr/0002-nextjs-on-vercel.md) |
+| Video playback control | YouTube IFrame Player API (external script, no npm dependency) | [ADR 0008](docs/adr/0008-youtube-iframe-player-api.md) |
 
 ### 2.3. Project structure
 
