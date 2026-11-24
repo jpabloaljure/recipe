@@ -2565,3 +2565,358 @@ validated
 - **Result:** REC-004 is validated with no open findings (13 first findings, 4 from the first re-check and 4 from the second all resolved). A size warning is recorded: 3 points against `size:L`, label unchanged. The backlog, log and PRD edits are uncommitted on the branch `feat/rec-003-autoplay-playback`, with the REC-003 implementation.
 - **Models:** Sonnet 5.5 (main session, all prompts) · Sonnet 5.5 (`story-validator`, three runs) · `estimate-story` ran in the main session.
 - **Why:** the cap keeps validation and estimating on Sonnet at medium effort; the findings come from a read-only agent and the choices stay with the user.
+
+## 357. Explore REC-003 (Opus 5.5)
+
+```
+/openspec-explore REC-003
+```
+
+## 358. Ask for alternatives to the player control (button answer, Opus 5.5)
+
+```
+Discuss alternatives
+```
+
+## 359. Take the recommended choices (Opus 5.5)
+
+```
+i will pick your choices
+```
+
+## 360. Say where the unmute button goes (two screenshots attached, Opus 5.5)
+
+```
+First image, for landskape view and desktop, put the Un mute button where the remix boton is on the the outside of the screen down right. were the remix icon is. And place the recipe at centered at the left outside of the video. Second image. For the mobile devices use a transparent icon and placed in the right corner down where the the remix button is.
+```
+
+## 361. Choose A: the layout switches on available space (Opus 5.5)
+
+```
+A
+```
+
+## 362. Choose A: loop mode hidden in the adapter (Opus 5.5)
+
+```
+A
+```
+
+## 363. Choose A: try with sound, fall back if it does not start (Opus 5.5)
+
+```
+A
+```
+
+## 364. Choose A: remember why the adapter paused (Opus 5.5)
+
+```
+A
+```
+
+## 365. Choose A: a new playback spec (Opus 5.5)
+
+```
+A
+```
+
+## 366. Choose A: one player per mounted iframe (Opus 5.5)
+
+```
+A
+```
+
+## 367. Open the PR with the validation edits (button answer, Opus 5.5)
+
+```
+Open the PR
+```
+
+## 368. Add the placement decision to the PR (button answer, Opus 5.5)
+
+```
+Add it to this PR
+```
+
+## 369. Merge PR #68 when green (button answer, Opus 5.5)
+
+```
+Merge when green
+```
+
+## 370. Switch the session model (local command)
+
+```
+/model claude-sonnet-5-5
+```
+
+## 371. Propose the change (button answer)
+
+```
+Propose REC-003
+```
+
+## 372. Open the PR with the proposal (button answer)
+
+```
+Open the PR
+```
+
+## 373. Merge PR #69 when green (button answer)
+
+```
+Merge when green
+```
+
+## 374. Apply the change (button answer)
+
+```
+Apply the change
+```
+
+## 375. Ask for the Android check steps (button answer)
+
+```
+Android check steps
+```
+
+## 376. Say they are lost
+
+```
+what are we doing? im lost
+```
+
+## 377. Ask whether production has it yet
+
+```
+im not able to see this on prod link yet am i right?
+```
+
+## 378. Ask for the manual test steps
+
+```
+ok, give me the step by step to tested manualy
+```
+
+## 379. Choose the preview link (button answer)
+
+```
+Preview link (PR)
+```
+
+## 380. Report the black screen on the preview
+
+```
+it says ready but i only see a black screen
+```
+
+## 381. Paste the feed error from the preview
+
+```
+{"error":{"code":"internal_error","message":"The feed could not be read."}}
+```
+
+## 382. Report the Vercel runtime log (screenshot attached)
+
+```
+RUN TIME LOG I HAVE SOAW THE DADABACE ON PREFIEW ENV
+```
+
+## 383. Paste the full runtime error (pasted log)
+
+```
+(pasted: the Vercel runtime log of `GET /api/feed failed`, ending with `[cause]: TypeError: Invalid URL`)
+```
+
+## 384. Ask for the button height and a faster start after unmuting
+
+```
+in chrome the button should be 3 times up than where is now. the autoplay when I move to the next video is taking to long after I press the unmute button. on chrome. Fix it.
+```
+
+## 385. Raise the button again
+
+```
+still move the button twice higher
+```
+
+## 386. Place the button above YouTube's controls
+
+```
+make sure is right about 5px above youtube player controls. for both mobile and desktop
+```
+
+## 387. Raise the phone icon
+
+```
+on mobile stil needs to be rised about 10px
+```
+
+## 388. Confirm the placement on Android and desktop
+
+```
+I have checked on android and chrome desktop and looks good.
+```
+
+## 389. Show a DevTools warning (screenshot attached)
+
+```
+(no text: a screenshot of Chrome DevTools Issues, "Content Security Policy of your site blocks the use of `eval` in JavaScript")
+```
+
+## 390. Ask for the step-by-step for task 1.2
+
+```
+1.2 On desktop Chrome and on Android Chrome (human check), play a Short in loop mode (loop=1&playlist=<id>) and in seek mode; verify whether loop mode reports an end every time, how long the gap is in seek mode and whether YouTube's end screen flashes, then write the chosen mode in design.md Decision 5. step by step to do this?
+```
+
+## 391. Paste the JSON error from localhost
+
+```
+{"error":{"code":"E_ROUTE_NOT_FOUND","message":"Cannot GET:/"}}
+```
+
+## 392. Say which address they opened
+
+```
+http://localhost:3333
+```
+
+## 393. Paste the terminal output (pasted)
+
+```
+(pasted: the terminal output of `pnpm dev -p 3200` run from the scratchpad folder, ending with `ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL` and `Command "dev" not found`)
+```
+
+## 394. Ask what they must send
+
+```
+after that test you need me to give you an input?
+```
+
+## 395. Send the Android and desktop check results (two screenshots attached)
+
+```
+Android result, Chrom desktop result
+```
+
+## 396. Say the loop restart is smooth (button answer)
+
+```
+Smooth, no flash
+```
+
+## 397. Ask for the button to follow YouTube's own mute control
+
+```
+question when I hit the unmute on the youtube playr out own unmute stll there can we hide it when video is un muted and showit when is muted always? or that will be to much work now?
+```
+
+## 398. Report the sound problems on the preview
+
+```
+No it look like the video its starting unmuted but is not sownding (maybe bloked by the browsers auto playback) i wanted to be muted in the first place. Also when I use the unmute button (Player or ours) after scrolling couple of videos the playback silenced and the video stops rendering with the players loading circle un the middle.
+```
+
+## 399. Report the sound problems again
+
+```
+No it look like the video its starting unmuted but with volume all down the youtube volume icon is not the unmute button (maybe bloked by the browsers auto playback) i wanted to be muted at the stat so it playsback automaticly. Also when I use the unmute button (Player or ours) when i move to the next video  the fideo loads fine but if I move again the vido all of the next videos the playback silenced and the video stops rendering with the players loading circle un the middle.
+```
+
+## 400. Send the debug log (screenshot attached)
+
+```
+I tok long
+```
+
+## 401. Roll back and keep the work in the draft backlog
+
+```
+lets rollback to before i wrote this prompt "question when I hit the unmute on the youtube playr out own unmute stll there can we hide it when video is un muted and showit when is muted always? or that will be to much work now?" and add this change and all the evidence we have to the draft backlog to be able to pick it up from here in the future.
+```
+
+## 402. Take the PR out of draft (button answer)
+
+```
+Take out of draft
+```
+
+## 403. Ask for a plainer explanation
+
+```
+wat you mean?
+```
+
+## 404. Leave the stall fix out
+
+```
+lo live it out.
+```
+
+## 405. Ask which preview address to use
+
+```
+what will be the preview branch now?
+```
+
+## 406. Answer the three open points
+
+```
+1 validated, 2. yes, 3 lets go
+```
+
+## 407. Ask for recommendations on the review fixes
+
+```
+recomendations for the fixes before implementing
+```
+
+## 408. Decide the review findings
+
+```
+Answer only: 1. Recommended. The rest add to draft backlog to take care of them in the future.
+```
+
+## 409. Merge PR #70 when green (button answer)
+
+```
+Merge when green
+```
+
+## 410. Start the close-out (button answer)
+
+```
+Start close-out
+```
+
+## 411. Merge PR #72 when green (button answer)
+
+```
+Merge when green
+```
+
+## 412. Ask whether the change is archived
+
+```
+we have archive already?
+```
+
+## 413. Register the REC-003 chain (question dialog answer)
+
+```
+REC-003 chain (Recommended)
+```
+
+### Summary (prompts 357–413)
+
+- **Goal:** take REC-003 (autoplay muted, tap to unmute, loop) from a validated story to `done`: explore its design, propose and build the OpenSpec change, test it on real devices, review it, merge it, and close it out.
+- **Changes:**
+  - **OpenSpec:** change `add-autoplay-playback` (proposal, the new `playback` spec and the modified `feed` requirement, design, 26 tasks), synced into `openspec/specs/` and archived to `openspec/changes/archive/2026-11-24-add-autoplay-playback/`.
+  - **Code:** `src/lib/player/` (playback rules, the YouTube IFrame API adapter, the embed URL), `src/app/feed/SlideVideo.tsx`, and `Feed.tsx` / `Feed.module.css` (a player per mounted iframe, an unmute button placed by the screen shape and 5 px above YouTube's controls, a `videoended` event); a fake `iframe_api` for E2E and 14 playback tests.
+  - **Architecture and docs:** ADR 0008, C4 level 3, `AGENTS.md` Stack, `README.md`, `docs/security.md`, PRD §5.2.
+  - **Draft backlog:** D-12 (a button that follows YouTube's own sound control, and sound across videos; evidence in `backlog/evidence/D-12-follow-the-players-sound/`, code under the tag `archive/rec-003-follow-player-sound`) and D-13 to D-18 from the code review.
+  - **PRs:** #68 (story validation), #69 (proposal), #70 (implementation) and #72 (close-out), all merged.
+- **Result:** REC-003 is `done` and in production (merge commit `d8241cb`, production smoke green). Real-device checks on desktop Chrome 154 and Android Chrome 138 showed that the embed's loop mode never reports an end, so the app restarts the video itself. A feature that made the button follow YouTube's own mute control, plus a volume fix, a `?debug` log and a stall watchdog, was built, then rolled back on request. The known limitation is a freeze after an unmute on a later video (D-12). The AI review found seven points: one accepted, six moved to the draft backlog, all threads resolved. The preview's black screen was an invalid `DATABASE_URL` in Vercel's Preview environment, fixed by the maintainer.
+- **Models:** Opus 5.5 (main session, prompts 357–369) · Sonnet 5.5 (main session from the `/model` switch, prompts 371–413) · Haiku 5.5, effort low (`doc-checker`, three runs: ADR 0008 and C4, the stack and README updates, and the close-out files) · the code review ran in the main session at `medium` effort.
+- **Why:** the cap keeps every step on Sonnet at medium effort at most (the first part ran on Opus 5.5 before the switch); the read-only doc checks stay on the cheap Haiku agent and the choices stay with the user.
