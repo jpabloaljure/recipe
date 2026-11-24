@@ -154,8 +154,8 @@ later (the visible gap on a real device is still a manual check). Only seek mode
 is built, and the embed URL has no loop parameter. Confirmed on real Chrome the
 same day: desktop Chrome 154 and Android 10 Chrome 138 both showed loop mode never
 reporting `ended` and seek mode reporting it, with 5 ms (desktop) and 57 ms
-(Android) between the `ended` and `playing` events. The visible gap and YouTube's
-end screen are still a manual check (task 7.2).
+(Android) between the `ended` and `playing` events. On both, the restart looked
+smooth: no freeze, black frame or YouTube end screen was seen.
 
 How the feed tells the app: the feed element dispatches a bubbling
 `CustomEvent("videoended", { detail: { youtubeId } })`. REC-007 can listen to it

@@ -7,7 +7,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 ## 1. Real-player check (first; picks the loop mode)
 
 - [x] 1.1 In a throwaway page (not committed), load the real IFrame API on desktop Chrome and attach `new YT.Player` to an iframe that already has `enablejsapi=1`, both right after the iframe is inserted and after its `load` event; verify the player becomes ready in both cases and record which was needed in `design.md` Decision 2
-- [ ] 1.2 On desktop Chrome and on Android Chrome (human check), play a Short in loop mode (`loop=1&playlist=<id>`) and in seek mode; verify whether loop mode reports an end every time, how long the gap is in seek mode and whether YouTube's end screen flashes, then write the chosen mode in `design.md` Decision 5
+- [x] 1.2 On desktop Chrome and on Android Chrome (human check), play a Short in loop mode (`loop=1&playlist=<id>`) and in seek mode; verify whether loop mode reports an end every time, how long the gap is in seek mode and whether YouTube's end screen flashes, then write the chosen mode in `design.md` Decision 5
 - [ ] 1.3 On the same two browsers, ask for sound before any tap and verify how a refused unmute shows (the player pauses, or stays muted) and whether the 0.8 s window is long enough on a slow connection; write the value in `design.md` Decision 4
 
 ## 2. ADR 0008 and architecture records
