@@ -106,7 +106,7 @@ and recovered in about 3 s; the second one, after a tap on our button, lasted 21
 
 Real Chrome, with the throwaway check page `yt-check.html` (it loads the real
 IFrame API and runs the checks by itself; serve it from a `public/` folder and open it, as in
-task 1 of `openspec/changes/add-autoplay-playback/tasks.md`). Results are in
+task 1 of `openspec/changes/archive/2026-11-24-add-autoplay-playback/tasks.md`). Results are in
 `check-page-android-chrome-138.jpg` and `check-page-desktop-chrome-154.png`:
 
 | | Android 10, Chrome 138 | macOS, Chrome 154 |

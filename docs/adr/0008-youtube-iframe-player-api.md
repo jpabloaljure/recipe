@@ -64,7 +64,7 @@ No npm dependency is added. In end-to-end tests the network guard serves a fake
 
 ## Links
 
-- Change: [`add-autoplay-playback`](../../openspec/changes/add-autoplay-playback/design.md)
+- Change: [`add-autoplay-playback`](../../openspec/changes/archive/2026-11-24-add-autoplay-playback/design.md)
 - Story: REC-003 in [`backlog/E01-browse-feed.md`](../../backlog/E01-browse-feed.md)
 - C4: [Level 3: web app components](../architecture/c4/03-components-web-app.md)
   (the Player controller and its relation to the YouTube player); levels 1 and 2
