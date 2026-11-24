@@ -8,6 +8,7 @@
  * timing) and registers everything in `window.__youTubeFake`, which
  * `player.ts` reads and drives from tests. Like the real player, `isMuted()` is
  * late: it shows the old value for 600 ms after an app mute or unmute. With
+ * `stallAfterUnmute` set, unmuting a playing video leaves it buffering. With
  * `blockUnmutedAutoplay` set, an
  * unmuted start does nothing and unmuting a playing video pauses it, as Chrome
  * does without permission.
@@ -21,7 +22,7 @@ export const FAKE_IFRAME_API = `
   var NAMES = { "-1": "unstarted", "0": "ended", "1": "playing", "2": "paused", "3": "buffering", "5": "cued" };
   // isMutedLagMs: the real player reports its muted state late, so isMuted() shows the old
   // value for this long after an app call to mute() or unMute().
-  var fake = { players: [], blockUnmutedAutoplay: false, isMutedLagMs: 600, reportedMuted: null };
+  var fake = { players: [], blockUnmutedAutoplay: false, isMutedLagMs: 600, reportedMuted: null, stallAfterUnmute: false };
   window.__youTubeFake = fake;
 
   function Player(iframe, options) {
@@ -70,6 +71,8 @@ export const FAKE_IFRAME_API = `
     this._setMuted(false);
     // Chrome pauses a playing video that is unmuted without permission.
     if (fake.blockUnmutedAutoplay && this.state === STATE.PLAYING) this._set(STATE.PAUSED);
+    // Or it accepts the unmute and leaves the player buffering for good: no error, no event.
+    if (fake.stallAfterUnmute && this.state === STATE.PLAYING) this._set(STATE.BUFFERING);
   };
   Player.prototype.seekTo = function (seconds) { this.calls.push("seekTo(" + seconds + ")"); };
   Player.prototype.destroy = function () { this.calls.push("destroy"); this.destroyed = true; };

@@ -78,11 +78,18 @@ one. The state is kept in memory only: a reload SHALL start muted again.
 - **AND** the unmute button is shown
 
 ### Requirement: Blocked unmuted autoplay falls back to muted
-When sound is on in this tab and the browser does not let the video start with
-sound, the video SHALL play muted and the unmute button SHALL be shown again.
+When sound is on in this tab and the browser does not let the video play with
+sound, whether it pauses the video, refuses the unmute or accepts it and leaves the
+video buffering, the video SHALL play muted and the unmute button SHALL be shown again.
 
 #### Scenario: Browser blocks unmuted autoplay
 - **GIVEN** I turned sound on in this tab and the browser blocks unmuted autoplay
+- **WHEN** another video becomes active
+- **THEN** it plays muted
+- **AND** the unmute button is shown
+
+#### Scenario: The video stalls after the unmute
+- **GIVEN** I turned sound on in this tab and the browser accepts the unmute but leaves the video buffering
 - **WHEN** another video becomes active
 - **THEN** it plays muted
 - **AND** the unmute button is shown

@@ -3,6 +3,8 @@ import {
   BLOCKED_AUTOPLAY_WINDOW_MS,
   POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE,
   SOUND_POLL_MS,
+  STALL_POLLS,
+  STALL_WATCH_POLLS,
   SlidePlayback,
   syncActive,
 } from "./playback";
@@ -524,6 +526,92 @@ describe("following the player's own sound control", () => {
     const { timers, playback } = setup();
     playback.markReady();
     expect(timers.pending(SOUND_POLL_MS)).toBe(0);
+  });
+});
+
+describe("a stall after the unmute", () => {
+  const poll = (timers: { fire: (ms?: number) => void }, times = 1) => {
+    for (let i = 0; i < times; i++) timers.fire(SOUND_POLL_MS);
+  };
+
+  /** The unmute was asked for and the sound check passed: the API says the video is not muted. */
+  function unmutedAndChecked() {
+    const ctx = setup();
+    ctx.playback.markReady();
+    ctx.playback.setActive(true, true);
+    ctx.playback.handleState("playing");
+    ctx.timers.fire(BLOCKED_AUTOPLAY_WINDOW_MS);
+    return ctx;
+  }
+
+  it("mutes the video and plays it when it stays buffering after the unmute", () => {
+    const { player, timers, playback, blockedCount } = unmutedAndChecked();
+    playback.handleState("buffering"); // the browser accepted the unmute and the player stalls
+    poll(timers, STALL_POLLS - 1);
+    expect(blockedCount()).toBe(0);
+    expect(since(player, () => poll(timers))).toEqual(["mute", "play"]);
+    expect(blockedCount()).toBe(1);
+  });
+
+  it("treats a video that goes back to unstarted as stalled too", () => {
+    const { timers, playback, blockedCount } = unmutedAndChecked();
+    playback.handleState("unstarted");
+    poll(timers, STALL_POLLS);
+    expect(blockedCount()).toBe(1);
+  });
+
+  it("does not count a short buffering", () => {
+    const { timers, playback, blockedCount } = unmutedAndChecked();
+    playback.handleState("buffering");
+    poll(timers, STALL_POLLS - 2);
+    playback.handleState("playing");
+    poll(timers, STALL_POLLS * 2);
+    expect(blockedCount()).toBe(0);
+  });
+
+  it("does not count a pause made by the home cook", () => {
+    const { timers, playback, blockedCount } = unmutedAndChecked();
+    playback.handleState("paused");
+    poll(timers, STALL_POLLS * 2);
+    expect(blockedCount()).toBe(0);
+  });
+
+  it("does not watch a video that never asked for sound", () => {
+    const { timers, playback, blockedCount } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.handleState("playing");
+    playback.handleState("buffering");
+    poll(timers, STALL_POLLS * 3);
+    expect(blockedCount()).toBe(0);
+  });
+
+  it("stops watching after a while, so a later slow network does not mute it", () => {
+    const { timers, playback, blockedCount } = unmutedAndChecked();
+    poll(timers, STALL_WATCH_POLLS);
+    playback.handleState("buffering");
+    poll(timers, STALL_POLLS * 3);
+    expect(blockedCount()).toBe(0);
+  });
+
+  it("stops watching when the video leaves the screen", () => {
+    const { timers, playback, blockedCount } = unmutedAndChecked();
+    playback.handleState("buffering");
+    playback.setActive(false, true);
+    poll(timers, STALL_POLLS * 2);
+    expect(blockedCount()).toBe(0);
+  });
+
+  it("does not ask for sound again on the next video after a stall", () => {
+    const ctx = unmutedAndChecked();
+    ctx.playback.handleState("buffering");
+    poll(ctx.timers, STALL_POLLS);
+    expect(ctx.blockedCount()).toBe(1);
+    // The feed now says "no sound": a video that becomes active starts muted and stays so.
+    ctx.playback.setActive(false, false);
+    expect(since(ctx.player, () => ctx.playback.setActive(true, false))).toEqual(["seekTo(0)", "mute", "play"]);
+    ctx.playback.handleState("playing");
+    expect(since(ctx.player, () => poll(ctx.timers, 3))).not.toContain("unMute");
   });
 });
 

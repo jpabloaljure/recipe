@@ -25,6 +25,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 - [x] 3.5 Add tests for the `ended` contract in both modes (report on every end, including each loop; seek mode also seeks to 0 and plays), that commands sent before ready are applied once on ready, and that at most one player is asked to play; verify `pnpm test` passes
 - [x] 3.6 Add `src/lib/player/youtube-player.ts`: the script loader (one `<script>`, one ready promise) and the `YT.Player` wrapper that maps API states to the player interface; verify `pnpm typecheck` passes and a Vitest test covers the state mapping with a fake `YT`
 - [x] 3.7 Add tests in `playback.test.ts` for following the player's own sound control with a fake timer: a change the player reports on two reads in a row is reported once, a wrong constant read, a late read and a single read are not, the first reads after the controller's own mute or unmute are skipped, a video the player unmuted by itself is muted again, nothing is reported while the controller's own unmute is being checked or before the video plays, polling runs only while the slide is active; verify `pnpm test` passes
+- [x] 3.8 Add tests in `playback.test.ts` for the stall after an unmute: a video still buffering or unstarted for five polls in a row after the unmute is muted and played again, a short buffering, a pause by the home cook, a video that never asked for sound, a watch that has run out and a video that left the screen are not, and the next video starts muted; verify `pnpm test` passes
 
 ## 4. E2E fake player
 
@@ -35,7 +36,7 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 
 - [x] 5.1 In `src/app/feed/Feed.tsx`, add `enablejsapi=1`, `origin` and `autoplay` in `allow`, create one player per mounted iframe keyed by slide key, and play only the active one; verify the E2E tests for "Autoplay muted › A video becomes active with sound off" and "Only the active video plays › Neighbour videos are idle" pass on the three projects
 - [x] 5.2 Add the unmute button (accessible name, shown only while sound is off) and the in-memory sound state; verify the E2E tests for "Unmute button › Tap the unmute button", "Sound carries over in this tab › Another video becomes active after turning sound on" and "… › Reload after turning sound on" pass
-- [x] 5.3 Wire the blocked-autoplay fallback; verify the E2E test for "Blocked unmuted autoplay falls back to muted › Browser blocks unmuted autoplay" passes using `blockUnmutedAutoplay()`
+- [x] 5.3 Wire the blocked-autoplay fallback; verify the E2E tests for "Blocked unmuted autoplay falls back to muted" ("Browser blocks unmuted autoplay" and "The video stalls after the unmute") pass using `blockUnmutedAutoplay()` and `stallAfterUnmute()`
 - [x] 5.4 Wire loop, seek mode (design Decision 5) and the bubbling `videoended` event on the feed element; verify the E2E test for "Loop and end event › Video reaches the end" passes
 - [x] 5.5 Wire pause and resume on swipe, user pause and tab visibility; verify the E2E tests for "Pause when swiped out of view" (both scenarios), "A pause made with the player's own control is kept" (both scenarios) and "Pause when the tab is hidden" (both scenarios) pass
 - [x] 5.6 Verify the existing `e2e/feed/` tests (including "Taps reach the video player") still pass, and note any that the new per-slide players change

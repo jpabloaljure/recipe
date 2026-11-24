@@ -131,6 +131,21 @@ test sleeps (E2E rule 6). The check page agrees on real Chrome (desktop 154, And
 an unmuted `play()` with no tap produced no player event at all, not even
 `buffering`, so a refused unmuted start can only be told by waiting.
 
+**A stall after the unmute.** Found on the owner's Chrome with the `?debug` log: the
+browser accepted the unmute (`isMuted()` false, no error, no "autoplay blocked"
+event), and the player then went to `buffering` and never played again, silent and
+on its loading circle. This happened on a video whose unmute came a few seconds
+after the home cook's tap, and not on the one right after it, which fits Chrome
+honouring an unmute only shortly after a tap. The page gets no signal for it, so
+for 40 polls (12 s) after the controller unmutes a video it counts the polls in a
+row that the video is buffering or unstarted; five (1.5 s) mean the sound was
+refused. The video is then muted and played again (muting is what lets the
+browser play it), `soundOn` goes back to `false` and the button returns. The
+following videos start muted without asking for sound, until the home cook taps
+again, so the stall happens at most once per tap. Sound therefore carries over
+only while the browser allows it; a single reused player would keep it, and that
+belongs to REC-004's work.
+
 **Following the player's own mute control.** The IFrame API has no event for a
 mute or unmute made with YouTube's own control, so the controller reads
 `isMuted()` of the active player every 300 ms and reports a change through

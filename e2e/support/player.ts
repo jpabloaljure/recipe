@@ -32,6 +32,7 @@ type FakeApi = {
   players: FakePlayer[];
   blockUnmutedAutoplay: boolean;
   reportedMuted: boolean | null;
+  stallAfterUnmute: boolean;
   stateName(code: number): string;
 };
 
@@ -158,6 +159,13 @@ async function setPlayerMuted(page: Page, youtubeId: string, muted: boolean): Pr
 export async function blockUnmutedAutoplay(page: Page): Promise<void> {
   await page.evaluate(() => {
     (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.blockUnmutedAutoplay = true;
+  });
+}
+
+/** From now on unmuting a playing video leaves it buffering for good, with no event (seen on Chrome). */
+export async function stallAfterUnmute(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.stallAfterUnmute = true;
   });
 }
 

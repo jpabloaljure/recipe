@@ -30,6 +30,15 @@ export const SOUND_POLL_MS = 300;
  */
 export const POLLS_TO_IGNORE_AFTER_OWN_SOUND_CHANGE = 4;
 
+/**
+ * After the controller unmutes a video, it watches for a stall: Chrome can accept
+ * an unmute with no error and then leave the player buffering for good (seen on
+ * the owner's Chrome, with no event at all). Polls to watch, and polls not playing
+ * in a row that count as a stall.
+ */
+export const STALL_WATCH_POLLS = 40;
+export const STALL_POLLS = 5;
+
 /** Time the browser gets to refuse an unmute, once the video is playing, before it counts as allowed. */
 export const BLOCKED_AUTOPLAY_WINDOW_MS = 1200;
 
@@ -61,6 +70,9 @@ export class SlidePlayback {
   private pauseReason: PauseReason | null = null;
   private blockedTimer: TimerHandle | null = null;
   private blockedRecheck = false;
+  /** Polls left to watch for a stall after the controller unmuted this video. */
+  private stallWatchPolls = 0;
+  private notPlayingPolls = 0;
   private pollTimer: TimerHandle | null = null;
   /** Reads still to skip after our own mute or unmute. */
   private pollsToIgnore = 0;
@@ -125,6 +137,8 @@ export class SlidePlayback {
         this.deps.log?.("playing -> asking for sound");
         this.unmuteWhenPlaying = false;
         this.unmuteNow();
+        this.stallWatchPolls = STALL_WATCH_POLLS;
+        this.notPlayingPolls = 0;
         this.armBlockedTimer(); // the browser may pause or keep it muted
       }
     } else if (next === "paused") {
@@ -150,6 +164,7 @@ export class SlidePlayback {
 
   private start(): void {
     this.deps.log?.(`start sound=${this.soundOn}`);
+    this.stallWatchPolls = 0;
     this.clearBlockedTimer();
     this.unmuteWhenPlaying = false;
     this.pauseReason = null;
@@ -174,6 +189,7 @@ export class SlidePlayback {
 
   private stop(): void {
     this.deps.log?.("stop");
+    this.stallWatchPolls = 0;
     this.clearBlockedTimer();
     this.stopPolling();
     this.unmuteWhenPlaying = false;
@@ -212,14 +228,17 @@ export class SlidePlayback {
     }, ms);
   }
 
-  private fallBackToMuted(): void {
+  private fallBackToMuted(forcePlay = false): void {
     this.deps.log?.(`FALLBACK to muted (state=${this.state})`);
     this.clearBlockedTimer();
+    this.stallWatchPolls = 0;
     this.unmuteWhenPlaying = false;
     this.soundOn = false;
     this.muteNow();
-    // A refused unmute usually paused the video; a video that kept playing muted needs no play().
-    if (this.state !== "playing" && this.state !== "buffering") this.deps.player.play();
+    // A refused unmute usually paused the video; a video that kept playing muted needs no
+    // play(). A stalled video does (muting is what lets the browser play it again).
+    const running = this.state === "playing" || this.state === "buffering";
+    if (forcePlay || !running) this.deps.player.play();
     this.deps.onSoundBlocked();
   }
 
@@ -256,12 +275,31 @@ export class SlidePlayback {
   }
 
   /**
+   * Chrome can accept an unmute and then leave the player buffering with no event,
+   * no error and no sound. While the watch is on, a video that stays buffering or
+   * unstarted for several polls in a row has had its sound refused: mute it and
+   * play. Returns true when it did, so the poll does nothing else this time.
+   */
+  private watchForStall(): boolean {
+    if (this.stallWatchPolls <= 0) return false;
+    this.stallWatchPolls--;
+    if (this.state === "buffering" || this.state === "unstarted") this.notPlayingPolls++;
+    else this.notPlayingPolls = 0;
+    if (this.notPlayingPolls < STALL_POLLS) return false;
+    this.deps.log?.("stalled after the unmute -> sound refused");
+    this.notPlayingPolls = 0;
+    this.fallBackToMuted(true);
+    return true;
+  }
+
+  /**
    * A mute or unmute the home cook made with the player's own control. Skipped
    * while the controller is changing the sound itself (the pending unmute and its
    * check), and while the video is not playing or paused by the home cook.
    */
   private followPlayerSound(): void {
     if (!this.ready || !this.active) return;
+    if (this.watchForStall()) return;
     if (this.pollsToIgnore > 0) {
       this.pollsToIgnore--;
       // A player may apply the volume the home cook last used on YouTube when it
