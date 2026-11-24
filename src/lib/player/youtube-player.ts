@@ -15,6 +15,8 @@ type YouTubePlayer = {
   mute(): void;
   unMute(): void;
   isMuted(): boolean;
+  getVolume(): number;
+  setVolume(volume: number): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 };
@@ -22,7 +24,14 @@ type YouTubePlayer = {
 type YouTubeNamespace = {
   Player: new (
     iframe: HTMLIFrameElement,
-    options: { events: { onReady: () => void; onStateChange: (event: { data: number }) => void } },
+    options: {
+      events: {
+        onReady: () => void;
+        onStateChange: (event: { data: number }) => void;
+        onError: (event: { data: number }) => void;
+        onAutoplayBlocked: () => void;
+      };
+    },
   ) => YouTubePlayer;
 };
 
@@ -86,6 +95,12 @@ export function resetYouTubeApiLoader(): void {
   loading = null;
 }
 
+/**
+ * A volume below this is taken as silent. YouTube remembers the volume the home
+ * cook last used, so `unMute()` alone can leave a player "unmuted" at a volume of 0.
+ */
+export const MIN_AUDIBLE_VOLUME = 10;
+
 export type AttachedPlayer = {
   handle: PlayerHandle;
   destroy(): void;
@@ -99,7 +114,14 @@ export type AttachedPlayer = {
 export function attachPlayer(
   api: YouTubeNamespace,
   iframe: HTMLIFrameElement,
-  events: { onReady: () => void; onState: (state: PlayerState) => void },
+  events: {
+    onReady: () => void;
+    onState: (state: PlayerState) => void;
+    /** The player reported an error (its code), for example a video that cannot be embedded. */
+    onError?: (code: number) => void;
+    /** The browser blocked autoplay or scripted playback. */
+    onAutoplayBlocked?: () => void;
+  },
 ): AttachedPlayer {
   const player = new api.Player(iframe, {
     events: {
@@ -108,6 +130,8 @@ export function attachPlayer(
         const state = mapYouTubeState(event.data);
         if (state !== null) events.onState(state);
       },
+      onError: (event) => events.onError?.(event.data),
+      onAutoplayBlocked: () => events.onAutoplayBlocked?.(),
     },
   });
   return {
@@ -115,8 +139,12 @@ export function attachPlayer(
       play: () => player.playVideo(),
       pause: () => player.pauseVideo(),
       mute: () => player.mute(),
-      unMute: () => player.unMute(),
-      isMuted: () => player.isMuted(),
+      unMute: () => {
+        player.unMute();
+        if (player.getVolume() < MIN_AUDIBLE_VOLUME) player.setVolume(100);
+      },
+      // A volume of 0 is as silent as a mute, so the button must show for it too.
+      isMuted: () => player.isMuted() || player.getVolume() === 0,
       seekTo: (seconds) => player.seekTo(seconds, true),
     },
     destroy: () => player.destroy(),

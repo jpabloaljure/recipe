@@ -55,5 +55,6 @@ Scenario names below are the exact ones in `specs/playback/spec.md` and
 
 ## Workflow follow-up
 
+- Before merging, remove the `?debug` player log (`src/lib/player/debug-log.ts`, `src/app/feed/DebugLog.tsx`, its styles and the `log` calls) or decide to keep it behind the flag.
 - Open the PR with the template, run the AI review (`/code-review --comment <PR#>`), and merge when CI is green.
 - After the production smoke check is green, archive the change (`openspec-archive-change`), sync `playback` and the modified `feed` requirement to `openspec/specs/`, and set REC-003 to `Status: done` once it meets the Definition of Done.

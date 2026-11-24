@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { debugLog } from "../../lib/player/debug-log";
 import { embedUrl } from "../../lib/player/embed-url";
 import { SlidePlayback } from "../../lib/player/playback";
 import type { Timers } from "../../lib/player/types";
@@ -44,13 +45,31 @@ export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlock
       .then((api) => {
         if (disposed) return;
         let playback: SlidePlayback | undefined;
+        const tag = youtubeId.slice(0, 4);
+        const log = (message: string) => debugLog(`${tag} ${message}`);
         const attached = attachPlayer(api, element, {
           onReady: () => playback?.markReady(),
-          onState: (state) => playback?.handleState(state),
+          onState: (state) => {
+            log(`state ${state}`);
+            playback?.handleState(state);
+          },
+          onError: (code) => log(`ERROR code ${code}`),
+          onAutoplayBlocked: () => log("AUTOPLAY BLOCKED by the browser"),
         });
+        const raw = attached.handle;
+        // Commands are logged so a real device's sequence can be read (`?debug`).
+        const player = {
+          play: () => (log("cmd play"), raw.play()),
+          pause: () => (log("cmd pause"), raw.pause()),
+          mute: () => (log("cmd mute"), raw.mute()),
+          unMute: () => (log("cmd unMute"), raw.unMute()),
+          isMuted: () => raw.isMuted(),
+          seekTo: (seconds: number) => (log("cmd seekTo"), raw.seekTo(seconds)),
+        };
         playback = new SlidePlayback({
           youtubeId,
-          player: attached.handle,
+          log,
+          player,
           timers: browserTimers,
           onEnded: (id) => callbacks.current.onEnded(id),
           onSoundBlocked: () => callbacks.current.onSoundBlocked(),

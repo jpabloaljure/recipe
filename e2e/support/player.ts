@@ -14,6 +14,7 @@ export type FakePlayerInfo = {
   youtubeId: string;
   state: string;
   muted: boolean;
+  volume: number;
   calls: string[];
 };
 
@@ -21,6 +22,7 @@ type FakePlayer = {
   youtubeId: string | null;
   state: number;
   muted: boolean;
+  volume: number;
   mutedReads: number;
   calls: string[];
   destroyed: boolean;
@@ -43,6 +45,7 @@ function liveInfo(youtubeId: string | null) {
       youtubeId: p.youtubeId as string,
       state: fake.stateName(p.state),
       muted: p.muted,
+      volume: p.volume,
       calls: [...p.calls],
     }));
 }
@@ -100,6 +103,18 @@ export async function reportMutedAs(page: Page, muted: boolean): Promise<void> {
   await page.evaluate((value) => {
     (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake.reportedMuted = value;
   }, muted);
+}
+
+/** The player remembers this volume (0 to 100), as YouTube does from the home cook's earlier use. */
+export async function setPlayerVolume(page: Page, youtubeId: string, volume: number): Promise<void> {
+  await page.evaluate(
+    ({ id, value }) => {
+      const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
+      const player = fake.players.find((p) => !p.destroyed && p.youtubeId === id);
+      if (player) player.volume = value;
+    },
+    { id: youtubeId, value: volume },
+  );
 }
 
 /** The video reaches its end (the real player reports `ended`). */

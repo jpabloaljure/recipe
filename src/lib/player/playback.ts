@@ -46,6 +46,8 @@ export type SlidePlaybackDeps = {
   /** Called when the home cook muted or unmuted the video with the player's own control. */
   onSoundChanged: (soundOn: boolean) => void;
   blockedWindowMs?: number;
+  /** Optional diagnostics (`?debug`): what the controller decided and why. */
+  log?: (message: string) => void;
 };
 
 export class SlidePlayback {
@@ -75,6 +77,7 @@ export class SlidePlayback {
 
   /** The player reported ready: start muted and apply whatever was asked meanwhile. */
   markReady(): void {
+    this.deps.log?.("ready");
     this.ready = true;
     this.muteNow();
     if (this.active) this.start();
@@ -119,14 +122,19 @@ export class SlidePlayback {
     if (next === "playing" || next === "buffering") {
       if (next === "playing" && this.pauseReason === "user") this.pauseReason = null;
       if (next === "playing" && this.unmuteWhenPlaying) {
+        this.deps.log?.("playing -> asking for sound");
         this.unmuteWhenPlaying = false;
         this.unmuteNow();
         this.armBlockedTimer(); // the browser may pause or keep it muted
       }
     } else if (next === "paused") {
       if (this.pauseReason !== null) return; // a pause we caused
-      if (this.blockedTimer !== null) this.fallBackToMuted();
-      else this.pauseReason = "user";
+      if (this.blockedTimer !== null) {
+        this.deps.log?.("paused during the sound check -> sound refused");
+        this.fallBackToMuted();
+      } else {
+        this.pauseReason = "user";
+      }
     } else if (next === "ended") {
       this.clearBlockedTimer();
       this.deps.onEnded(this.deps.youtubeId);
@@ -141,6 +149,7 @@ export class SlidePlayback {
   }
 
   private start(): void {
+    this.deps.log?.(`start sound=${this.soundOn}`);
     this.clearBlockedTimer();
     this.unmuteWhenPlaying = false;
     this.pauseReason = null;
@@ -164,6 +173,7 @@ export class SlidePlayback {
   }
 
   private stop(): void {
+    this.deps.log?.("stop");
     this.clearBlockedTimer();
     this.stopPolling();
     this.unmuteWhenPlaying = false;
@@ -191,6 +201,7 @@ export class SlidePlayback {
     this.blockedTimer = this.deps.timers.set(() => {
       this.blockedTimer = null;
       const playing = this.state === "playing" || this.state === "buffering";
+      this.deps.log?.(`sound check: state=${this.state} muted=${this.deps.player.isMuted()} recheck=${this.blockedRecheck}`);
       if (!playing) {
         this.fallBackToMuted();
       } else if (this.deps.player.isMuted()) {
@@ -202,6 +213,7 @@ export class SlidePlayback {
   }
 
   private fallBackToMuted(): void {
+    this.deps.log?.(`FALLBACK to muted (state=${this.state})`);
     this.clearBlockedTimer();
     this.unmuteWhenPlaying = false;
     this.soundOn = false;
@@ -257,6 +269,7 @@ export class SlidePlayback {
       // looks unmuted but is silent. Mute it again.
       const playing = this.state === "playing" || this.state === "buffering";
       if (!this.soundOn && !this.unmuteWhenPlaying && playing && !this.deps.player.isMuted()) {
+        this.deps.log?.("player unmuted itself -> muting again");
         this.deps.player.mute();
       }
       return;
@@ -283,6 +296,7 @@ export class SlidePlayback {
     const soundNow = !muted;
     if (soundNow === this.soundOn) return;
     this.soundOn = soundNow;
+    this.deps.log?.(`player changed the sound -> ${soundNow ? "on" : "off"}`);
     this.deps.onSoundChanged(soundNow);
   }
 

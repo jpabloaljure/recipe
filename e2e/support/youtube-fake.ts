@@ -33,6 +33,7 @@ export const FAKE_IFRAME_API = `
     this.shownMuted = false;
     this.mutedChangedAt = 0;
     this.mutedReads = 0;
+    this.volume = 100;
     this.state = STATE.UNSTARTED;
     this.calls = [];
     this.destroyed = false;
@@ -72,6 +73,8 @@ export const FAKE_IFRAME_API = `
   };
   Player.prototype.seekTo = function (seconds) { this.calls.push("seekTo(" + seconds + ")"); };
   Player.prototype.destroy = function () { this.calls.push("destroy"); this.destroyed = true; };
+  Player.prototype.getVolume = function () { return this.volume; };
+  Player.prototype.setVolume = function (volume) { this.calls.push("setVolume(" + volume + ")"); this.volume = volume; };
   Player.prototype.getPlayerState = function () { return this.state; };
   Player.prototype.isMuted = function () {
     this.mutedReads += 1;

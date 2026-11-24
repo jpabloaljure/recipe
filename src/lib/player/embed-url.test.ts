@@ -8,7 +8,6 @@ describe("embedUrl", () => {
     expect(url.searchParams.get("enablejsapi")).toBe("1");
     expect(url.searchParams.get("origin")).toBe("https://example.com");
     expect(url.searchParams.get("playsinline")).toBe("1");
-    expect(url.searchParams.get("mute")).toBe("1");
     expect(url.searchParams.has("loop")).toBe(false);
   });
 

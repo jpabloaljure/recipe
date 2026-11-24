@@ -21,10 +21,17 @@ not turned sound on in this browser tab.
 ### Requirement: Unmute button
 The feed SHALL show an unmute button whenever the active video is muted, and
 none while it has sound. Tapping it SHALL turn sound on for the active video.
-The button never turns sound off.
+The button never turns sound off. A player whose own volume is 0 counts as muted,
+and unmuting raises that volume, because YouTube remembers the volume last used.
 
 #### Scenario: Tap the unmute button
 - **GIVEN** a video is playing muted and the unmute button is shown
+- **WHEN** I tap the unmute button
+- **THEN** the video plays with sound
+- **AND** the unmute button is no longer shown
+
+#### Scenario: Tap the unmute button when the player's volume is 0
+- **GIVEN** a video is playing muted and the player's own volume is at 0
 - **WHEN** I tap the unmute button
 - **THEN** the video plays with sound
 - **AND** the unmute button is no longer shown

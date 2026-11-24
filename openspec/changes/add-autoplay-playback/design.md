@@ -147,7 +147,10 @@ a tap, and the player could stall on its loading circle. Now:
   skipped, because the player reports late; during that window a video meant to be
   muted is muted again if the player says it is not (a player may apply the volume
   the home cook last used on YouTube when it starts);
-- the embed URL has `mute=1`, so a new player starts muted whatever it remembers;
+- a player whose volume is 0 counts as muted, and unmuting raises a volume below 10
+  to 100: YouTube remembers the volume last used, so `unMute()` alone can leave a
+  player "unmuted" at a volume of 0, which is silent. (`mute=1` in the embed URL
+  was tried and removed: it was unproven, and the symptom changed after adding it);
 - the read is skipped while the controller is changing the sound itself (the
   pending unmute and its check), and while the video is neither playing nor paused
   by the home cook.
@@ -261,6 +264,12 @@ can drift from the real API; the manual checks against the real player in Chrome
   bar; re-check them before launch.
 - [Creating a player on an iframe that has not finished loading] -> `(assumed)`
   the API handles it; task 1 confirms it.
+
+- [The player or the browser stalls a later video on its loading circle after an
+  unmute, seen on the owner's Chrome and not reproduced elsewhere] -> A `?debug`
+  on-screen log (`debug-log.ts`, `DebugLog.tsx`) shows each command, player state,
+  player error and "autoplay blocked" event; it is meant to be removed, or kept
+  behind the flag, once the cause is known.
 
 ## Migration Plan
 
