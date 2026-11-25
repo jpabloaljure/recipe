@@ -9,14 +9,8 @@ _Last updated: 2026-11-25_
 
 ## Still missing
 
-Only what is not ✅ yet, in the order that matters for Entrega 2:
-
-1. **README §1.3:** screenshots or a video of the feed (item 14). Needs images from the maintainer.
-2. **README §2.5:** the security practices (item 14, also item 1).
-3. **README §2.4:** say where the secrets live (item 14).
-4. **Decision:** whether C4 level 3 for the web app moves to `Current` (item 14).
-5. **Item 15:** record which devices the manual check used.
-6. **Entrega 1 carry-overs:** the final product name (item 3), the prompts used to write the PRD (item 2), and 11 stories (REC-005 and REC-008 to REC-017) still flagged `needs-human-validation` (item 9).
+Everything not done yet is in the last section,
+[Toward the complete MVP](#toward-the-complete-mvp).
 
 Outside the checklist: D-11 (iPhone landscape), the ADR 0007 wording about pool tuning, and daily discovery (REC-005).
 
@@ -26,8 +20,8 @@ Delivered on branch `feature/entrega-1-jpa`. Open items carry over to Entrega 2.
 
 | # | Item | Status | Where | Notes / what's left |
 |---|---|---|---|---|
-| 1 | README.md (root) | 🟡 | `README.md` | Follows the delivery template (sections 0–7), each section a short summary with links to the full docs; details moved to `docs/` (map in `docs/README.md`). Sections with nothing to show yet are marked TODO with the template's description: 1.3 design/UX (placeholder app), 2.5 security; both are filled in Entrega 2 (item 14). |
-| 2 | Prompts log | 🟡 | `prompts.md`, `docs/prompts-log.md` | `prompts.md` is the AI usage log: tools and models by phase, up to 3 key prompts per template section with context and human adjustments, and a human-adjustments summary. `docs/prompts-log.md` is the full log (setup §0 and prompts 1–335), appended with the `pend-` keyword. Still missing: the prompts used to write the PRD itself. |
+| 1 | README.md (root) | ✅ | `README.md` | Follows the delivery template (sections 0–7), each section a short summary with links to the full docs; details moved to `docs/` (map in `docs/README.md`). Sections with nothing to show yet are marked TODO with the template's description: 1.3 design/UX (placeholder app), 2.5 security; both are filled in Entrega 2 (item 14). Closed in the final delivery (item 27): no TODO left, section 8 added. |
+| 2 | Prompts log | 🟡 | `prompts.md`, `docs/prompts-log.md` | `prompts.md` is the AI usage log: tools and models by phase, up to 3 key prompts per template section with context and human adjustments, and a human-adjustments summary. `docs/prompts-log.md` is the full log (setup §0 and every prompt since, 593 at the final delivery), appended with the `pend-` keyword. Still missing: the prompts used to write the PRD itself. |
 | 3 | Project info sheet | 🟡 | `README.md` (§0) | Author (Juan Pablo Aljure), short description, project URL and repository filled in. Left: the final product name (working title for now, PRD §12). |
 | 4 | Overview (goal and features) | ✅ | `README.md` | Objective, target user and features summarized from the PRD; scope and performance targets linked to the PRD. |
 | 5 | Architecture (diagram and components) | ✅ | `docs/architecture/`, `docs/adr/` | C4 levels 1–3 in Mermaid (context and containers Current; web app and ingestion components Proposed) and ADRs 0001–0007. Kept current with the `write-adr` skill. |
@@ -50,41 +44,28 @@ blocked by the LLM provider decision).
 
 | # | Item | Status | Where | Notes / what's left |
 |---|---|---|---|---|
-| 12 | Connected scaffolds | ✅ | `src/`, Neon, Vercel, `.github/workflows/` | Web app ↔ `GET /api/feed` ↔ Postgres on Neon ↔ ingestion job scaffold (GitHub Actions), deployed. Done (REC-019, 2026-11-22): the Neon project (Postgres 17), the read-only role `app_readonly`, `DATABASE_URL` (pooled, read-only) in Vercel and `DATABASE_URL_DIRECT` (direct, owner) in GitHub Actions secrets, and the migration workflow, whose first run applied the four migrations to production (the tables, three triggers and grants checked in Neon; a write as `app_readonly` is rejected). Done (REC-002, 2026-11-22): the feed route reads the database as `app_readonly`, and the manual loader workflow loaded 27 curated Shorts into production. The ingestion job scaffold for this delivery is the manual loader workflow (`.github/workflows/load-curated.yml`, `scripts/db/load-curated.mts`): it loads a curated list into production as the owner role and is safe to re-run. The daily discovery job (REC-005) is out of scope for Entrega 2. |
+| 12 | Connected scaffolds | ✅ | `src/`, Neon, Vercel, `.github/workflows/` | Web app ↔ `GET /api/feed` ↔ Postgres on Neon ↔ ingestion job scaffold (GitHub Actions), deployed. Done (REC-019, 2026-11-22): the Neon project (Postgres 17), the read-only role `app_readonly`, `DATABASE_URL` (pooled, read-only) in Vercel and `DATABASE_URL_DIRECT` (direct, owner) in GitHub Actions secrets, and the migration workflow, whose first run applied the four migrations to production (the tables, three triggers and grants checked in Neon; a write as `app_readonly` is rejected). Done (REC-002, 2026-11-22): the feed route reads the database as `app_readonly`, and the manual loader workflow loaded 27 curated Shorts into production (24 served in the feed, 3 stored as `rejected` because they cannot be embedded). The ingestion job scaffold for this delivery is the manual loader workflow (`.github/workflows/load-curated.yml`, `scripts/db/load-curated.mts`): it loads a curated list into production as the owner role and is safe to re-run. The daily discovery job (REC-005) is out of scope for Entrega 2. |
 | 13 | End-to-end feature | ✅ | production URL | A home cook opens the app and swipes through real cooking Shorts that come from the database through the API. Done 2026-11-22: REC-001 (swipe feed, PR #43), REC-019 (schema on Neon) and REC-002 (PR #59, #61; change `add-database-feed` archived): production serves 24 real Shorts from the database, title only (recipes wait for REC-008), 10 per page with a next cursor, CDN-cached (second request `HIT`); the production smoke run is green and the maintainer checked it by hand on a phone. Known, outside this delivery: on an iPhone in landscape the player's header sits outside the video (`backlog/draft-backlog-list.md` D-11; iOS is outside the MVP), and an empty feed showed a black screen until REC-018 (done 2026-11-24). |
-| 14 | Updated files | 🟡 | `README.md`, `docs/`, `prompts.md` | Done: `prompts.md` with the Entrega 2 prompts (REC-001, REC-019, REC-002), the tools and models, the agent context and the human adjustments (2026-11-22); README §1.4 installation (database, seed, `pnpm db:*` commands), `docs/development.md` with the database, seed and loader setup, the data model and C4 level 2 at `Current`. Left: README §1.3 screenshots or a video of the feed (TODO in the README); README §2.5 security practices (TODO in the README); README §2.4 secrets (it describes the roles, not where `DATABASE_URL` and `DATABASE_URL_DIRECT` live: Vercel and GitHub Actions secrets, see `docs/development.md`); C4 level 3 web app is `Proposed` by design until the other components exist (Feed and Feed route are built), so decide whether to move it to `Current`. |
+| 14 | Updated files | ✅ | `README.md`, `docs/`, `prompts.md` | Done: `prompts.md` with the Entrega 2 prompts (REC-001, REC-019, REC-002), the tools and models, the agent context and the human adjustments (2026-11-22); README §1.4 installation (database, seed, `pnpm db:*` commands), `docs/development.md` with the database, seed and loader setup, the data model and C4 level 2 at `Current`. Left: README §1.3 screenshots or a video of the feed (TODO in the README); README §2.5 security practices (TODO in the README); README §2.4 secrets (it describes the roles, not where `DATABASE_URL` and `DATABASE_URL_DIRECT` live: Vercel and GitHub Actions secrets, see `docs/development.md`); C4 level 3 web app is `Proposed` by design until the other components exist (Feed and Feed route are built), so decide whether to move it to `Current`. Closed in the final delivery (item 27): screenshots in §1.3, §2.4 secrets and §2.5 security filled, and the C4 level 3 web app kept `Proposed` while favorites, share and the video route are not built. |
 | 15 | Tests | 🟡 | `src/**/*.test.ts`, `e2e/` | Unit tests for the feed logic, schema rules and API; E2E tests for every automatable feed scenario (stub data, no shared database); device checks on Android and desktop; green smoke check in production. Done for REC-001: Vitest for the feed logic, stub route and HTTP source, Playwright for every automatable feed scenario, device checks passed 2026-11-20, smoke green; its `Hard flick` E2E test is skipped on CI (`backlog/draft-backlog-list.md` D-9). Done for REC-019: 68 database tests (one per `video-catalog` scenario, plus the unit-only checks) and unit tests for the client and the local-only guard, run in CI on a `postgres:17` service. Done for REC-002: unit tests for the cursor, route handler, shuffle, recipe mapping, seed and loader rules, 82 database tests in total (the keyset walk with ties, the loader's re-runs), and the `@smoke` test against a seeded database in CI. Done 2026-11-22: the maintainer's manual checks (cache `HIT`, the loaded feed in production, the real-device wrap) were successful, and the production smoke is green on REC-002's merge commit. Left: write down which devices the manual check used (Android and desktop are the supported ones; the iPhone look found D-11), and the ingestion tests, which arrive with daily discovery (REC-005, out of scope). |
 
-## Entrega final — Complete MVP
+## Entrega final — Delivered MVP slice
 
-What is left for a home cook to open the app, swipe through easy recipes and
-save or share them (PRD goals G1–G3), and for the launch checks (PRD §8). The
-starting point is the end of Entrega 2: the feed serves 24 real Shorts, title
-only. Playback (REC-003, REC-004) is done; no other story below is started: the
-others still carry `needs-human-validation` (11 of them: REC-005 and REC-008 to REC-017; REC-006, REC-007, REC-018, REC-022 and REC-023 are validated), so each needs validation and a team estimate first
-(item 9). Daily ingestion and recipe extraction run in the ingestion job
-(GitHub Actions), never in the request path.
+The final delivery: three must-have features working end to end in
+production, from the database to the screen. A home cook opens the app,
+swipes through 24 real cooking Shorts read from Postgres through
+`GET /api/feed`, hears a video with one tap, and reads its recipe next to it.
+How to check them by hand: [verify-features.md](verify-features.md). Branch
+`final-project-jpa`, pull request #103.
 
-| # | Item | Status | Stories | What it needs |
+| # | Item | Status | Stories | Notes |
 |---|---|---|---|---|
-| 16 | Pick the LLM provider | ❌ | pending decision in `docs/adr/README.md` | Decide the provider and model, write the ADR, add the key as a secret. Blocks 17 and 19. |
-| 17 | Daily discovery of videos | ❌ | REC-005 | A scheduled job that finds new candidate Shorts. Open decision: which seed channels and search queries. Replaces the hand-loaded curated list. |
-| 18 | Recipe panel | 🟡 | REC-006, REC-022, REC-023, REC-007 | Done 2026-11-25: the panel beside the video where there is room, about 260 px on each side (REC-006, change `add-recipe-panel`; the recipes in production are placeholders, draft D-22). Done 2026-11-25 (REC-022, change `add-recipe-sheet`): where there is no room and the unmute button is over the video (a phone in portrait), a Recipe button opens a sheet over the video. Missing: the same for a narrow window (REC-023); where the sheet is used it opens by itself after the first play-through (REC-007). |
-| 19 | Recipe extraction | ❌ | REC-008, REC-017, REC-010, spike REC-009 | The LLM extracts the recipe ahead of time from the description, then the top comment; only easy recipes enter the feed; videos with no recipe keep the title only. The captions spike decides whether captions are a third source. |
+| 18 | Recipe next to the video | ✅ | REC-006, REC-022 | Done 2026-11-25: the panel beside the video where there is room, about 260 px on each side (REC-006, change `add-recipe-panel`), and where there is no room and the unmute button is over the video (a phone in portrait), a Recipe button that opens a sheet over the video (REC-022, change `add-recipe-sheet`). The recipes in production are placeholders written from the titles (draft D-22). The rest of the panel work is item 29. |
 | 20 | Playback | ✅ | REC-003, REC-004 | Autoplay muted, tap to unmute, loop (REC-003, done 2026-11-24); the next video is warmed up so it starts in under 500 ms in the by-eye check, and at most three players are alive (REC-004, done 2026-11-24). Known limitation: a stall after an unmute on a later video (draft D-12). REC-015 takes the real PERF-3 numbers. |
 | 21 | Feed states | ✅ | REC-018 | Done 2026-11-24 (PR #82, change `add-feed-states` archived): a loading, "No recipes yet" and "Oops, something went wrong" view with Retry for the first page (failed, offline or no answer in 10 seconds); an end slide with a loading indicator or retry row while more pages remain; a video that is removed, private or not embeddable is skipped, with "Oops" after 3 skips in a row. The maintainer checked it by hand on the production site. Still open outside this story: a video that never loads, or autoplay refused even when muted (draft D-19, D-20). |
-| 22 | Favorites | ❌ | REC-011, REC-012 | Save a recipe and see the saved list, with no account (stored in the browser). Open decision: whether favorites keep a copy of the recipe. |
-| 23 | Share and deep link | ❌ | REC-013, REC-014 | Share a recipe by link; the link opens the feed on that recipe (uses `GET /api/videos/{youtubeId}`). |
-| 24 | Launch catalog | ❌ | PRD ING-4 | About 50 `ready` recipes in production, up from 24 title-only Shorts. |
-| 25 | Launch checks | ❌ | REC-015, REC-016 | Performance on a real mid-range phone (PERF-2, PERF-3); manual review of about 50 recipes with at least 90% correct. Both are timeboxed spikes. |
-| 26 | Tests for the new stories | ❌ | all of the above | A passing E2E test for every automatable scenario of each story (E2E rule 12), unit and database tests for the new logic, a green production smoke check. |
-| 27 | Final documentation | 🟡 | `README.md`, `docs/`, `prompts.md` | Carry-overs from above: feed screenshots (README §1.3), the final product name, the prompts used to write the PRD, the C4 level 3 decision, the devices of the manual check. Then update the README, PRD, data model, OpenAPI, C4, `prompts.md` and this checklist for what the final delivery built. |
-| 28 | Final delivery branch | ❌ | CONTRIBUTING | The branch `final-project-jpa` (the course's `final-project-[INITIALS]` name), with everything merged and CI green. |
-
-Suggested order: item 16 first (it blocks the LLM work), validate the stories
-as each one comes up, then 20 and 21 (frontend only, no new decision), 17 and
-19 together (both run in the ingestion job), then 18, 22 and 23, and last 24,
-25, 26 and 27.
+| 26 | Tests for the delivered stories | ✅ | REC-001 to REC-004, REC-006, REC-018, REC-019, REC-022 | Every automatable scenario of the delivered stories has a passing E2E test on three screens (315 test runs), with 218 unit tests, the database tests and a green production smoke check; the manual device checks are recorded in each change's tasks. Tests for the remaining stories are item 30. |
+| 27 | Final documentation | ✅ | `README.md`, `docs/verify-features.md`, `docs/screenshots/`, `prompts.md` | Done 2026-11-25 for the final delivery: README on the template with the status of every feature, a step-by-step guide to verify the three delivered features with production screenshots, `repository-layout.md` and the web-app C4 intro brought in line with the code, and `prompts.md` collapsed into one synthesis. Still open outside the delivery: the final product name (working title, PRD §12). |
+| 28 | Final delivery branch | 🟡 | CONTRIBUTING | The branch `final-project-jpa` (the course's `final-project-[INITIALS]` name), created from `main` with the final documentation, delivered by a pull request into `main` with CI green. |
 
 ## Suggested order
 
@@ -113,3 +94,29 @@ Items 5–8 depend on picking the stack (6), and items 1, 3 and 4 collect everyt
                                                                          v
                                                                     11 Git repo
 ```
+
+## Toward the complete MVP
+
+What is left after the final delivery for the full MVP of the PRD: a home
+cook who swipes through easy recipes extracted by an LLM and can save and
+share them (goals G1–G3), plus the launch checks (PRD §8). Daily ingestion
+and recipe extraction run in the ingestion job (GitHub Actions), never in
+the request path.
+
+| # | Item | Status | Stories | What it needs |
+|---|---|---|---|---|
+| 16 | Pick the LLM provider | ❌ | pending decision in `docs/adr/README.md` | Decide the provider and model, write the ADR, add the key as a secret. Blocks 17 and 19. |
+| 17 | Daily discovery of videos | ❌ | REC-005 | A scheduled job that finds new candidate Shorts. Open decision: which seed channels and search queries. Replaces the hand-loaded curated list. |
+| 19 | Recipe extraction | ❌ | REC-008, REC-017, REC-010, spike REC-009 | The LLM extracts the recipe ahead of time from the description, then the top comment; only easy recipes enter the feed; videos with no recipe keep the title only. The captions spike decides whether captions are a third source. |
+| 22 | Favorites | ❌ | REC-011, REC-012 | Save a recipe and see the saved list, with no account (stored in the browser). Open decision: whether favorites keep a copy of the recipe. |
+| 23 | Share and deep link | ❌ | REC-013, REC-014 | Share a recipe by link; the link opens the feed on that recipe (uses `GET /api/videos/{youtubeId}`). |
+| 24 | Launch catalog | ❌ | PRD ING-4 | About 50 `ready` recipes in production, up from the 24 curated Shorts and their 21 placeholder recipes. |
+| 25 | Launch checks | ❌ | REC-015, REC-016 | Performance on a real mid-range phone (PERF-2, PERF-3); manual review of about 50 recipes with at least 90% correct. Both are timeboxed spikes. |
+| 29 | Recipe panel: the rest | ❌ | REC-023, REC-007 | The Recipe button and sheet beside the video in narrow desktop windows (REC-023), and the panel opening by itself after the first play-through where the sheet is used (REC-007). Both are validated. |
+| 30 | Tests for the remaining stories | ❌ | all of the above | A passing E2E test for every automatable scenario of each new story (E2E rule 12), unit and database tests for the new logic, a green production smoke check. |
+| 31 | Open details | ❌ | REC-005, REC-008 to REC-017 | Validate the 11 stories still flagged `needs-human-validation` (item 9), choose the final product name (item 3, PRD §12), add the prompts used to write the PRD to the prompt log (item 2), and check the safe-area width on a phone with a display cutout. |
+
+Suggested order: item 16 first (it blocks the LLM work), then 17 and 19
+together (both run in the ingestion job), 24 once extraction fills the
+catalog, then 29, 22 and 23 (frontend, stories validated or to validate
+first, item 31), and last 25 and 30.

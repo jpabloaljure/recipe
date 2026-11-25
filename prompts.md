@@ -1,12 +1,14 @@
 # AI usage log
 
 The main prompts used to build Easy Recipes, showing how AI coding assistants
-were used in each phase of the project: at most 3 per section, chosen from
-initial creation and from the corrections or additions that mattered most.
-Each prompt is copied exactly as typed (typos kept) and keeps its number from
-the full log, [docs/prompts-log.md](docs/prompts-log.md), where the whole
-conversation around it can be read. Prompts from Entrega 2 (working code) are
-marked **[Entrega 2]**; the rest come from Entrega 1 (documentation).
+were used in each phase of the project (documentation, working code and the
+final MVP): at most 3 per section, chosen from the initial creation and from
+the corrections or additions that mattered most across the whole project. Each
+prompt is copied exactly as typed (typos kept) and keeps its number from the
+full log, [docs/prompts-log.md](docs/prompts-log.md), where the whole
+conversation around it can be read. This is a synthesis, not a diary: the
+sections read as one story of the product, and §8 lists where the human
+changed the AI's course.
 
 ## Index
 
@@ -28,18 +30,19 @@ marked **[Entrega 2]**; the rest come from Entrega 1 (documentation).
 
 | Tool | Model | Effort | Phase | What it did |
 |---|---|---|---|---|
-| Claude Code (desktop app) | Opus 5.5 until the cap of 2026-11-21 (Sonnet 5.5 for some steps from 2026-11-20); Sonnet 5.5 from the cap | session default; `high` in `decompose-prd`, `write-adr`, `validate-backlog` until the cap; `medium` from the cap | Entrega 1: PRD → backlog, story validation and estimation, ADRs, C4, data model, API spec. Entrega 2: OpenSpec changes, code, tests, CI, migrations, deployment, PRs | Main agent for planning and building |
+| Claude Code (desktop app) | Opus 5.5 until the cap of 2026-11-21 (Sonnet 5.5 for some steps from 2026-11-20); Sonnet 5.5 from the cap | session default; `high` in `decompose-prd`, `write-adr`, `validate-backlog` until the cap; `medium` from the cap | PRD → backlog, story validation and estimation, ADRs, C4, data model, API spec; then OpenSpec changes, code, tests, CI, migrations, deployment, PRs, the seed recipes, the recipe panel and sheet, and the final documentation | Main agent for planning and building |
 | Claude Code (desktop app) | Haiku 5.5 | session default | Some `openspec-explore` sessions | Quick exploration before a decision |
-| Claude Code built-in browser | Sonnet 5.5 (the session's model) | `medium` | Entrega 2: the curated list of real Shorts; checks on the production URL | Opened each YouTube watch page and tested each embed in an iframe |
+| Claude Code built-in browser | Sonnet 5.5 (the session's model) | `medium` | The curated list of real Shorts; checks on the production URL | Opened each YouTube watch page and tested each embed in an iframe |
 | `story-validator` agent | Same as the session; Opus 5.5 at `high` from 2026-11-19 until the cap; Sonnet 5.5 at `medium` from the cap | see model | Backlog validation | Reviews one story at a time |
 | `doc-checker` agent | Haiku 5.5 (from 2026-11-19) | `low` | Docs checks | Checks links and that docs agree; reports only |
 | `/code-review` (Claude Code) | The session's model | `high` until the cap; `medium` from the cap | Every code PR | Posts its findings as PR comments before merge |
 
 The project is capped at Sonnet 5.5 and `medium` effort from 2026-11-21
-([AGENTS.md › Model routing](AGENTS.md#model-routing)), so REC-019 and
-REC-002 were built on Sonnet; REC-001 was built mostly on Opus, before the
-cap. Each summary in the full log lists the models used and why. This file
-was updated on Opus 5.5, chosen by hand with `/model`, outside the cap.
+([AGENTS.md › Model routing](AGENTS.md#model-routing)), so REC-019,
+REC-002 and everything after them were built on Sonnet; REC-001 was built mostly on Opus, before the
+cap. Each summary in the full log lists the models used and why. Earlier
+versions of this file were written on Opus 5.5, chosen by hand with `/model`
+outside the cap; the final synthesis was written on Sonnet 5.5.
 
 ### Context the agents work with
 
@@ -73,12 +76,15 @@ Details: [docs/ai-workflow.md](docs/ai-workflow.md).
 | Tests | Vitest for logic, database tests on a Postgres service, Playwright for each spec scenario, manual device checks | §2.6 |
 | Deployment | Merge to `main` → Vercel deploy → migrations run on Neon → production smoke test | §2.4 |
 
-**What works end to end (Entrega 2).** A home cook opens
-[the app](https://recipe-henna-pi.vercel.app) and swipes through 24 real
-cooking Shorts that come from Postgres on Neon through `GET /api/feed`
-(10 per page, a next cursor, CDN-cached). Stories: REC-001 (swipe feed),
-REC-019 (schema and migrations), REC-002 (feed API and curated-list loader).
-Recipes are not shown yet (REC-008 waits for the LLM provider decision).
+**What works end to end (final delivery).** A home cook opens
+[the app](https://recipe-henna-pi.vercel.app), swipes through 24 real cooking
+Shorts that come from Postgres on Neon through `GET /api/feed` (10 per page, a
+next cursor, CDN-cached), hears a video with one tap, and reads its recipe next
+to it: in a panel where there is room, or from a Recipe button on a phone.
+Stories: REC-001, REC-002, REC-003, REC-004, REC-006, REC-018, REC-019 and
+REC-022. The 21 recipes in production are placeholders written from the video
+titles; extraction and ingestion (REC-008, REC-005) wait for the LLM provider
+decision. Check it by hand: [docs/verify-features.md](docs/verify-features.md).
 
 ---
 
@@ -116,8 +122,8 @@ Recipes are not shown yet (REC-008 waits for the LLM provider decision).
   (REC-020).
 - **Human adjustment:** videos with no recipe found stay in the feed with
   their title only, and adding recipes by hand left the MVP. The PRD,
-  README, C4 diagrams and 8 stories were realigned (#146–#147). In Entrega 2
-  this is what production shows: real Shorts with their title only.
+  README, C4 diagrams and 8 stories were realigned (#146–#147). The first production feed showed exactly
+  this: real Shorts with their title only.
 
 ---
 
@@ -152,19 +158,33 @@ Make sure you are covering the C4 Arquitecture documentation on mermaid. and a p
 - **Result:** C4 levels 1–3 in Mermaid, ADRs 0001–0004, and the `write-adr`
   skill that keeps them current
   ([docs/architecture/](docs/architecture/README.md), [docs/adr/](docs/adr/README.md)).
-  In Entrega 2 the same skill wrote ADR 0007 (database connections, roles
+  The same skill later wrote ADR 0007 (database connections, roles
   and migrations), and C4 level 2 moved to `Current`.
 
 ### 2.2. Main components
 
-**Prompt 1:** (log #33) Settle how the feed component is built.
+**Prompt 1:** (log #521, #525) Design the recipe panel against the code,
+then propose it.
 
 ```
-for the question 2. I changed my mind and now build REC-001 with stub data and leave PERF-2 to other stories. For 15 if we could use library what Technical context aere you sugesting?
+/openspec-explore REC-006
 ```
 
-- **Result:** the feed uses CSS scroll-snap and no carousel library (no new
-  library without an ADR).
+```
+/openspec-propose REC-006
+```
+
+- **Context:** before proposing, the explore compared the validated story with
+  the real feed code; the story was then reopened and re-validated four times
+  (log #542–#554), and the story for narrow screens (REC-022) was re-checked
+  with it, which split REC-023 out of it.
+- **Result:** the change `add-recipe-panel` (PRs #92 and #93): one recipe
+  panel next to the feed's scroll container, with its own switch (at least
+  260 px on each side of the video), so a touch on it cannot move the feed.
+  A new `recipe-panel` capability spec holds its scenarios.
+- **Human adjustment:** the layout for narrow screens had been taken out of
+  the story earlier and given its own (REC-022, the Recipe button and sheet),
+  built right after it (PR #100).
 
 **Prompt 2:** (log #41, #42) Check the riskiest part on a real phone before
 estimating.
@@ -182,7 +202,7 @@ Slow swipes and watch on youtube work for both, Hard fast fail some go more than
 - **Human adjustment:** tested on an Android phone; hard flicks skipped
   videos with the overlay, so the overlay was dropped (#43).
 
-**Prompt 3:** [Entrega 2] (log #313, #314) Plan the feed route that reads the
+**Prompt 3:** (log #313, #314) Plan the feed route that reads the
 database.
 
 ```
@@ -228,7 +248,7 @@ the only thing any information we dont have yet dont put it. and if the document
 - **Result:** the README follows the template with short sections and links;
   the full tree moved to
   [docs/architecture/repository-layout.md](docs/architecture/repository-layout.md).
-  Entrega 2 added `src/lib/db/` (schema, client), `src/lib/feed/`,
+  The code phase added `src/lib/db/` (schema, client), `src/lib/feed/`,
   `src/lib/catalog/`, the migrations in `src/lib/db/migrations/` and
   `scripts/db/` to that layout.
 
@@ -250,7 +270,7 @@ B
   option B: run the `@smoke` E2E test against production after each Vercel
   deploy.
 
-**Prompt 2:** [Entrega 2] (log #276, #286) Put the database in production.
+**Prompt 2:** (log #276, #286) Put the database in production.
 
 ```
 give me the instructions for 9.1
@@ -268,7 +288,7 @@ Yes, run it
   first run created the tables, triggers and grants on Neon, and a write as
   `app_readonly` was rejected, as designed.
 
-**Prompt 3:** [Entrega 2] (log #329, #330) Fix an empty production feed.
+**Prompt 3:** (log #329, #330) Fix an empty production feed.
 
 ```
 Deployed I see now a black screen
@@ -300,7 +320,7 @@ Strict, admins too (Recommended)
 - **Result:** every change to `main` needs a pull request with CI green,
   admins included.
 
-**Prompt 2:** [Entrega 2] (log #280) Choose the database password.
+**Prompt 2:** (log #280) Choose the database password.
 
 ```
 CREATE ROLE app_readonly WITH LOGIN PASSWORD '<your password>'; what password should i use?
@@ -311,7 +331,7 @@ CREATE ROLE app_readonly WITH LOGIN PASSWORD '<your password>'; what password sh
 - **Human adjustment:** the password generated in #279 had been shown in the
   chat, so it was discarded and replaced; the log leaves the secret out.
 
-**Prompt 3:** [Entrega 2] (log #273) Cap model use.
+**Prompt 3:** (log #273) Cap model use.
 
 ```
 Fix all my use of models to at max use sonet medium for all this project.
@@ -336,16 +356,26 @@ Create a new change proposal for this new precondition before we continue with R
 - **Result:** Playwright in Chromium on three screen sizes, 13 E2E rules in
   `AGENTS.md`, and ADR 0006.
 
-**Prompt 2:** (log #89) Check that a failing test blocks the merge.
+**Prompt 2:** (log #531, #587) Record the checks only a real device can
+do.
 
 ```
-it says som checks where nor successful
+Manual-check record:phone was honor on landskape and on desktop chrom with phone simulations on devtools.  Fix all 3
 ```
 
-- **Context:** a throwaway PR (#2) with a failing test; it showed the merge
-  is blocked and the report is uploaded.
+```
+I have cheked 1 to 5 and works correctly
+```
 
-**Prompt 3:** [Entrega 2] (log #238, #240) Handle a flaky E2E test.
+- **Context:** the E2E rules keep real touch behavior manual (rule 13); the
+  agent listed the checks in each change's tasks and the human did them on a
+  real Honor phone and in Chrome DevTools phone simulations.
+- **Result:** the results are written in the change's tasks; the AI review of
+  the panel (5 findings) was followed by fixes in PR #94.
+  What nobody could check, such as the safe-area width on a phone with a
+  display cutout, is recorded as not checked instead of ticked.
+
+**Prompt 3:** (log #238, #240) Handle a flaky E2E test.
 
 ```
 Slow the flick
@@ -360,7 +390,7 @@ Yes, fixme on CI
 - **Human adjustment:** the test is skipped on CI with `test.fixme` and
   tracked as D-9 in the draft backlog, as E2E rule 10 says, instead of
   turning retries on.
-- **Result (Entrega 2 tests):** Vitest for the feed logic, cursor, route,
+- **Result (tests in the final code):** Vitest for the feed logic, cursor, route,
   shuffle and loader rules; 82 database tests on a `postgres:17` service in
   CI, named after the spec scenarios; Playwright for every automatable feed
   scenario; the `@smoke` test against a seeded database in CI and against
@@ -370,14 +400,20 @@ Yes, fixme on CI
 
 ## 3. Data model
 
-**Prompt 1:** (log #140) Validate the data model story.
+**Prompt 1:** (log #509) Fill the recipes of the curated videos without the
+LLM.
 
 ```
-Validate REC-020
+i have decided, for seeding the recipe for the actual videos just get from the video title use internet to search and come up with a reccipy that match that title, dont try to scrub the video and its comments use only whant you find. if you dont find the exact recipi just make up it up jur best. this will be dummy recipies, leave a couple of good videos with no recipe to visualice on the app verification.
 ```
 
-- **Context:** the `validate-backlog` skill ran the `story-validator` agent
-  over four rounds (32 findings).
+- **Context:** the first plan read each video's description and top comment
+  (with the YouTube API); the human chose a cheaper one-time seed,
+  because the real extraction (REC-008) waits for the LLM provider decision.
+- **Result:** 21 placeholder recipes in `scripts/db/curated-recipes.json`, a
+  loader (`pnpm db:load-recipes`) with `--revert` and `--check`, and a manual
+  workflow; production now has 21 `ready` and 3 title-only videos, and the
+  dish name is kept in the title. The gap is tracked as draft D-22.
 
 **Prompt 2:** (log #154, #155) Decide when a video is saved and which key it
 has.
@@ -394,7 +430,7 @@ A, and capture the lines in the stories
   status;
   [docs/architecture/data-model.md](docs/architecture/data-model.md).
 
-**Prompt 3:** [Entrega 2] (log #264, #265) Build the schema as an OpenSpec
+**Prompt 3:** (log #264, #265) Build the schema as an OpenSpec
 change in two PRs.
 
 ```
@@ -442,7 +478,7 @@ I will accept all 5
 - **Result:** [docs/api/openapi.yaml](docs/api/openapi.yaml) (OpenAPI 3.1)
   with schemas, errors, cache headers and examples.
 
-**Prompt 3:** [Entrega 2] (log #299, #302) Question the edge cases before
+**Prompt 3:** (log #299, #302) Question the edge cases before
 building the feed API.
 
 ```
@@ -505,7 +541,7 @@ lets /validate-story  REC-001 to see if still fits.
 ```
 
 - **Result:** the `validate-backlog` skill and the `story-validator` agent,
-  built on a validation prompt turned into a skill (#26). [Entrega 2] Before
+  built on a validation prompt turned into a skill (#26). Before
   building, REC-001 and REC-002 were re-validated against what had changed:
   REC-001 was reopened (12 findings, estimate 3 → 5) and REC-002 took 12
   re-checks (estimate 8).
@@ -533,7 +569,7 @@ C I acree and lets do the propouse
 - **Result:** stories are full-stack slices and split by layer only when
   needed; every story has a `layer:` label ("Story slicing" in `AGENTS.md`).
 
-**Prompt 3:** [Entrega 2] (log #211, #212) Decide where the API route of the
+**Prompt 3:** (log #211, #212) Decide where the API route of the
 first feature lives.
 
 ```
@@ -547,7 +583,7 @@ For the cons. backend work in a frontend story, overlaps REC-002, and likely rai
 - **Result:** REC-001 became a full-stack slice (`layer:fullstack`): the
   swipe feed plus a stub `GET /api/feed`, so the feature worked end to end
   before the database existed. REC-002 later swapped the stub for the
-  database with no change to the client. Entrega 2 shipped as three tickets:
+  database with no change to the client. The first code delivery shipped as three tickets:
   REC-001 (5 points), REC-019 (8) and REC-002 (8).
 
 ---
@@ -568,7 +604,7 @@ lets do local.
 - **Result:** `CONTRIBUTING.md`, Definition of Ready and Done, a PR template
   and CODEOWNERS; every code PR gets `/code-review --comment` from Claude
   Code (`/code-review medium --comment` from the cap) before merge.
-  [Entrega 2] It found 5 issues in REC-001 (PR #43), 9 in REC-019 (PR #52)
+  It found 5 issues in REC-001 (PR #43), 9 in REC-019 (PR #52)
   and 7 in REC-002 (PR #59); all were fixed or answered on the PR.
 
 **Prompt 2:** (log #138) Choose OpenSpec or a direct PR for every change.
@@ -580,14 +616,24 @@ fix the documentation to every time i ask for a change or explore a change it su
 - **Result:** the agent recommends a path, with one reason, before any work
   (`CONTRIBUTING.md`, `AGENTS.md`).
 
-**Prompt 3:** (log #95) Automate the prompt-log PRs.
+**Prompt 3:** (log #530, #589) Run the AI review and fix what it finds.
 
 ```
-When "pend-"  is called, i will review and after review PR an merge. withowt asking. fix the flow. and merge now
+Run the AI review first
 ```
 
-- **Result:** the `pend-` keyword appends the prompts to the log, opens a
-  PR and merges it once CI passes.
+```
+fix them
+```
+
+- **Context:** the review of REC-006 (PR #93) ran after it had been merged
+  (5 findings, 4 fixed in PR #94, one test skipped); from then on the order was
+  review, fix, merge. The review of REC-022 (PR #100) found three nits.
+- **Result:** all three fixed before the merge (focus and Escape for the
+  sheet, closing it when the aspect ratio changes, one shared clearance
+  variable), each with the spec, tests and docs updated in the same PR. The
+  `pend-` keyword that logs the prompts and merges its PR (#95) keeps the full
+  log current.
 
 ---
 
@@ -609,13 +655,18 @@ Where the human corrected or redirected the AI:
 | Title-only videos in the feed; no manual recipes in the MVP | #142–#143 |
 | Validated stories reopened when the docs did not match the decisions | #147 |
 | README rebuilt on the template; nothing unknown, everything else linked | #188–#195 |
-| [Entrega 2] REC-001 reopened before building; the stub route kept in it instead of moved to another story | #206–#212 |
-| [Entrega 2] The agent raised effort but never lowered it; a rule now tells the human when to lower it | #229–#230 |
-| [Entrega 2] The flaky `Hard flick` test skipped on CI and tracked, not retried | #238–#240 |
-| [Entrega 2] The human questioned why the change's worktree sat outside the project folder; it was kept after the agent explained it | #266–#267 |
-| [Entrega 2] All model use capped at Sonnet 5.5 and `medium` effort | #273 |
-| [Entrega 2] A password shown in the chat was discarded and replaced | #279–#280 |
-| [Entrega 2] The agent was asked whether it had pulled `main` before re-validating | #297 |
-| [Entrega 2] The curated list was collected in a separate session with the built-in browser and handed over with its results table | #309–#322 |
-| [Entrega 2] The black screen in production was traced to an empty database; the loader was run | #329–#330 |
-| [Entrega 2] The iPhone landscape layout bug found on a real phone was recorded with screenshots as D-11 | #331–#333 |
+| REC-001 reopened before building; the stub route kept in it instead of moved to another story | #206–#212 |
+| The agent raised effort but never lowered it; a rule now tells the human when to lower it | #229–#230 |
+| The flaky `Hard flick` test skipped on CI and tracked, not retried | #238–#240 |
+| The human questioned why the change's worktree sat outside the project folder; it was kept after the agent explained it | #266–#267 |
+| All model use capped at Sonnet 5.5 and `medium` effort | #273 |
+| A password shown in the chat was discarded and replaced | #279–#280 |
+| The agent was asked whether it had pulled `main` before re-validating | #297 |
+| The curated list was collected in a separate session with the built-in browser and handed over with its results table | #309–#322 |
+| The black screen in production was traced to an empty database; the loader was run | #329–#330 |
+| The iPhone landscape layout bug found on a real phone was recorded with screenshots as D-11 | #331–#333 |
+| The recipes were seeded from the video titles by the owner's decision, instead of reading descriptions and comments | #507–#511 |
+| The recipe panel's narrow-screen layout was split into its own stories (REC-022, REC-023) | #555–#559 |
+| The AI review of REC-006 ran after the merge; from then on review comes before merge | #530 |
+| Manual checks on a real Honor phone and in DevTools recorded; the notched-phone check left as not done | #531, #587 |
+| Escape and focus for the sheet were added after the AI review although draft D-21 had put them out of the story | #589 |

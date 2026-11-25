@@ -3,15 +3,17 @@
 A mobile-first web app with a vertical, full-screen feed of short YouTube
 cooking videos (Shorts), each with an easy written recipe.
 
-> Status: **MVP in progress.** The vertical swipe feed reads its videos from
-> the database through `GET /api/feed` (newest first, shuffled within each
-> page). Production serves 24 curated Shorts from the database; 21 of them
-> carry a placeholder recipe (written from the title, not extracted: see
-> [docs/development.md](docs/development.md#placeholder-recipes-for-the-curated-shorts)),
-> and the recipe panel shows it beside the video on screens with room for it
-> (about 260 px on each side); on a phone in portrait a Recipe button opens it as a
-> sheet over the video; narrow desktop windows (REC-023) are not built. Delivery progress:
-> [docs/checklist.md](docs/checklist.md).
+> Status: **final delivery (Entrega final).** Three must-have features work
+> end to end in production: the **swipe feed** (24 curated Shorts read from
+> Postgres through `GET /api/feed`), **playback** (muted autoplay, one tap to
+> unmute, loop) and the **recipe next to the video** (a panel where there is
+> room, a Recipe button and sheet on a phone in portrait). 21 of the 24 videos
+> carry a placeholder recipe written from the title, not extracted (see
+> [docs/development.md](docs/development.md#placeholder-recipes-for-the-curated-shorts));
+> 3 show their title only. Favorites, sharing, deep links, daily ingestion and
+> LLM extraction are not built. **How to verify the three features, with
+> screenshots: [docs/verify-features.md](docs/verify-features.md).**
+> Delivery progress: [docs/checklist.md](docs/checklist.md).
 
 ## Index
 
@@ -23,6 +25,7 @@ cooking videos (Shorts), each with an easy written recipe.
 5. [User stories](#5-user-stories)
 6. [Work tickets](#6-work-tickets)
 7. [Pull requests](#7-pull-requests)
+8. [MVP final status](#8-mvp-final-status)
 
 **More documentation:** [how this project is built with AI](docs/ai-workflow.md)
 · [documentation map](docs/README.md)
@@ -53,21 +56,29 @@ recipe videos and read the recipe without pausing and rewinding.
 
 ### 1.2. Main features
 
-- **Feed:** vertical, one video at a time, swipe to move.
-- **Playback:** muted autoplay, one tap to unmute, loop.
-- **Recipe panel:** servings, ingredients, numbered steps and their source;
-  a video with no recipe found shows its title only.
-- **Favorites:** saved in the browser, no account.
-- **Sharing:** native share sheet or copy link; deep links to a recipe.
-- **Daily ingestion (background):** finds new Shorts, extracts recipes with
-  an LLM, and keeps only easy ones.
+| Feature | Status | What it does |
+|---|---|---|
+| **1. Feed** | Built (REC-001, REC-002, REC-018) | Vertical, one full-screen video at a time, swipe to move, next page loaded ahead, wrap to the start, error and empty states. |
+| **2. Playback** | Built (REC-003, REC-004) | Muted autoplay of the active video only, one tap to unmute (kept in the tab), loop, pause when out of view, the next video ready before the swipe. |
+| **3. Recipe** | Built (REC-006, REC-022) | Servings, ingredients, numbered steps and the source: a panel beside the video where there is room, a Recipe button and sheet on a phone in portrait; a video with no recipe shows its title only. |
+| Favorites | Not built (REC-011, REC-012) | Saved in the browser, no account. |
+| Sharing | Not built (REC-013, REC-014) | Native share sheet or copy link; deep links to a recipe. |
+| Daily ingestion and extraction | Not built (REC-005, REC-008) | Finds new Shorts, extracts recipes with an LLM and keeps only easy ones. Today a one-time loader fills the database from a curated list. |
 
 Full requirements, scope and performance targets: [PRD](docs/PRD.md).
 
 ### 1.3. Design and user experience
 
-> **TODO:** provide images and/or a video walkthrough showing the user
-> experience from landing in the app through all the main features.
+Step-by-step checks of the three features, with these screenshots of the
+production app: **[docs/verify-features.md](docs/verify-features.md)**.
+
+| Phone in portrait: feed and Recipe button | Phone in portrait: recipe sheet |
+|---|---|
+| ![Feed with the Recipe button](docs/screenshots/03-feed-recipe-button-phone-portrait.webp) | ![Recipe sheet over the video](docs/screenshots/01-recipe-sheet-phone-portrait.webp) |
+
+| Phone in landscape: recipe panel | Desktop: recipe panel and video |
+|---|---|
+| ![Recipe panel in landscape](docs/screenshots/02-recipe-panel-phone-landscape.webp) | ![Recipe panel on desktop](docs/screenshots/04-recipe-panel-desktop.webp) |
 
 ### 1.4. Installation
 
@@ -98,7 +109,9 @@ Setup details, the database, E2E tests and testing a deployed site:
 Two paths: a **request path** (browser → Vercel CDN → Next.js API → Postgres,
 with cached feed responses) and a **batch path** (a daily GitHub Actions job
 that finds videos, extracts recipes with an LLM and writes to Postgres). The
-LLM is never called while a user is browsing.
+LLM is never called while a user is browsing. The request path is built; the
+batch path is the plan (REC-005, REC-008): today a manual workflow loads a
+curated list of Shorts and placeholder recipes.
 
 Diagrams (C4 model, Mermaid): [docs/architecture/](docs/architecture/README.md)
 · Reasons, benefits and trade-offs: [ADRs](docs/adr/README.md).
@@ -177,11 +190,19 @@ headers, no Dependabot, no rate limiting), are in
 
 ### 2.6. Tests
 
-- **Unit:** Vitest.
-- **End-to-end:** Playwright in Chromium on three screens (phone portrait,
-  phone landscape, desktop), on every pull request
-  ([ADR 0006](docs/adr/0006-playwright-end-to-end-tests.md)).
+- **Unit (Vitest, 218 tests):** feed logic, cursor, route handler, playback
+  rules, recipe text, loaders. No database needed.
+- **Database (Vitest, `pnpm test:db`):** the schema, triggers, read-only role
+  and the feed query against a real Postgres.
+- **End-to-end (Playwright, Chromium):** about 100 scenarios named after the
+  specs in `openspec/specs/`, each run on three screens (phone portrait, phone
+  landscape, desktop; 315 test runs), on every pull request
+  ([ADR 0006](docs/adr/0006-playwright-end-to-end-tests.md)). The main flow
+  (open the feed, swipe, unmute, open the recipe) is covered by `e2e/feed/`,
+  `e2e/playback/` and `e2e/recipe-panel/`.
 - **Production smoke:** the `@smoke` E2E test after each deploy.
+- **Manual:** touch-flick physics and the YouTube player's own controls on
+  real phones, recorded in each change's tasks.
 
 How to run them: [docs/development.md](docs/development.md).
 
@@ -200,7 +221,7 @@ the feed. ER diagram, fields, types, keys and rules:
 | Endpoint | Returns |
 |---|---|
 | `GET /api/feed` | One page of the feed: `ready` videos with their recipe, `needs_recipe` videos with their title only |
-| `GET /api/videos/{youtubeId}` | One feed video (with its recipe, or title only), for deep links |
+| `GET /api/videos/{youtubeId}` | One feed video, for deep links. **Specified, not built** (REC-014) |
 
 OpenAPI 3.1 spec with schemas and examples:
 [docs/api/openapi.yaml](docs/api/openapi.yaml).
@@ -209,25 +230,25 @@ OpenAPI 3.1 spec with schemas and examples:
 
 ## 5. User stories
 
-Validated stories (all stories: [backlog/](backlog/README.md)):
+Three of the stories that drive the three features (all stories:
+[backlog/](backlog/README.md)); each has Given/When/Then criteria, a team
+estimate and passing E2E tests:
 
-- [**REC-001** · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe):
-  as a home cook, I want to swipe through short recipe videos one at a time,
-  so that I can quickly find something to cook today.
-- [**REC-002** · Feed shows ready and title-only videos, newest first with variety](backlog/E01-browse-feed.md#rec-002--feed-shows-ready-and-title-only-videos-newest-first-with-variety):
-  as a home cook, I want the feed to contain easy recipe videos, plus videos
-  whose recipe could not be found shown by their title, in a fresh order, so
-  that I always have something worth watching.
-- [**REC-019** · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog):
-  as a maintainer, I want one versioned database schema for videos, their
-  status and their recipe, so that the feed and the ingestion job read and write
-  the same data.
-- [**REC-020** · Data model document](backlog/E01-browse-feed.md#rec-020--data-model-document-no-implementation):
-  as a maintainer, I want the data model written down before the schema is
-  built, so that the feed, the recipe panel and the ingestion job agree.
-- [**REC-021** · API specification document](backlog/E01-browse-feed.md#rec-021--api-specification-document-no-implementation):
-  as a maintainer, I want the feed API specified before it is built, so that
-  the web app and its tests rely on one agreed shape.
+- [**REC-001** · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe)
+  (feature 1): as a home cook, I want to swipe through short recipe videos
+  one at a time, so that I can quickly find something to cook today.
+- [**REC-003** · Autoplay muted, tap to unmute, loop](backlog/E01-browse-feed.md#rec-003--autoplay-muted-tap-to-unmute-loop)
+  (feature 2): as a home cook, I want each video to start playing by itself
+  and to turn the sound on with one tap, so that I can watch without setup.
+- [**REC-006** · Recipe panel with servings, ingredients and steps](backlog/E02-recipe-every-video.md#rec-006--recipe-panel-with-servings-ingredients-and-steps)
+  (feature 3): as a home cook, I want the recipe next to the video, so that I
+  can cook from it without pausing and rewinding. Its phone-portrait slice is
+  [REC-022](backlog/E02-recipe-every-video.md#rec-022--recipe-button-and-sheet-when-there-is-no-room-for-the-panel).
+
+Other validated stories: REC-002 (feed with ready and title-only videos),
+REC-004 (instant next video), REC-018 (empty, error and unavailable states),
+REC-019 (database schema), REC-020 (data model document), REC-021 (API
+specification document).
 
 ---
 
@@ -238,14 +259,37 @@ Tickets are backlog stories with a `layer:` label (no separate tracker; see
 
 | Layer | Ticket |
 |---|---|
-| Database | [REC-019 · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog) |
-| Backend | [REC-021 · API specification document](backlog/E01-browse-feed.md#rec-021--api-specification-document-no-implementation) |
-| Full stack (feed UI and a stub feed route) | [REC-001 · Vertical full-screen feed with manual swipe](backlog/E01-browse-feed.md#rec-001--vertical-full-screen-feed-with-manual-swipe) |
+| Database | [REC-019 · Database schema and migration for the video catalog](backlog/E01-browse-feed.md#rec-019--database-schema-and-migration-for-the-video-catalog): the `video` and `recipe` tables, four migrations, triggers, the read-only role |
+| Backend | [REC-002 · Feed shows ready and title-only videos, newest first with variety](backlog/E01-browse-feed.md#rec-002--feed-shows-ready-and-title-only-videos-newest-first-with-variety): `GET /api/feed` with a cursor, cache headers and a curated-list loader (full-stack slice, mostly API and database) |
+| Frontend | [REC-006 · Recipe panel with servings, ingredients and steps](backlog/E02-recipe-every-video.md#rec-006--recipe-panel-with-servings-ingredients-and-steps) (`layer:frontend`) |
 
 ---
 
 ## 7. Pull requests
 
-- [#1 Add Playwright end-to-end testing and E2E test rules](https://github.com/jpabloaljure/recipe/pull/1)
-- [#5 Add contribution workflow: DoR, DoD, PR flow, production smoke](https://github.com/jpabloaljure/recipe/pull/5)
-- [#11 Add story slicing rules and a layer label on every story](https://github.com/jpabloaljure/recipe/pull/11)
+- [#43 REC-001: Vertical swipe feed with a stub feed API](https://github.com/jpabloaljure/recipe/pull/43):
+  the first feature, with the first AI code review (5 findings fixed).
+- [#59 REC-002: Feed reads the database, with a per-page shuffle and a curated-list loader](https://github.com/jpabloaljure/recipe/pull/59):
+  connects the app to Postgres on Neon.
+- [#100 REC-022: Recipe button and sheet](https://github.com/jpabloaljure/recipe/pull/100):
+  the recipe on a phone in portrait, with 23 new E2E tests and an AI review
+  whose three findings were fixed before merge.
+
+---
+
+## 8. MVP final status
+
+The MVP now works end to end in production: a person opens the app and swipes
+through 24 real cooking Shorts that come from Postgres on Neon, sees each video
+start by itself and muted, turns the sound on with one tap, and reads the recipe
+next to the video, in a panel where there is room or from a "Recipe" button that
+opens a sheet over the video on a phone in portrait. The infrastructure is also
+in place (deployment on Vercel, migrations, CI with unit, database and
+end-to-end tests, and an automatic check after each deploy), as is the final
+documentation with a verification guide and screenshots. To complete the full
+MVP, what mainly remains is the real recipe extraction with an LLM (today the 21
+recipes are placeholders written from the titles, and the provider is still to be
+chosen), the daily discovery of new videos to grow the catalog to about 50
+recipes, favorites and sharing with direct links to a recipe, the panel opening
+by itself after the first video, the button version for narrow desktop windows,
+and the performance and accuracy checks on a real phone.
