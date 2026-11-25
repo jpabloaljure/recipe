@@ -62,8 +62,10 @@ timeout. See proposal.md for why.
    keeps `status: ready` and marks the end slide as failed, so the video above
    stays. The silent retry two slides before the end stays: it is the same
    `PageRequests.fail` path, and the end slide shows the failure only when I
-   reach it. Retry (first page or end slide) is ignored while its request runs,
-   because `PageRequests.begin` already refuses a cursor that is in flight.
+   reach it. Retry on the error view is ignored while its request runs (the handler
+   checks the status and `PageRequests` is renewed); the end slide's retry row
+   is replaced by the loading indicator when tapped, and `PageRequests.begin`
+   refuses a cursor that is in flight.
 
 5. **Player errors reach the feed through the adapter.** `attachPlayer` passes
    `onError(code)` to the API; `youtube-player.ts` maps 100, 101 and 150 to a

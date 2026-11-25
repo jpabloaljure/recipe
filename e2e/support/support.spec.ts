@@ -1,5 +1,5 @@
 import { catalog, openFeed, slides, videos } from "./feed";
-import { livePlayers } from "./player";
+import { emitError, failVideos, livePlayers } from "./player";
 import { expect, test } from "./test";
 
 // Self-tests of the network guard in e2e/support/test.ts and the feed stub in e2e/support/feed.ts.
@@ -89,4 +89,49 @@ test("network guard › IFrame Player API › gives each fake player its own cre
   expect(first.map((p) => [p.youtubeId, p.serial])).toEqual([["aaa", 0], ["bbb", 1]]);
   // Reading again returns the same serials: a player keeps its serial for its whole life.
   expect((await livePlayers(page)).map((p) => p.serial)).toEqual([0, 1]);
+});
+
+test("network guard › IFrame Player API › a player reports an error the test emits", async ({ page }) => {
+  await page.setContent(
+    `<iframe id="a" src="https://www.youtube-nocookie.com/embed/aaa?enablejsapi=1"></iframe>
+     <script src="https://www.youtube.com/iframe_api"></script>`,
+  );
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { YT?: { Player?: unknown } }).YT?.Player)).toBe("function");
+  await page.evaluate(() => {
+    const w = window as unknown as { YT: { Player: new (el: Element, o: unknown) => unknown }; __errors: number[] };
+    w.__errors = [];
+    new w.YT.Player(document.getElementById("a") as Element, {
+      events: { onError: (e: { data: number }) => w.__errors.push(e.data) },
+    });
+  });
+
+  await emitError(page, "aaa", 100);
+
+  expect(await page.evaluate(() => (window as unknown as { __errors: number[] }).__errors)).toEqual([100]);
+});
+
+test("network guard › IFrame Player API › a video set to fail reports its error once created", async ({ page }) => {
+  await failVideos(page, { aaa: 150 });
+  await page.goto("about:blank"); // an init script runs when a document loads
+  await page.setContent(
+    `<iframe id="a" src="https://www.youtube-nocookie.com/embed/aaa?enablejsapi=1"></iframe>
+     <iframe id="b" src="https://www.youtube-nocookie.com/embed/bbb?enablejsapi=1"></iframe>
+     <script src="https://www.youtube.com/iframe_api"></script>`,
+  );
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { YT?: { Player?: unknown } }).YT?.Player)).toBe("function");
+  await page.evaluate(() => {
+    const w = window as unknown as { YT: { Player: new (el: Element, o: unknown) => unknown }; __log: string[] };
+    w.__log = [];
+    for (const id of ["a", "b"]) {
+      new w.YT.Player(document.getElementById(id) as Element, {
+        events: {
+          onReady: () => w.__log.push(`${id}:ready`),
+          onError: (e: { data: number }) => w.__log.push(`${id}:error${e.data}`),
+        },
+      });
+    }
+  });
+
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __log: string[] }).__log.length)).toBe(2);
+  expect(await page.evaluate(() => (window as unknown as { __log: string[] }).__log.sort())).toEqual(["a:error150", "b:ready"]);
 });

@@ -200,7 +200,7 @@ L: YouTube API quota (search calls are expensive) shapes the whole job.
 Depends on the open decision about seed channels and queries.
 
 ## REC-018 · Feed handles empty, error and unavailable states
-- **Status:** todo
+- **Status:** in-progress
 - **Labels:** module:feed, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 6.4, 9 (videos removed after ingestion)
 - **Flags:** split-from:REC-001

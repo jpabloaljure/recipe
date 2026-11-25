@@ -22,7 +22,13 @@ type YouTubePlayer = {
 type YouTubeNamespace = {
   Player: new (
     iframe: HTMLIFrameElement,
-    options: { events: { onReady: () => void; onStateChange: (event: { data: number }) => void } },
+    options: {
+      events: {
+        onReady: () => void;
+        onStateChange: (event: { data: number }) => void;
+        onError: (event: { data: number }) => void;
+      };
+    },
   ) => YouTubePlayer;
 };
 
@@ -54,6 +60,15 @@ export function mapYouTubeState(code: number): PlayerState | null {
     default:
       return null;
   }
+}
+
+/**
+ * True for the player errors that mean the video cannot be watched here:
+ * 100 (removed or private) and 101 and 150 (embedding not allowed). Every other
+ * code, 153 (a missing referrer, a bug of ours) among them, is not a skip.
+ */
+export function isUnplayableError(code: number): boolean {
+  return code === 100 || code === 101 || code === 150;
 }
 
 let loading: Promise<YouTubeNamespace> | null = null;
@@ -93,13 +108,14 @@ export type AttachedPlayer = {
 
 /**
  * Attaches a player to an iframe whose URL has `enablejsapi=1`. `onReady` and
- * `onState` are called as the player reports; commands sent before ready are
- * the caller's to hold (`SlidePlayback` does).
+ * `onState` are called as the player reports; `onUnplayable` when the video
+ * cannot be watched (`isUnplayableError`); commands sent before ready are the
+ * caller's to hold (`SlidePlayback` does).
  */
 export function attachPlayer(
   api: YouTubeNamespace,
   iframe: HTMLIFrameElement,
-  events: { onReady: () => void; onState: (state: PlayerState) => void },
+  events: { onReady: () => void; onState: (state: PlayerState) => void; onUnplayable: () => void },
 ): AttachedPlayer {
   const player = new api.Player(iframe, {
     events: {
@@ -107,6 +123,9 @@ export function attachPlayer(
       onStateChange: (event) => {
         const state = mapYouTubeState(event.data);
         if (state !== null) events.onState(state);
+      },
+      onError: (event) => {
+        if (isUnplayableError(event.data)) events.onUnplayable();
       },
     },
   });

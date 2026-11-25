@@ -3,6 +3,7 @@ import {
   type ApiEnvironment,
   attachPlayer,
   IFRAME_API_URL,
+  isUnplayableError,
   loadYouTubeApi,
   mapYouTubeState,
   resetYouTubeApiLoader,
@@ -43,7 +44,13 @@ class FakePlayer {
   readonly calls: string[] = [];
   constructor(
     readonly iframe: unknown,
-    readonly options: { events: { onReady: () => void; onStateChange: (event: { data: number }) => void } },
+    readonly options: {
+      events: {
+        onReady: () => void;
+        onStateChange: (event: { data: number }) => void;
+        onError: (event: { data: number }) => void;
+      };
+    },
   ) {
     FakePlayer.last = this;
   }
@@ -114,6 +121,16 @@ describe("loadYouTubeApi", () => {
   });
 });
 
+describe("isUnplayableError", () => {
+  it("is true for removed or private (100) and for embedding not allowed (101, 150)", () => {
+    expect([100, 101, 150].map(isUnplayableError)).toEqual([true, true, true]);
+  });
+
+  it("is false for every other code, 153 and 5 among them", () => {
+    expect([2, 5, 153, 0].map(isUnplayableError)).toEqual([false, false, false, false]);
+  });
+});
+
 describe("attachPlayer", () => {
   it("maps the commands and the state events", () => {
     const states: string[] = [];
@@ -122,6 +139,7 @@ describe("attachPlayer", () => {
     const attached = attachPlayer({ Player: FakePlayer as never }, iframe, {
       onReady: () => ready++,
       onState: (state) => states.push(state),
+      onUnplayable: () => {},
     });
     const fake = FakePlayer.last;
     expect(fake.iframe).toBe(iframe);
@@ -141,5 +159,37 @@ describe("attachPlayer", () => {
     attached.handle.seekTo(0);
     attached.destroy();
     expect(fake.calls).toEqual(["play", "pause", "mute", "unMute", "seekTo(0,true)", "destroy"]);
+  });
+});
+
+describe("attachPlayer errors", () => {
+  function attach() {
+    let unplayable = 0;
+    attachPlayer({ Player: FakePlayer as never }, {} as HTMLIFrameElement, {
+      onReady: () => {},
+      onState: () => {},
+      onUnplayable: () => unplayable++,
+    });
+    return { fake: FakePlayer.last, count: () => unplayable };
+  }
+
+  it("reports a removed video (error 100)", () => {
+    const { fake, count } = attach();
+    fake.options.events.onError({ data: 100 });
+    expect(count()).toBe(1);
+  });
+
+  it("reports embedding not allowed (errors 101 and 150)", () => {
+    const { fake, count } = attach();
+    fake.options.events.onError({ data: 101 });
+    fake.options.events.onError({ data: 150 });
+    expect(count()).toBe(2);
+  });
+
+  it("does not report another error code", () => {
+    const { fake, count } = attach();
+    fake.options.events.onError({ data: 153 });
+    fake.options.events.onError({ data: 5 });
+    expect(count()).toBe(0);
   });
 });
