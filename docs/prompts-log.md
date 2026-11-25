@@ -3533,3 +3533,105 @@ Merge when green
 - **Result:** REC-007 is validated (estimates 3/3, size warning: 3 points against `size:S`, label unchanged). Decisions: auto-open applies only on tall screens (with room beside the video the panel is always open, so nothing changes); a view belongs to a slide (cycle plus YouTube ID) and ends on swipe-away, per tab and in memory; the auto-open happens at most once per view and counts as used when the panel was already shown, never reopens after a manual close, and is skipped after a manual open; the count uses the `videoended` event of the active slide. 11 stories are validated and 11 remain flagged. REC-005's first check is still paused and unlogged.
 - **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, two runs; `estimate-story` ran in the main session) · Haiku 5.5, effort low (`doc-checker`: this log).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent, and the choices (tall screens only, the once-per-view rules, the estimate, the merge) stay with the user.
+
+## 506. Explore the seed recipes idea (slash command)
+
+```
+/openspec-explore getting the seed videos data that we have on the data base, and extract from the video the Dish and the recipe and correctly added to the data base and uptate the states keeping the DB healty and consistent.
+```
+
+## 507. Narrow it to a one-time seed with the dish in the title
+
+```
+Lisen, the first version read the description and top comment. As this will be a complement of the seed data, this is not going to replace the "Extraction". We will do this only once. yo will extract the videos, guide me on the youtube API setup, you extract video's info and build the recipe, Put the dish on the Title. withowt changing. the database.
+```
+
+## 508. Ask about the browser instead of the YouTube API
+
+```
+quiestion, can we do this from the browser instead of using youtube API?
+```
+
+## 509. Decide on dummy recipes from the titles
+
+```
+i have decided, for seeding the recipe for the actual videos just get from the video title use internet to search and come up with a reccipy that match that title, dont try to scrub the video and its comments use only whant you find. if you dont find the exact recipi just make up it up jur best. this will be dummy recipies, leave a couple of good videos with no recipe to visualice on the app verification.
+```
+
+## 510. Say which videos to use
+
+```
+use the videos that already are on the jason file that we loaded
+```
+
+## 511. Go with the defaults
+
+```
+go with defoults.
+```
+
+## 512. Ask for the SQL to see the data
+
+```
+Give me the SQL to select all the videos and see all what you wrote in the DB
+```
+
+## 513. Ask about the PR and how to test
+
+```
+do we have PR already? how can i testit now?
+```
+
+## 514. Ask whether the recipes have instructions
+
+```
+Does we jave instuctions also? or only ingredients?
+```
+
+## 515. Ask for a recipe panel mockup
+
+```
+Make me an example how will locl in the recipy panel. a full recipe
+```
+
+## 516. Ask for the PR
+
+```
+PR
+```
+
+## 517. Merge PR #90 when green (button answer)
+
+```
+Merge when green
+```
+
+## 518. Run the production dry run (button answer)
+
+```
+Run dry-run
+```
+
+## 519. Run the production apply (button answer)
+
+```
+Run apply
+```
+
+## 520. Register the seed recipes chain (question dialog answer)
+
+```
+Seed recipes chain (Recommended)
+```
+
+### Summary (prompts 506–520)
+
+- **Goal:** fill the curated Shorts that are in the database with recipes, so the app can be checked while the real extraction (REC-008, REC-010) is not built, keeping the database consistent.
+- **Changes:**
+  - **Data:** `scripts/db/curated-recipes.json`: dummy recipes for 21 of the 24 curated videos in the feed, written from each title (web-searched patterns, in my own words, no scraping of videos or comments), with the dish name set as the title; three videos left without a recipe on purpose.
+  - **Code:** `scripts/db/load-recipes.mts` (`--dry-run`, `--revert`, `--check`), `src/lib/catalog/recipes.mts` (planner and easy check), `src/lib/catalog/recipes-load.mts` (one transaction per video, guarded by status, revert and a read-only health check); 20 unit tests and 8 database tests; `package.json` script.
+  - **Workflow and docs:** `.github/workflows/load-recipes.yml` (manual, modes dry-run, apply, revert, check); `docs/development.md`, a note in `docs/architecture/data-model.md`, draft D-22 (replace the placeholders with real extraction).
+  - **PR:** #90, merged (`f4ef2bd`).
+- **Result:** an exploration that started from a YouTube API plan ended as a direct PR with no schema change: the owner chose dummy recipes from the titles, no API, no scraping. The production dry run (run 45695757052) and apply (run 45696200039) passed: 21 recipes written, 0 failed, the catalog is 21 `ready`, 3 `needs_recipe` and 3 `rejected`, the health check passed, and the production feed API already returns the recipes. A recipe panel mockup was shown. Known caveat: the recipes carry source `description`, which will be wrong on the recipe panel (REC-006) until they are replaced (D-22 and `--revert`).
+- **Models:** Sonnet 5.5 (main session; web searches ran in the main session) · Haiku 5.5, effort low (`doc-checker`, two runs: the new docs and this log).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent, and the product choices (dummy recipes, the dish in the title, the three blank videos, the production runs) stay with the user.
