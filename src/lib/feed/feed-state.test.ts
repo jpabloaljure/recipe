@@ -6,6 +6,7 @@ import {
   endSlideMode,
   ensureCycles,
   type FeedState,
+  gestureMoved,
   initialFeedState,
   inPlayerWindow,
   MAX_SKIPS_IN_A_ROW,
@@ -305,5 +306,20 @@ describe("skipped videos (REC-018)", () => {
     expect(slideIndexOfKey(after, key)).toBe(2);
     expect(slideIndexOfKey(after, "9-zz")).toBe(-1);
     expect(slideIndexOfKey(after, null)).toBe(-1);
+  });
+});
+
+describe("gesture ends the count of skips in a row (REC-018)", () => {
+  const twoSkipped = () =>
+    skipVideo(skipVideo(appendPage(initialFeedState, pageOf(["a", "b", "c", "d"], null)), "a", true), "b", true);
+
+  it("starts the count over when the feed moves to another slide", () => {
+    expect(gestureMoved(twoSkipped(), 0, 1).skipsInARow).toBe(0);
+  });
+
+  it("keeps the count when the active slide did not change", () => {
+    const state = twoSkipped();
+    expect(gestureMoved(state, 1, 1)).toBe(state);
+    expect(state.skipsInARow).toBe(2);
   });
 });

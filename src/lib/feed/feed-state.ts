@@ -139,6 +139,16 @@ export function videoPlayed(state: FeedState): FeedState {
 }
 
 /**
+ * The active slide changed because the home cook moved the feed (a scroll that
+ * settled on another slide): the count of videos skipped in a row starts over,
+ * so a video that never played and was swiped away does not count towards the
+ * next skips. A resize or a skip that shifts the list is not a gesture.
+ */
+export function gestureMoved(state: FeedState, from: number, to: number): FeedState {
+  return from === to ? state : videoPlayed(state);
+}
+
+/**
  * The end slide after the last loaded video, shown only while more pages
  * remain: a loading indicator, or a retry row after a failed request.
  */

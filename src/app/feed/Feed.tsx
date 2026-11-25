@@ -8,6 +8,7 @@ import {
   endSlideMode,
   ensureCycles,
   type FeedState,
+  gestureMoved,
   initialFeedState,
   inPlayerWindow,
   pageFailed,
@@ -67,10 +68,12 @@ export function Feed() {
     setState(next);
   }, []);
 
-  // A gesture that lands on another video ends the count of videos skipped in a row (a skip alone does not).
+  // The settled slide changed. A scroll that lands on another video is a gesture and ends the count of videos
+  // skipped in a row; a resize, or a skip that shifts the list, is not (`gesture` false).
   const moveTo = useCallback(
-    (index: number) => {
-      if (index !== current.current.activeIndex) update(videoPlayed);
+    (index: number, gesture: boolean) => {
+      const from = current.current.activeIndex;
+      if (gesture) update((previous) => gestureMoved(previous, from, index));
       current.current = { ...current.current, activeIndex: index };
       setActiveIndex(index);
     },
@@ -124,18 +127,19 @@ export function Feed() {
   useEffect(() => {
     const element = scroller.current;
     if (!element) return;
-    const settle = () => moveTo(activeIndexFrom(element.scrollTop, element.clientHeight));
+    const settle = (gesture: boolean) => moveTo(activeIndexFrom(element.scrollTop, element.clientHeight), gesture);
+    const onScrollEnd = () => settle(true);
     const onScroll = () => {
       const settled = settledIndexFrom(element.scrollTop, element.clientHeight);
-      if (settled !== null) moveTo(settled);
+      if (settled !== null) moveTo(settled, true);
     };
-    settle();
-    element.addEventListener("scrollend", settle);
+    settle(false);
+    element.addEventListener("scrollend", onScrollEnd);
     element.addEventListener("scroll", onScroll, { passive: true });
-    const resize = new ResizeObserver(settle);
+    const resize = new ResizeObserver(() => settle(false));
     resize.observe(element);
     return () => {
-      element.removeEventListener("scrollend", settle);
+      element.removeEventListener("scrollend", onScrollEnd);
       element.removeEventListener("scroll", onScroll);
       resize.disconnect();
     };

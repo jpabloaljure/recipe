@@ -12,9 +12,23 @@ test("feed › The watched video stays on screen when others are dropped › An 
   await expect(activeSlide(page)).toHaveAttribute("data-youtube-id", second);
   await expectPlayerExists(page, first); // the second cycle's first video is the neighbour above
 
+  // Record every slide that becomes active from here on: only the watched video may, never another one for a moment.
+  await page.getByTestId("feed").evaluate((feed) => {
+    const log: string[] = [];
+    (window as unknown as { __activeLog: string[] }).__activeLog = log;
+    new MutationObserver((records) => {
+      for (const record of records) {
+        const target = record.target as HTMLElement;
+        if (target.getAttribute("data-active") === "true") log.push(target.getAttribute("data-youtube-id") ?? "");
+      }
+    }).observe(feed, { subtree: true, attributes: true, attributeFilter: ["data-active"] });
+  });
+
   await emitError(page, first, 100);
 
   await expect(page.locator(`[data-testid="feed-slide"][data-youtube-id="${first}"]`)).toHaveCount(0);
   await expect(activeSlide(page)).toHaveAttribute("data-youtube-id", second);
   await expect(activeSlide(page)).toBeInViewport();
+  const becameActive = await page.evaluate(() => (window as unknown as { __activeLog: string[] }).__activeLog);
+  expect(becameActive.filter((id) => id !== second)).toEqual([]);
 });

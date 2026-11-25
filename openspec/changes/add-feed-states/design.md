@@ -32,7 +32,7 @@ timeout. See proposal.md for why.
 
 1. **The feed state gains a status, the skipped IDs and a skip counter.**
    `FeedState` adds `status` (`loading`, `empty`, `error`, `ready`), `skipped`
-   (a set of YouTube IDs) and `skipsInARow`. The count starts over when a video plays or when a gesture moves to another video (a video that never played and was swiped away must not count towards the next skips). `buildSlides` drops skipped IDs and
+   (a set of YouTube IDs) and `skipsInARow`. The count starts over when a video plays or when a gesture (a scroll that settles on another video, not a resize or a skip) moves to another video (a video that never played and was swiped away must not count towards the next skips). `buildSlides` drops skipped IDs and
    `appendPage` ignores them, so no later page or Retry puts a dropped video
    back. A dropped video is removed by ID, so it leaves every repeat of the list.
    Alternative: remove by slide key only; rejected because the repeats would
