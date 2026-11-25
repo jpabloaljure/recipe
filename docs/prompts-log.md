@@ -3737,3 +3737,303 @@ REC-006 chain (Recommended)
 - **Result:** the panel is live in production beside the video where there are at least 260 px per side, showing the 21 placeholder recipes. The AI review of the merged PR found 5 points (one important: the panel could overlap the video on a phone with a display cutout); 4 were fixed and the left-gutter swipe test was skipped. The manual checks were reported done on a real Honor phone in landscape and on desktop Chrome with DevTools phone simulations. Not checked: the safe-area fix on a phone with a cutout, and the owner's look at the production URL. Until REC-022, REC-023 and REC-007 ship, a phone in portrait or a narrow window shows no recipe.
 - **Models:** Sonnet 5.5 (main session; the code review ran in it at `medium` effort; the re-validation used the owner's words, with no `story-validator` run) · Haiku 5.5, effort low (`doc-checker`, three runs: the C4 and change docs, the close-out files, and this log).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent, and the choices (the estimate, the merges, skipping the review first, which findings to fix) stay with the user.
+
+## 536. Ask how local main is
+
+```
+check how is main local
+```
+
+## 537. Agree to sync main (answer to a question)
+
+```
+ok
+```
+
+## 538. Ask about local worktrees
+
+```
+any worktree in local?
+```
+
+## 539. Ask to check again
+
+```
+check again
+```
+
+## 540. Clean up the branches and stashes
+
+```
+yes and also check what is here and see if is save to deleted to.
+```
+
+## 541. Ask whether docs/readme-hub is safe to delete
+
+```
+si if docs/readme-hub is save to delete
+```
+
+## 542. Explore REC-006
+
+```
+/openspec-explore REC-006
+```
+
+## 543. Take all three recommendations (button answer)
+
+```
+Yes, all three
+```
+
+## 544. Approve the story edits (answer to a yes/no question)
+
+```
+yes
+```
+
+## 545. Re-check REC-006 (button answer)
+
+```
+Re-check
+```
+
+## 546. Choose all options A for the first re-check
+
+```
+all A
+```
+
+## 547. Ask for the second re-check
+
+```
+Done, re-check
+```
+
+## 548. Choose all options A for the second re-check
+
+```
+all A
+```
+
+## 549. Ask for the third re-check
+
+```
+Done, re-check
+```
+
+## 550. Choose all options A for the third re-check
+
+```
+All A
+```
+
+## 551. Ask for the fourth re-check
+
+```
+Done, re-check
+```
+
+## 552. Choose all options A for the fourth re-check
+
+```
+all A
+```
+
+## 553. Approve REC-006's criteria
+
+```
+AC approved
+```
+
+## 554. Give the team estimate for REC-006
+
+```
+5
+```
+
+## 555. Ask to re-check REC-022
+
+```
+re check 022
+```
+
+## 556. Ask what the band case is
+
+```
+what is the band case?
+```
+
+## 557. Choose all options A for REC-022's first re-check
+
+```
+all A
+```
+
+## 558. Ask for the second re-check of REC-022
+
+```
+Done, re-check
+```
+
+## 559. Choose all options A and split the band into REC-023
+
+```
+all A
+```
+
+## 560. Validate REC-006 (button answer)
+
+```
+Validate REC-006
+```
+
+## 561. Ask to re-check REC-022 again
+
+```
+Rechekc 022
+```
+
+## 562. Choose all options A for REC-022's third check
+
+```
+all A
+```
+
+## 563. Ask for the next re-check of REC-022
+
+```
+Done, re-check
+```
+
+## 564. Choose all options A for REC-022's fourth check
+
+```
+all A
+```
+
+## 565. Approve REC-022's criteria
+
+```
+AC approved
+```
+
+## 566. Give the team estimate for REC-022
+
+```
+8
+```
+
+## 567. Validate REC-022
+
+```
+validate
+```
+
+## 568. Check REC-023
+
+```
+Check REC-023
+```
+
+## 569. Choose all options A for REC-023's first check
+
+```
+all A
+```
+
+## 570. Ask for the re-check of REC-023
+
+```
+Done, re-check
+```
+
+## 571. Choose all options A for REC-023's re-check
+
+```
+all A
+```
+
+## 572. Approve REC-023's criteria
+
+```
+AC approved
+```
+
+## 573. Give the team estimate for REC-023
+
+```
+5
+```
+
+## 574. Ask to re-check REC-007
+
+```
+Re-check007
+```
+
+## 575. Validate REC-023
+
+```
+REC-023 validate
+```
+
+## 576. Choose all options A for REC-007's re-check
+
+```
+all A
+```
+
+## 577. Ask for the second re-check of REC-007
+
+```
+Done, re-check
+```
+
+## 578. Choose all options A for REC-007's second re-check
+
+```
+all A
+```
+
+## 579. Approve REC-007's criteria
+
+```
+AC approved
+```
+
+## 580. Give the team estimate for REC-007
+
+```
+3
+```
+
+## 581. Validate REC-007
+
+```
+validate
+```
+
+## 582. Open the PR with the recipe panel backlog (button answer)
+
+```
+Open PR
+```
+
+## 583. Merge PR #96 when green (button answer)
+
+```
+Merge when green
+```
+
+### Summary (prompts 536–583)
+
+- **Goal:** explore REC-006 (the recipe panel) against the code, reopen and re-validate the stories around it (REC-006, REC-022 and REC-007), split a new story REC-023 out of REC-022, and put the result on `main`; plus a clean-up of local branches, stashes and worktrees.
+- **Changes:**
+  - **Backlog:** `backlog/E02-recipe-every-video.md`: REC-006 (17 criteria, panel with its own 260 px switch in the left gutter, one panel outside the feed), REC-022 (25 criteria, the button and sheet where the unmute button is over the video), the new REC-023 (15 criteria, the same beside the video, placement assumed and gated by a real-window check) and REC-007 (11 criteria, size S to M, `blocked-by:REC-022` and `blocked-by:REC-023`); `backlog/README.md` (Decided 6, next free ID REC-024, Open decision 3 closed), `backlog/draft-backlog-list.md` (D-21 extended), `backlog/validation-log.md`.
+  - **Docs:** `docs/PRD.md` 5.1 and 5.3 (the panel threshold, the used-state rule of the auto-open), `docs/checklist.md` (story counts and the panel row).
+  - **Repository:** local `main` synced (22 commits behind), two stale stashes dropped, ten merged branches deleted, no worktrees left.
+  - **PR:** #96, merged.
+- **Result:** REC-006 validated at 5/5 (another session then built, merged and archived it, PRs #92 to #95), REC-022 validated at 8/8, REC-023 validated at 5/5, REC-007 validated at 3/3; 11 stories still flagged `needs-human-validation`. The recipe panel group is ready for OpenSpec changes: REC-022 first, then REC-023, then REC-007. Open points kept as assumptions: the 260 px threshold, the band placement of the button and its fallback, the panel's 400 px maximum width. `docs/checklist.md` rows 9 and 10 still list REC-006, REC-007 and REC-022 as the validated ones and omit REC-022 and REC-023 from the frontend list; they are left for a separate fix.
+- **Models:** Sonnet 5.5 (main session; `estimate-story` ran in it, four times) · Sonnet 5.5, effort medium (`story-validator`, twelve runs across the four stories) · Haiku 5.5, effort low (`doc-checker`, one run on this log).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent and the choices stay with the user.
