@@ -115,7 +115,7 @@ user-facing slice and is `blocked-by` each child; each child is flagged
 6. The recipe panel has its own switch, separate from the unmute button's:
    it is always open to the left of the video when at least 260 px (assumed)
    remain on each side of it (desktop, a phone in landscape); otherwise the
-   recipe uses the "Recipe" button and the sheet (REC-022). The panel is one
+   recipe uses the "Recipe" button and the sheet (REC-022, and REC-023 where the unmute button sits beside the video). The panel is one
    component outside the feed's scroll container, so scrolling over it never
    moves the feed. This reverses the earlier "no new threshold" decision of
    REC-006 and REC-022. Decided 2026-11-25 (REC-006 explore and re-check).
