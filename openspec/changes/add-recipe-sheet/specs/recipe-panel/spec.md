@@ -99,8 +99,9 @@ the sheet, and tapping it SHALL turn sound on and leave the sheet open.
 - **AND** the sheet stays open
 
 ### Requirement: The sheet closes with its button and when the video changes
-A close button with the accessible name "Close recipe" SHALL be the only way to
-close the sheet. Closing it SHALL show the "Recipe" button again and leave the
+A close button with the accessible name "Close recipe" and the Escape key SHALL be
+the only ways to close the sheet. Opening the sheet SHALL move keyboard focus to the
+close button, and closing it SHALL return focus to the "Recipe" button. Closing it SHALL show the "Recipe" button again and leave the
 video visible and playing. The sheet SHALL also close when the active video
 changes, and the "Recipe" button SHALL be shown for the new video.
 
@@ -114,6 +115,17 @@ changes, and the "Recipe" button SHALL be shown for the new video.
 - **GIVEN** there is no room for the panel
 - **WHEN** I open the sheet
 - **THEN** its close button has the accessible name "Close recipe"
+
+#### Scenario: Close the sheet with Escape
+- **GIVEN** the sheet is open and there is no room for the panel
+- **WHEN** I press Escape
+- **THEN** the sheet closes
+- **AND** keyboard focus is on the "Recipe" button
+
+#### Scenario: Focus moves into the sheet
+- **GIVEN** there is no room for the panel
+- **WHEN** I open the sheet
+- **THEN** keyboard focus is on its close button
 
 #### Scenario: The video keeps playing
 - **GIVEN** the sheet is open and there is no room for the panel
@@ -146,7 +158,9 @@ the active video.
 When a phone is turned, or a window is resized, so that there is room for the
 panel, the panel SHALL open beside the video and the "Recipe" button and the
 sheet SHALL be gone; when it ends with no room, the panel SHALL be closed and
-the "Recipe" button shown. Playback and sound SHALL NOT change.
+the "Recipe" button shown. An open sheet SHALL also close when the screen's aspect
+ratio crosses 3/4, where the "Recipe" button appears or disappears. Playback and
+sound SHALL NOT change.
 
 #### Scenario: Turn a phone from landscape to portrait
 - **GIVEN** a phone shows the recipe panel beside the video in landscape

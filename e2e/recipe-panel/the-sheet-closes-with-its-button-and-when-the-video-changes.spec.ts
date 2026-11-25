@@ -49,3 +49,24 @@ test("recipe-panel › The sheet closes with its button and when the video chang
   await expect(page.getByTestId("recipe-sheet")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Recipe", exact: true })).toBeVisible();
 });
+
+test("recipe-panel › The sheet closes with its button and when the video changes › Close the sheet with Escape", async ({ page }) => {
+  onAPhoneInPortrait();
+  await openFeed(page, catalog(videosWithRecipes(3), 3));
+  await page.getByRole("button", { name: "Recipe" }).click();
+  await expect(page.getByTestId("recipe-sheet")).toBeVisible();
+
+  await page.keyboard.press("Escape");
+
+  await expect(page.getByTestId("recipe-sheet")).toHaveCount(0);
+  await expect(page.getByTestId("recipe-button")).toBeFocused();
+});
+
+test("recipe-panel › The sheet closes with its button and when the video changes › Focus moves into the sheet", async ({ page }) => {
+  onAPhoneInPortrait();
+  await openFeed(page, catalog(videosWithRecipes(3), 3));
+
+  await page.getByRole("button", { name: "Recipe" }).click();
+
+  await expect(page.getByRole("button", { name: "Close recipe", exact: true })).toBeFocused();
+});

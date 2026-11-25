@@ -9,7 +9,7 @@
  */
 .sheet {
   --sheet-top: 72px;
-  --sheet-bottom: 130px;
+  --sheet-bottom: var(--player-controls-clearance);
   position: fixed;
   top: var(--sheet-top);
   bottom: var(--sheet-bottom);

@@ -82,7 +82,7 @@
      * Above YouTube's control area: 115px tall on an emulated 375x812 phone, and
      * 10px more was needed on the owner's real Android phone (2026-11-23).
      */
-    bottom: 130px;
+    bottom: var(--player-controls-clearance);
     width: 44px;
     height: 44px;
     background: rgba(0, 0, 0, 0.18);
@@ -108,7 +108,7 @@
     align-items: center;
     justify-content: center;
     right: 8px;
-    bottom: calc(130px + 44px + 8px);
+    bottom: calc(var(--player-controls-clearance) + 44px + 8px);
     width: 44px;
     height: 44px;
     padding: 0;

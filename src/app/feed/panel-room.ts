@@ -9,14 +9,19 @@ import { useEffect, useRef } from "react";
  */
 export const PANEL_MEDIA_QUERY = "(min-width: calc(56.25vh + 520px))";
 
-/** Calls `onChange` whenever the answer to `PANEL_MEDIA_QUERY` changes, in either direction. */
+/** Where the unmute and Recipe buttons are over the video (a tall screen). Also written in `Feed.module.css`. */
+export const TALL_SCREEN_MEDIA_QUERY = "(max-aspect-ratio: 3/4)";
+
+/** Calls `onChange` whenever the answer to `PANEL_MEDIA_QUERY` or `TALL_SCREEN_MEDIA_QUERY` changes, in either direction. */
 export function usePanelRoomChange(onChange: () => void): void {
   const latest = useRef(onChange);
   latest.current = onChange;
   useEffect(() => {
-    const query = window.matchMedia(PANEL_MEDIA_QUERY);
+    const queries = [PANEL_MEDIA_QUERY, TALL_SCREEN_MEDIA_QUERY].map((q) => window.matchMedia(q));
     const changed = () => latest.current();
-    query.addEventListener("change", changed);
-    return () => query.removeEventListener("change", changed);
+    for (const query of queries) query.addEventListener("change", changed);
+    return () => {
+      for (const query of queries) query.removeEventListener("change", changed);
+    };
   }, []);
 }
