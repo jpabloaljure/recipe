@@ -38,4 +38,4 @@ are named `playback › <Requirement> › <Scenario>` and live in `e2e/playback/
 
 ## 7. Close-out
 
-- [ ] 7.1 Set REC-004 `Status: done` when the E2E tests pass and the manual results are on record; sync the delta into `openspec/specs/playback/spec.md` and archive the change
+- [x] 7.1 Set REC-004 `Status: done` when the E2E tests pass and the manual results are on record; sync the delta into `openspec/specs/playback/spec.md` and archive the change
