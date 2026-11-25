@@ -9,7 +9,7 @@ prd-goal: G2
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4, API-1
 - **Flags:** needs-human-validation
-- **AI estimate:** 3
+- **AI estimate:** 5
 - **Estimate:** 3
 
 As a home cook, I want to open a written recipe next to the video, so that I can cook without pausing and rewinding.
@@ -73,6 +73,8 @@ M: one component with the wide-screen layout. After the 2026-11-24 split the sto
 Data already arrives with the feed, so no loading states are needed.
 
 AI estimate (2026-11-24, predates the reopening of 2026-11-25, its counts are stale (17 criteria now) and it is re-run after the criteria are approved): 3. Calibration: REC-004 (team 3, AI 3) is the nearest in effort: a frontend story on the feed whose logic mostly exists, with a handful of E2E tests. REC-018 (team 5) and REC-003 (team 5) are the upper bound: both carry real state logic (error states, the player controller), which this story does not. What is here is one presentational component (servings, ingredients, steps, a source label and link), a layout switch (at the time of this estimate `(assumed)` to reuse the unmute button's; since 2026-11-25 the panel has its own 260 px switch), 11 criteria (17 now) that each need a short E2E test on the three projects, and recipe-bearing stub data for those tests (the production fixture has `recipe: null` everywhere). Risks that move it: keeping the video exactly centered with the panel beside it, and containing wheel, trackpad and touch scrolling over the panel inside the feed's scroll-snap container (REC-001 showed that gestures near the feed can misbehave on a real device); if either fights the existing feed CSS it goes to 5. I have no information about the panel's visual design (typography, spacing), which is `(assumed)` to be plain. Size check: 3 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
+
+AI estimate (2026-11-25, after the reopening): 5. Calibration: REC-018 (team 5, 16 criteria) and REC-003 (team 5) are the nearest in effort, though both carry more state logic; REC-004 (team 3) is the lower bound and is what the first estimate of 3 was based on. What changed since that estimate: the story went from 11 to 17 criteria, the panel has its own 260 px switch (with its boundary tested at 260 and 255 px through custom viewports on the three projects), it is one component outside the feed's scroll container (a restructure of the feed's layout, not an addition beside it), its content swaps at the moment the active video changes, a new `recipe-panel` capability spec is created and two `feed` requirements are amended, and the E2E tests need recipe-bearing stub data. It stays presentational (no state logic), which keeps it below 8. Risks that move it: keeping the video exactly centered with the panel beside it, and keeping wheel, trackpad and touch scrolling over the panel from moving the feed (REC-001 showed that gestures near the feed can misbehave on a real device); if either fights the feed CSS it goes to 8. The manual checks (a real landscape phone, a small landscape phone, readability at 260 px) can add rounds that I cannot size `(assumed)`. Size check: 5 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-022 · Recipe button and sheet when there is no room for the panel
 - **Status:** todo
