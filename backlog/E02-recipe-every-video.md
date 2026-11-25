@@ -201,8 +201,8 @@ As a home cook, I want the recipe to appear by itself once I've watched the vide
 
 ### Acceptance criteria
 - Given there is no room for the panel and a video with a recipe is playing for the first time in this view, when it reaches the end and starts its first repeat, then the recipe sheet opens automatically.
-- Given there is no room for the panel and the sheet opened automatically and I closed it, when the video loops again, then the sheet does not reopen.
-- Given there is no room for the panel and I swiped away from a video and came back to it (a new view), when it reaches the end of its first loop, then the sheet opens automatically again.
+- Given there is no room for the panel and the sheet opened automatically and I closed it, when the video reaches its second end, then the sheet does not reopen.
+- Given there is no room for the panel and I swiped away from a video and came back to it (a new view), when it reaches its first end, then the sheet opens automatically again.
 - Given there is no room for the panel and a video is playing, when the sheet opens automatically, then the video keeps playing.
 - Given there is no room for the panel and a `needs_recipe` video is playing, when it reaches the end and starts its first repeat, then no sheet opens.
 - Given the screen has room for the panel beside the video, so the recipe panel is always open, when a video reaches the end and starts its first repeat, then nothing changes and the panel stays open.
