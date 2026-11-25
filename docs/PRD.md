@@ -46,7 +46,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 ### 5.1 Feed
 - Vertical, full-screen feed with one video at a time (Shorts style).
 - **No autoscroll.** The user scrolls or swipes to move to the next or previous video. The one exception: a video that cannot be played (removed, private or not embeddable) is skipped, and the next video takes its place.
-- The layout follows the space beside the video. With room for the panel beside it (about 260 px on each side: desktop, or a phone in landscape) the vertical video is centered and the recipe panel is always open to its left. Without that room (a phone in portrait, or a narrow window) the panel is a sheet that opens from a "Recipe" button.
+- The layout follows the space beside the video. With room for the panel beside it (about 260 px on each side: desktop, or a larger phone in landscape) the vertical video is centered and the recipe panel is always open to its left. Without that room (a phone in portrait, or a narrow window) the panel is a sheet that opens from a "Recipe" button.
 
 ### 5.2 Playback
 - **Autoplay** when a video becomes the active one in the feed.
