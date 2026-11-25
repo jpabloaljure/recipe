@@ -149,9 +149,9 @@ AI estimate (2026-11-25, after the criteria were approved): 8. Calibration: REC-
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
-- **Flags:** needs-human-validation; split-from:REC-022; blocked-by:REC-022
+- **Flags:** split-from:REC-022; blocked-by:REC-022
 - **AI estimate:** 5
-- **Estimate:** —
+- **Estimate:** 5
 
 As a home cook in a narrow desktop window or on a small phone in landscape, I want the "Recipe" button and the sheet to work where the unmute button sits beside the video, so that I can read the recipe there too.
 

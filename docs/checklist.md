@@ -61,7 +61,7 @@ What is left for a home cook to open the app, swipe through easy recipes and
 save or share them (PRD goals G1–G3), and for the launch checks (PRD §8). The
 starting point is the end of Entrega 2: the feed serves 24 real Shorts, title
 only. Playback (REC-003, REC-004) is done; no other story below is started: the
-others still carry `needs-human-validation` (13 of them: REC-005, REC-007 to REC-017 and REC-023; REC-006, REC-018 and REC-022 are validated), so each needs validation and a team estimate first
+others still carry `needs-human-validation` (12 of them: REC-005 and REC-007 to REC-017; REC-006, REC-018, REC-022 and REC-023 are validated), so each needs validation and a team estimate first
 (item 9). Daily ingestion and recipe extraction run in the ingestion job
 (GitHub Actions), never in the request path.
 
