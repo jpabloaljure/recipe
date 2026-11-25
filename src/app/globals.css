@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+/* Height of the YouTube control bar plus a margin (REC-003, REC-022): the unmute and Recipe buttons sit above it, the recipe sheet ends above it. */
+:root {
+  --player-controls-clearance: 130px;
+}
+
 html,
 body {
   height: 100%;

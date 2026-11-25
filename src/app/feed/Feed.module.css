@@ -64,6 +64,8 @@
   left: calc(100% + 16px);
   bottom: 125px;
   background: rgba(255, 255, 255, 0.16);
+  /* Above the recipe sheet (REC-022), so it stays tappable with the sheet open. */
+  z-index: 2;
 }
 
 .unmute:hover,
@@ -80,10 +82,46 @@
      * Above YouTube's control area: 115px tall on an emulated 375x812 phone, and
      * 10px more was needed on the owner's real Android phone (2026-11-23).
      */
-    bottom: 130px;
+    bottom: var(--player-controls-clearance);
     width: 44px;
     height: 44px;
     background: rgba(0, 0, 0, 0.18);
+  }
+}
+
+/*
+ * The "Recipe" button (REC-022, change add-recipe-sheet, design Decisions 3 and 7).
+ * Only where the unmute button is over the video (aspect ratio 3/4 or narrower) and
+ * there is no room for the recipe panel (the band between the two switches is
+ * REC-023's). Directly above where the unmute button sits, 8px over it, and in the
+ * same place when the unmute button is hidden. Same size and look as the unmute icon.
+ */
+.recipeButton {
+  display: none;
+}
+
+@media (max-aspect-ratio: 3/4) and (not (min-width: calc(56.25vh + 520px))) {
+  .recipeButton {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    right: 8px;
+    bottom: calc(var(--player-controls-clearance) + 44px + 8px);
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+  }
+
+  .recipeButton:hover,
+  .recipeButton:focus-visible {
+    background: rgba(0, 0, 0, 0.32);
   }
 }
 

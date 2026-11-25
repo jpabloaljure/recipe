@@ -1,0 +1,63 @@
+/*
+ * The recipe sheet (REC-022, change add-recipe-sheet, design Decisions 1 to 3 and 6).
+ * Fixed over the video's column (as wide as the video, at most the screen),
+ * between two edges that leave the player's control zones free: the title
+ * overlay at the top and the control bar at the bottom. Both values are
+ * assumed and tuned on a real phone (REC-003 measured the bar at about 115 to
+ * 120 px and put the unmute icon at 130 px). Not displayed where the panel is
+ * shown. Below the unmute button, which has a higher z-index.
+ */
+.sheet {
+  --sheet-top: 72px;
+  --sheet-bottom: var(--player-controls-clearance);
+  position: fixed;
+  top: var(--sheet-top);
+  bottom: var(--sheet-bottom);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(56.25dvh, 100vw);
+  z-index: 1;
+  box-sizing: border-box;
+  color: #f2f2f2;
+  background: rgba(0, 0, 0, 0.78);
+}
+
+@media (min-width: calc(56.25vh + 520px)) {
+  .sheet {
+    display: none;
+  }
+}
+
+.body {
+  box-sizing: border-box;
+  height: 100%;
+  /* Room for the close button at the top and the unmute button at the bottom right. */
+  padding: 52px 16px 56px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+}

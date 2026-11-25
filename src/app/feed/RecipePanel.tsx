@@ -1,5 +1,5 @@
 import type { Recipe } from "../../lib/feed/types";
-import { ingredientLine, servingsText, sourceLabel, videoUrl } from "../../lib/feed/recipe-text";
+import { RecipeContent } from "./RecipeContent";
 import styles from "./RecipePanel.module.css";
 
 type Props = {
@@ -20,30 +20,11 @@ type Props = {
  * to the top, in the same render as `data-active` (Decision 4).
  */
 export function RecipePanel({ slideKey, youtubeId, recipe }: Props) {
-  const servings = recipe ? servingsText(recipe.servings) : null;
   return (
     <aside className={styles.panel} aria-label="Recipe" data-testid="recipe-panel" hidden={recipe === null || youtubeId === null || slideKey === null}>
       {recipe && youtubeId && slideKey && (
         <div key={slideKey} className={styles.body} data-testid="recipe-body" data-youtube-id={youtubeId}>
-          {servings && <p className={styles.servings}>{servings}</p>}
-          <h2 className={styles.heading}>Ingredients</h2>
-          <ul className={styles.list}>
-            {recipe.ingredients.map((ingredient, index) => (
-              <li key={index}>{ingredientLine(ingredient)}</li>
-            ))}
-          </ul>
-          <h2 className={styles.heading}>Steps</h2>
-          <ol className={styles.list}>
-            {recipe.steps.map((step, index) => (
-              <li key={index}>{step}</li>
-            ))}
-          </ol>
-          <p className={styles.source}>
-            {sourceLabel(recipe.source)} ·{" "}
-            <a href={videoUrl(youtubeId)} target="_blank" rel="noopener noreferrer">
-              Open on YouTube
-            </a>
-          </p>
+          <RecipeContent recipe={recipe} youtubeId={youtubeId} />
         </div>
       )}
     </aside>
