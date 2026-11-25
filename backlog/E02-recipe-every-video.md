@@ -8,38 +8,44 @@ prd-goal: G2
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4, API-1
-- **Flags:** —
+- **Flags:** needs-human-validation
 - **AI estimate:** 3
 - **Estimate:** 3
 
 As a home cook, I want to open a written recipe next to the video, so that I can cook without pausing and rewinding.
 
 ### Acceptance criteria
-- Given the screen has room beside the video (desktop, or a phone in landscape) and the active video has a recipe, when the video becomes active, then the recipe panel is open beside the centered video.
-- Given the screen has room beside the video and the active video has a recipe, when the video becomes active, then there is no "Recipe" button and no close button.
-- Given the screen has room beside the video and the active video has a recipe, when the video becomes active, then its recipe is shown with no extra network request (PERF-4).
-- Given the screen has room beside the video and the active video has a recipe, when the video becomes active, then the panel shows servings, ingredients with their quantities and numbered steps.
-- Given the screen has room beside the video and the active video has a recipe, when the video becomes active, then a label shows the source (description, comment or captions).
+- Given the screen has room for the panel beside the video (desktop, or a phone in landscape) and the active video has a recipe, when the video becomes active, then the recipe panel is open to the left of the centered video.
+- Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then there is no "Recipe" button and no close button.
+- Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then its recipe is shown with no extra network request (PERF-4).
+- Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then the panel shows servings, ingredients with their quantities and numbered steps.
+- Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then a label shows the source (description, comment or captions).
 - Given the recipe panel shows a recipe, when I select the source link, then the original YouTube video opens in a new tab.
 - Given the recipe panel is open beside the video, when the active video changes, then the panel shows the new video's recipe.
 - Given the recipe panel is open beside the video and the recipe is taller than the panel, when I scroll over it with the wheel, trackpad or touch, then only the recipe scrolls, the feed does not move, and I can reach the last step.
 - Given the recipe panel is open beside the video and the recipe is shorter than the panel, when I scroll over it with the wheel, trackpad or touch, then the feed does not move.
-- Given the screen has room beside the video and the active video's recipe has a missing serving size or quantity, when the video becomes active, then the missing item is left out with no empty label (confirmed 2026-11-24).
-- Given the screen has room beside the video, when a `needs_recipe` video becomes active, then the panel area is empty and the video stays centered.
+- Given the screen has room for the panel and the active video's recipe has a missing serving size or quantity, when the video becomes active, then the missing item is left out with no empty label (confirmed 2026-11-24).
+- Given the screen has room for the panel, when a `needs_recipe` video becomes active, then the panel area is empty and the video stays centered.
 
 ### Technical context
 `needs_recipe` videos are in the feed with their title only (decided 2026-11-17, `backlog/README.md` Decided 4; PRD 5.3, PERF-4).
 
 Decisions 2026-11-24 (validation, first check 16 findings, re-check N1 to N8, "All A"):
 - **Split by behavior (N5 A):** this story keeps the panel and its wide-screen layout; the "Recipe" button and the sheet on tall screens moved to REC-022 (`split-from:REC-006`, `blocked-by:REC-006`). REC-006 does not need REC-022, so it has no `blocked-by`. REC-006 alone does not cover a phone in portrait.
-- **Layout by space, not device:** the same switch as the unmute button (`playback` spec, "Unmute button placement"); this story and REC-022 add no new threshold. With room beside the video (desktop, phone in landscape) the recipe panel is always open beside the centered video, with no "Recipe" button and no close button, and it follows the active video. A tall screen is REC-022.
+- **Layout by space, not device (revised 2026-11-25, see below):** with room for the panel (desktop, phone in landscape) the recipe panel is always open beside the centered video, with no "Recipe" button and no close button, and it follows the active video. Any other screen is REC-022. The first version of this decision reused the unmute button's switch with no new threshold; the explore of 2026-11-25 reversed that part.
 - **Scrolling:** scrolling over the panel never moves the feed, also when the recipe is short or at its end.
 - **Label and link:** the link opens in a new tab and the app tab's video pauses by the hidden-tab rule (`playback` spec). Label wording: "Recipe from the description / top comment / captions" (confirmed 2026-11-24).
 - **Missing fields:** a missing serving size or quantity is left out; long lists scroll (confirmed 2026-11-24).
 - **Title-only videos:** the panel area is empty and the video stays centered (confirmed 2026-11-24). The app shows no title of its own: the embed's own overlay shows the title and channel (seen on the owner's real-device screenshots).
 - **Playback:** the panel does not depend on playback state, and hiding the tab changes nothing in it. Opening or closing it never changes playback or sound, and a pause made with the player's own control stays.
 - **Feed spec and PRD:** PRD 5.1 and 5.3 are already updated (2026-11-24). The `feed` spec "Taps reach the video player" is amended by REC-022 (the Recipe button and the sheet over the video).
-- **Related, none blocking:** REC-002 and REC-021 (the `recipe` data shape), REC-007 (auto-open applies only on tall screens, because here the panel is always open: revisit REC-007 when it is validated, and give it `blocked-by:REC-022` then), REC-014 (a deep link lands on a video with its recipe available), REC-012 (favorites). A `ready` video always has a complete recipe (EXT-5), so there is no error path here. Accessibility beyond the "Recipe" button's accessible name (REC-022) goes to the draft backlog.
+- **Related, none blocking:** REC-002 and REC-021 (the `recipe` data shape), REC-007 (auto-open applies only where the sheet is used, because with room for the panel it is always open; `blocked-by:REC-022`), REC-014 (a deep link lands on a video with its recipe available), REC-012 (favorites). A `ready` video always has a complete recipe (EXT-5), so there is no error path here. Accessibility beyond the "Recipe" button's accessible name (REC-022) goes to the draft backlog.
+
+Decisions 2026-11-25 (explore of REC-006 against the code, "All three", reopened for validation):
+- **Room for the panel (reverses "no new threshold"):** the panel has its own switch: the room beside the video on each side must be at least 260 px `(assumed)`; the value is tuned in the manual check. The room per side is (screen width minus the video's width) divided by two, the video being as tall as the screen and 9/16 as wide. Examples: 1280x800 has 415 px, a phone at 915x412 has 342, 1024x768 has 296, 900x800 has 225 (no panel), 700x800 has 125 (no panel). Below 260 px the screen takes REC-022's path. The unmute button keeps its own switch (`playback` spec), so there is a band of screens where it sits beside the video but the recipe uses the button and the sheet (see REC-022).
+- **Left gutter:** the panel sits to the left of the video, because the unmute button lives in the right gutter (about 125 px above the bottom).
+- **One panel, outside the feed:** a single panel that is a sibling of the feed's scroll container, not one per slide, so a wheel or touch over it cannot move the feed's scroll-snap container; it changes its content when the active video changes. A swipe that starts on the panel's area does not move the feed (a manual check on a landscape phone).
+- **Seeing it:** production has only title-only videos until REC-008, so the E2E tests use stubbed recipes and the manual check uses a preview or a local database seeded with recipes (`scripts/db/seed.mts` supports them).
 
 ### Estimation notes
 M: one component with the wide-screen layout. After the 2026-11-24 split the story is the panel, its content and the wide-screen behavior (11 criteria); the tall-screen button and sheet are REC-022.
@@ -51,14 +57,15 @@ AI estimate (2026-11-24): 3. Calibration: REC-004 (team 3, AI 3) is the nearest 
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
-- **Flags:** split-from:REC-006; blocked-by:REC-006
+- **Flags:** needs-human-validation; split-from:REC-006; blocked-by:REC-006
 - **AI estimate:** 5
 - **Estimate:** 5
 
 As a home cook on my phone in portrait, I want to open the recipe from a button that does not cover the video's controls, so that I can read it while the video keeps playing.
 
 ### Acceptance criteria
-- Given a video with a recipe is active on a tall screen (no room beside the video), when I tap the "Recipe" button, then the recipe panel opens instantly with no extra network request (PERF-4).
+- Given a video with a recipe is active on a tall screen (no room for the panel beside the video), when I tap the "Recipe" button, then the recipe panel opens instantly with no extra network request (PERF-4).
+- Given a window that leaves less room beside the video than the panel needs but is wider than a tall phone screen, when a video with a recipe becomes active, then the "Recipe" button is shown and there is no panel beside the video.
 - Given a video with a recipe is active on a tall screen, when I open the recipe panel, then it shows servings, ingredients with their quantities and numbered steps.
 - Given a video with a recipe is active on a tall screen, when I open the recipe panel, then it is a sheet with a semi-transparent black background that lets the video show dimly behind it.
 - Given a video with a recipe is active on a tall screen, when I open the recipe panel, then it leaves the player's control zones at the top and at the bottom free (manual check).
@@ -72,12 +79,12 @@ As a home cook on my phone in portrait, I want to open the recipe from a button 
 - Given the recipe panel is open on a tall screen and the recipe is shorter than the sheet, when I swipe vertically on it, then the active video does not change.
 - Given the recipe panel is open on a tall screen, when I swipe in a free control zone to the next video, then the active video changes, the panel is closed and the "Recipe" button is shown (confirmed 2026-11-24).
 - Given a phone shows the recipe panel beside the video in landscape, when I turn it to portrait (a tall screen), then the panel is closed and the "Recipe" button is shown.
-- Given a phone shows the "Recipe" button or the open sheet in portrait, when I turn it to landscape (room beside the video), then the recipe panel is open beside the video and the "Recipe" button is gone.
+- Given a phone shows the "Recipe" button or the open sheet in portrait, when I turn it to landscape (room for the panel beside the video), then the recipe panel is open beside the video and the "Recipe" button is gone.
 - Given the screen is tall, when a `needs_recipe` video becomes active, then there is no "Recipe" button and no sheet.
 
 ### Technical context
 Split from REC-006 on 2026-11-24 (its validation, N5 A). Decisions from that validation:
-- **Placement:** the "Recipe" button sits directly above the unmute button's place and stays there when the unmute button is hidden (the owner's choice). A small transparent icon over the video on a tall screen, like the unmute icon (`playback` spec, "Unmute button placement"). The owner first asked for a button on wide screens too and then said wide screens have the panel always open with no button: this story follows the later statement (confirmed 2026-11-24, "All A"). "Tall screen" and "room beside the video" use the unmute button's switch; this story adds no new threshold, and a desktop window resize across it behaves like a rotation.
+- **Placement:** the "Recipe" button sits directly above the unmute button's place and stays there when the unmute button is hidden (the owner's choice). A small transparent icon over the video on a tall screen, like the unmute icon (`playback` spec, "Unmute button placement"). The owner first asked for a button on wide screens too and then said wide screens have the panel always open with no button: this story follows the later statement (confirmed 2026-11-24, "All A"). Revised 2026-11-25: "tall screen" now means less than room for the panel beside the video (REC-006's switch, at least 260 px per side `(assumed)`), not the unmute button's aspect switch, and a desktop window resize across it behaves like a rotation.
 - **Sheet:** a full-height sheet with a semi-transparent black background that shows the video dimly behind it and leaves the player's top and bottom control zones free; the video keeps playing. The exact size of the free zones is tuned and checked only in the manual check on a real phone (the player's own behavior, E2E rule 13), not as a number in the criteria (confirmed 2026-11-24); the change's tasks list it as a manual check.
 - **Closing:** a close button is the only way to close. "Tap outside" is not used because what is left outside the sheet is the player's own control zones, which must receive taps. Browser Back is not intercepted in the MVP.
 - **Feed spec:** the change amends the `feed` spec "Taps reach the video player": it allows the small Recipe button over the video on a tall screen and the open sheet, which leaves the player's control zones free. The sheet is a layer above the video that catches taps outside the free zones, so the amendment must say so.
@@ -86,6 +93,10 @@ Split from REC-006 on 2026-11-24 (its validation, N5 A). Decisions from that val
 - **Accessibility:** beyond the button's accessible name, keyboard and screen-reader support is out of this story (draft backlog D-21).
 - **Playback:** opening or closing the sheet never changes playback or sound, and the sheet does not depend on playback state; hiding the tab changes nothing in it.
 - **Related:** REC-007 (auto-open applies only on tall screens: it opens this sheet), REC-003 (the unmute button's place).
+
+Decisions 2026-11-25 (explore of REC-006, "All three", reopened for validation):
+- **A band of windows between the two switches:** the unmute button goes over the video only when the screen is tall by aspect (3/4 or narrower); the recipe panel needs 260 px per side. A window such as 700x800 has the unmute button beside the video and the Recipe button and sheet (this story), because only 125 px remain per side. There the "Recipe" button sits directly above the unmute button in the right gutter, beside the video, not over it `(assumed)`. The sheet still covers the video's area, with the player's control zones free.
+- **Left gutter for the panel:** REC-006 puts the always-open panel on the left, so the unmute button's right gutter stays free.
 
 ### Estimation notes
 M: a button placed relative to another control, a translucent sheet with free control zones (a layout risk tuned on a real phone), a feed spec amendment and the rotation change. Split from REC-006 by behavior.
