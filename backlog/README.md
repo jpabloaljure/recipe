@@ -124,7 +124,9 @@ user-facing slice and is `blocked-by` each child; each child is flagged
 
 1. Seed channels and search queries (REC-005).
 2. Whether favorites save a copy of the recipe (REC-012).
-3. What counts as one "view" for auto-opening the panel (REC-007).
+3. ~~What counts as one "view" for auto-opening the panel (REC-007).~~ Closed:
+   decided 2026-11-24 in REC-007's validation (a view starts when a video becomes
+   active and ends when I swipe away; coming back is a new view).
 4. Whether the unmute "session" means the tab or the visit (REC-003).
 5. ~~Deep link behavior for unknown or non-ready videos (REC-014).~~ Closed
    by Decided 5.
