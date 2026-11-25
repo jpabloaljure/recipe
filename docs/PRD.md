@@ -127,7 +127,7 @@ Speed is a core requirement: users should never wait on videos.
 |---|---|
 | PERF-1 | **Recipe extraction never runs while a user is browsing.** Everything is processed ahead of time. |
 | PERF-2 | First video playable in **< 2 s** on a mid-range phone over 4G. |
-| PERF-3 | The next video starts in **< 500 ms** after a swipe. The client keeps the previous and next videos loaded and paused (inside the PERF-5 player cap); recipes arrive with the feed (PERF-4). |
+| PERF-3 | The next video starts in **< 500 ms** after a swipe. The client keeps the previous and next videos loaded and paused (inside the PERF-5 player cap); the next one first plays muted for about a second, out of sight, so it starts fast; recipes arrive with the feed (PERF-4). |
 | PERF-4 | The recipe panel opens instantly (its data arrives with the feed). A `needs_recipe` video has no recipe panel. |
 | PERF-5 | Only a few video players are kept alive at once (current, previous, next) to keep memory and CPU low. |
 | PERF-6 | Feed responses are cacheable (CDN/edge). In the MVP they are cached for up to an hour, so new videos can take up to an hour to appear. |

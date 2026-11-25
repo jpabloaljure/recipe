@@ -5,7 +5,7 @@ Update the status and notes as items are done.
 
 Status: ✅ done · 🟡 partial · ❌ missing
 
-_Last updated: 2026-11-23_
+_Last updated: 2026-11-24_
 
 ## Still missing
 
@@ -16,7 +16,7 @@ Only what is not ✅ yet, in the order that matters for Entrega 2:
 3. **README §2.4:** say where the secrets live (item 14).
 4. **Decision:** whether C4 level 3 for the web app moves to `Current` (item 14).
 5. **Item 15:** record which devices the manual check used.
-6. **Entrega 1 carry-overs:** the final product name (item 3), the prompts used to write the PRD (item 2), and 16 stories (REC-003 to REC-018) still flagged `needs-human-validation` (item 9).
+6. **Entrega 1 carry-overs:** the final product name (item 3), the prompts used to write the PRD (item 2), and 14 stories (REC-005 to REC-018) still flagged `needs-human-validation` (item 9).
 
 Outside the checklist: D-11 (iPhone landscape), the empty-feed black screen (REC-018), the ADR 0007 wording about pool tuning, and daily discovery (REC-005).
 
@@ -34,7 +34,7 @@ Delivered on branch `feature/entrega-1-jpa`. Open items carry over to Entrega 2.
 | 6 | Tech stack | ✅ | `AGENTS.md`, `README.md` | Next.js + React 19 on Vercel, Postgres on Neon + Drizzle, ingestion on GitHub Actions, pnpm, Vitest (change `choose-tech-stack`); Playwright for end-to-end tests (ADR 0006, change `add-e2e-testing`). LLM provider is a pending decision. |
 | 7 | Data model | ✅ | [docs/architecture/data-model.md](architecture/data-model.md) | REC-020 (change `add-data-model-document`): Mermaid ER diagram of video and recipe with field types and keys, the five statuses, the feed-entry time rule and required fields. `Status: Current`: REC-019 built the schema and it runs in production since 2026-11-22. Whether an ingestion run is stored is a pending decision. |
 | 8 | API specification | ✅ | [README › API specification](../README.md#4-api-specification), [docs/api/openapi.yaml](api/openapi.yaml) | REC-021 (change `add-api-specification`): OpenAPI 3.1 for `GET /api/feed` (paged by opaque cursor, up to 10 items) and `GET /api/videos/{youtubeId}`, with item, recipe and error schemas, cache headers, examples and a field-to-column table; the README has an endpoint table. REC-002 and REC-014 implement it. |
-| 9 | User stories | 🟡 | `backlog/E01`–`E04` | 21 stories (REC-001 to REC-021): generated with `decompose-prd`, plus REC-019 split out during validation and REC-020/REC-021 (data model and API spec documents). REC-001 (done 2026-11-21), REC-019 (done 2026-11-22), REC-020, REC-021 and REC-002 (done 2026-11-22, 8 points) are validated and estimated; REC-003 is in review and the other 15 are not started; all 16 (REC-003 to REC-018) are still flagged `needs-human-validation`. Validation in progress with `validate-backlog`. |
+| 9 | User stories | 🟡 | `backlog/E01`–`E04` | 21 stories (REC-001 to REC-021): generated with `decompose-prd`, plus REC-019 split out during validation and REC-020/REC-021 (data model and API spec documents). REC-001 (done 2026-11-21), REC-019 (done 2026-11-22), REC-020, REC-021 and REC-002 (done 2026-11-22, 8 points) are validated and estimated; REC-003 and REC-004 are validated and done (2026-11-24) and the other 14 are not started; those 14 (REC-005 to REC-018) are still flagged `needs-human-validation`. Validation in progress with `validate-backlog`. |
 | 10 | Work tickets (backend, frontend, DB) | ✅ | `AGENTS.md` ("Story slicing"), `backlog/E01`–`E04` | Stories are full-stack slices by default and split by layer only when needed (change `add-story-slicing-rules`); every story has a `layer:` label. DB: REC-019, REC-020. Backend: REC-005, REC-008, REC-009, REC-010, REC-016, REC-017, REC-021. Frontend: REC-003, REC-004, REC-006, REC-007, REC-011–REC-013, REC-015, REC-018. Full stack: REC-001, REC-002, REC-014. Validated per layer: DB REC-019 (2026-11-21, done 2026-11-22) and REC-020 (2026-11-17), backend REC-021 (2026-11-18), full stack REC-001 (feed UI plus a stub feed route; re-validated 2026-11-19, was frontend). No frontend-only story is validated yet. |
 | 11 | Git repo | ✅ | [github.com/jpabloaljure/recipe](https://github.com/jpabloaljure/recipe), `.github/workflows/ci.yml` | Pushed to `main`; CI (typecheck, unit tests, build, E2E tests) runs on pull requests and pushes to `main`. `main` is protected (PR and green `check` required); the PR flow, DoR and DoD are in `CONTRIBUTING.md` and `docs/process/`, and a smoke check runs after each production deploy. |
 
@@ -60,8 +60,8 @@ blocked by the LLM provider decision).
 What is left for a home cook to open the app, swipe through easy recipes and
 save or share them (PRD goals G1–G3), and for the launch checks (PRD §8). The
 starting point is the end of Entrega 2: the feed serves 24 real Shorts, title
-only. No story below is started: all 16 (REC-003 to REC-018) still carry
-`needs-human-validation`, so each needs validation and a team estimate first
+only. Playback (REC-003, REC-004) is done; no other story below is started: the 14
+others (REC-005 to REC-018) still carry `needs-human-validation`, so each needs validation and a team estimate first
 (item 9). Daily ingestion and recipe extraction run in the ingestion job
 (GitHub Actions), never in the request path.
 
@@ -71,7 +71,7 @@ only. No story below is started: all 16 (REC-003 to REC-018) still carry
 | 17 | Daily discovery of videos | ❌ | REC-005 | A scheduled job that finds new candidate Shorts. Open decision: which seed channels and search queries. Replaces the hand-loaded curated list. |
 | 18 | Recipe panel | ❌ | REC-006, REC-007 | Servings, ingredients and numbered steps in a panel; it opens by itself after the first play-through. |
 | 19 | Recipe extraction | ❌ | REC-008, REC-017, REC-010, spike REC-009 | The LLM extracts the recipe ahead of time from the description, then the top comment; only easy recipes enter the feed; videos with no recipe keep the title only. The captions spike decides whether captions are a third source. |
-| 20 | Playback | ❌ | REC-003, REC-004 | Autoplay muted, tap to unmute, loop; an instant move to the next video (PERF-2). |
+| 20 | Playback | ✅ | REC-003, REC-004 | Autoplay muted, tap to unmute, loop (REC-003, done 2026-11-24); the next video is warmed up so it starts in under 500 ms in the by-eye check, and at most three players are alive (REC-004, done 2026-11-24). Known limitation: a stall after an unmute on a later video (draft D-12). REC-015 takes the real PERF-3 numbers. |
 | 21 | Feed states | ❌ | REC-018 | Feed shows empty, error and unavailable states instead of a blank screen. |
 | 22 | Favorites | ❌ | REC-011, REC-012 | Save a recipe and see the saved list, with no account (stored in the browser). Open decision: whether favorites keep a copy of the recipe. |
 | 23 | Share and deep link | ❌ | REC-013, REC-014 | Share a recipe by link; the link opens the feed on that recipe (uses `GET /api/videos/{youtubeId}`). |

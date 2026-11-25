@@ -15,7 +15,7 @@ C4Component
 
   Container_Boundary(web, "Web app (Next.js)") {
     Component(feed, "Feed", "React", "CSS scroll-snap feed, one video per gesture, wrap-around, next page via /api/feed; light shuffle of each page once per visit (5.1, API-2)")
-    Component(player, "Player controller", "React + IFrame API", "Autoplay muted, unmute, loop, pause (5.2); preload and the player cap come with REC-004 (PERF-3, PERF-5)")
+    Component(player, "Player controller", "React + IFrame API", "Autoplay muted, unmute, loop, pause (5.2); warms up the next video and keeps at most three players (REC-004, PERF-3, PERF-5)")
     Component(panel, "Recipe panel", "React", "Servings, ingredients, steps, source, auto-open (5.3, PERF-4)")
     Component(favs, "Favorites store", "localStorage", "Save, list, remove favorites (5.4)")
     Component(share, "Share", "Web Share API", "Share sheet or copy deep link (5.5)")
@@ -48,7 +48,7 @@ C4Component
 - Built in REC-003 (change `add-autoplay-playback`): the Player controller,
   for autoplay muted, unmute, sound carried over per tab, loop with an `ended`
   event, and pause and resume. It controls one player per mounted iframe through
-  the YouTube IFrame Player API (ADR 0008). Preloading stays REC-004.
+  the YouTube IFrame Player API (ADR 0008). REC-004 adds the warm-up of the next video (muted, about a second, then paused) and the cap of three live players (the feed mounts only the active slide and its two neighbours).
   The diagram stays `Proposed` until the other components exist.
 
 ## Related ADRs
