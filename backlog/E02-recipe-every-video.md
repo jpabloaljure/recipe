@@ -77,7 +77,7 @@ AI estimate (2026-11-24, predates the reopening of 2026-11-25, its counts are st
 AI estimate (2026-11-25, after the reopening): 5. Calibration: REC-018 (team 5, 16 criteria) and REC-003 (team 5) are the nearest in effort, though both carry more state logic; REC-004 (team 3) is the lower bound and is what the first estimate of 3 was based on. What changed since that estimate: the story went from 11 to 17 criteria, the panel has its own 260 px switch (with its boundary tested at 260 and 255 px through custom viewports on the three projects), it is one component outside the feed's scroll container (a restructure of the feed's layout, not an addition beside it), its content swaps at the moment the active video changes, a new `recipe-panel` capability spec is created and two `feed` requirements are amended, and the E2E tests need recipe-bearing stub data. It stays presentational (no state logic), which keeps it below 8. Risks that move it: keeping the video exactly centered with the panel beside it, and keeping wheel, trackpad and touch scrolling over the panel from moving the feed (REC-001 showed that gestures near the feed can misbehave on a real device); if either fights the feed CSS it goes to 8. The manual checks (a real landscape phone, a small landscape phone, readability at 260 px) can add rounds that I cannot size `(assumed)`. Size check: 5 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-022 · Recipe button and sheet when there is no room for the panel
-- **Status:** todo
+- **Status:** in-progress
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
 - **Flags:** split-from:REC-006; blocked-by:REC-006

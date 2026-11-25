@@ -26,7 +26,9 @@ import { PageRequests } from "../../lib/feed/page-requests";
 import { shuffleFeedPage } from "../../lib/feed/shuffle";
 import { type SlidePlayback, syncActive } from "../../lib/player/playback";
 import styles from "./Feed.module.css";
+import { usePanelRoomChange } from "./panel-room";
 import { RecipePanel } from "./RecipePanel";
+import { RecipeSheet } from "./RecipeSheet";
 import { SlideVideo } from "./SlideVideo";
 
 /**
@@ -203,6 +205,16 @@ export function Feed() {
   // Unmuted autoplay was refused, so the video plays muted and the button comes back.
   const soundBlocked = useCallback(() => setSoundOn(false), []);
 
+  // The recipe sheet (REC-022): open for one slide. It is closed by its button, when another
+  // slide becomes active and when the panel's switch changes (a turn or a resize). REC-007
+  // opens it at a video's first end with `openSheet`.
+  const [sheetFor, setSheetFor] = useState<string | null>(null);
+  const sheetOpen = sheetFor !== null && sheetFor === activeKey;
+  const openSheet = useCallback(() => setSheetFor(latest.current.activeKey), []);
+  const closeSheet = useCallback(() => setSheetFor(null), []);
+  useEffect(() => setSheetFor(null), [activeKey]);
+  usePanelRoomChange(closeSheet);
+
   // A video was removed or cannot be embedded: drop it and keep the watched video where it is.
   const unplayable = useCallback((youtubeId: string) => {
     const { state: before, activeIndex: index } = current.current;
@@ -301,6 +313,19 @@ export function Feed() {
                     </svg>
                   </button>
                 )}
+                {index === activeIndex && slide.item.recipe !== null && !sheetOpen && (
+                  <button
+                    type="button"
+                    className={styles.recipeButton}
+                    data-testid="recipe-button"
+                    aria-label="Recipe"
+                    onClick={openSheet}
+                  >
+                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M4 6h2v2H4V6zm4 0h12v2H8V6zM4 11h2v2H4v-2zm4 0h12v2H8v-2zM4 16h2v2H4v-2zm4 0h12v2H8v-2z" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </section>
           ))}
@@ -318,6 +343,7 @@ export function Feed() {
           </section>
         )}
       </div>
+      <RecipeSheet open={sheetOpen} youtubeId={activeItem?.youtubeId ?? null} recipe={activeItem?.recipe ?? null} onClose={closeSheet} />
       <RecipePanel slideKey={activeKey} youtubeId={activeItem?.youtubeId ?? null} recipe={activeItem?.recipe ?? null} />
     </>
   );
