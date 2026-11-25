@@ -55,14 +55,16 @@ function setup(youtubeId = "vid") {
   const timers = fakeTimers();
   const ended: string[] = [];
   let blocked = 0;
+  let playingReports = 0;
   const playback = new SlidePlayback({
     youtubeId,
     player,
     timers,
     onEnded: (id) => ended.push(id),
     onSoundBlocked: () => blocked++,
+    onPlaying: () => playingReports++,
   });
-  return { player, timers, ended, playback, blockedCount: () => blocked };
+  return { player, timers, ended, playback, blockedCount: () => blocked, playingReports: () => playingReports };
 }
 
 /** Calls since the last `clear`, so a test reads only what its action caused. */
@@ -378,5 +380,142 @@ describe("one player at a time", () => {
     expect(playing()).toEqual(["c"]);
     syncActive(controllers, null, true);
     expect(playing()).toEqual([]);
+  });
+});
+
+describe("warm-up of the next video", () => {
+  it("plays muted, then pauses at the start once it has played for a moment", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    expect(since(player, () => playback.warmUp())).toEqual(["mute", "play"]);
+    playback.handleState("playing");
+    expect(since(player, () => timers.fire())).toEqual(["pause", "seekTo(0)"]);
+  });
+
+  it("waits for the player to be ready", () => {
+    const { player, playback } = setup();
+    expect(since(player, () => playback.warmUp())).toEqual([]);
+    expect(since(player, () => playback.markReady())).toEqual(["mute", "mute", "play"]);
+  });
+
+  it("gives up without a playing state and pauses, with no error", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    expect(since(player, () => timers.fire())).toEqual(["pause", "seekTo(0)"]);
+  });
+
+  it("starts counting its play time at the first playing state only", () => {
+    const { timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    playback.handleState("buffering");
+    playback.handleState("playing");
+    expect(timers.pending()).toBe(1);
+  });
+
+  it("runs once in the life of a player", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    timers.fire();
+    expect(since(player, () => playback.warmUp())).toEqual([]);
+  });
+
+  it("does not run for the active video", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    expect(since(player, () => playback.warmUp())).toEqual([]);
+  });
+
+  it("does not start while the tab is hidden, and is not retried when it is visible again", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setTabVisible(false);
+    expect(since(player, () => playback.warmUp())).toEqual([]);
+    expect(since(player, () => playback.setTabVisible(true))).toEqual([]);
+  });
+
+  it("ends at once, paused at the start, when the tab is hidden during it", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    expect(since(player, () => playback.setTabVisible(false))).toEqual(["pause", "seekTo(0)"]);
+  });
+
+  it("does not report playing or ended to the app, and does not restart on ended", () => {
+    const { player, ended, playback, playingReports } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    expect(since(player, () => playback.handleState("ended"))).toEqual([]);
+    expect(ended).toEqual([]);
+    expect(playingReports()).toBe(0);
+  });
+
+  it("is not a user pause: the video plays when it becomes active", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    timers.fire();
+    playback.handleState("paused"); // the player reports the warm-up pause
+    expect(since(player, () => playback.setActive(true, false))).toEqual(["mute", "play"]);
+  });
+
+  it("becoming active during it cancels it and starts from the beginning", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    expect(since(player, () => playback.setActive(true, false))).toEqual(["seekTo(0)", "mute", "play"]);
+    expect(timers.pending()).toBe(0);
+  });
+
+  it("asks for sound when the swipe cancels a warm-up that is already playing", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing"); // no new `playing` will come when it is asked to play again
+    expect(since(player, () => playback.setActive(true, true))).toEqual(["seekTo(0)", "mute", "play", "unMute"]);
+  });
+
+  it("does not ask for sound right after a finished warm-up, before the player reports paused", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    timers.fire(); // warm-up over: pause sent, the player's paused event has not arrived yet
+    expect(since(player, () => playback.setActive(true, true))).toEqual(["mute", "play"]);
+  });
+
+  it("does not warm up a video that has already played", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.setActive(false, false);
+    expect(since(player, () => playback.warmUp())).toEqual([]);
+  });
+
+  it("is cancelled when the controller is disposed", () => {
+    const { timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.dispose();
+    expect(timers.pending()).toBe(0);
+  });
+
+  it("says when the active video is playing, and tells the app each time", () => {
+    const { playback, playingReports } = setup();
+    playback.markReady();
+    expect(playback.isPlaying()).toBe(false);
+    playback.setActive(true, false);
+    playback.handleState("playing");
+    expect(playback.isPlaying()).toBe(true);
+    expect(playingReports()).toBe(1);
   });
 });

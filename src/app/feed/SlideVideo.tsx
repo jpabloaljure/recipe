@@ -19,6 +19,8 @@ type Props = {
   onPlayback: (playback: SlidePlayback | null) => void;
   onEnded: (youtubeId: string) => void;
   onSoundBlocked: () => void;
+  /** The active video is playing: the feed warms up the next one. */
+  onPlaying: () => void;
 };
 
 /**
@@ -26,11 +28,11 @@ type Props = {
  * iframe; the player is attached to it when it mounts and lives as long as the
  * iframe does (add-autoplay-playback design Decisions 2 and 3).
  */
-export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlocked }: Props) {
+export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlocked, onPlaying }: Props) {
   const iframe = useRef<HTMLIFrameElement>(null);
   // The latest callbacks, so the player is created once and not on every render.
-  const callbacks = useRef({ onPlayback, onEnded, onSoundBlocked });
-  callbacks.current = { onPlayback, onEnded, onSoundBlocked };
+  const callbacks = useRef({ onPlayback, onEnded, onSoundBlocked, onPlaying });
+  callbacks.current = { onPlayback, onEnded, onSoundBlocked, onPlaying };
 
   useEffect(() => {
     const element = iframe.current;
@@ -52,6 +54,7 @@ export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlock
           timers: browserTimers,
           onEnded: (id) => callbacks.current.onEnded(id),
           onSoundBlocked: () => callbacks.current.onSoundBlocked(),
+          onPlaying: () => callbacks.current.onPlaying(),
         });
         callbacks.current.onPlayback(playback);
         cleanup = () => {
