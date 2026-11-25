@@ -2,8 +2,10 @@
 
 Status: Proposed
 
-The main parts inside the Next.js app. Feed and the Feed route are built
-(REC-001); the other components are still the plan.
+The main parts inside the Next.js app. Built: the Feed, the Feed route, the
+Player controller and the Recipe panel and sheet (REC-001 to REC-006, REC-018,
+REC-022). Still the plan: the Favorites store, Share, the Video route and the
+panel's auto-open (REC-007).
 
 ```mermaid
 C4Component

@@ -15,6 +15,7 @@ Every project document, by what you want to know.
 | See the security practices and known gaps | [Security](security.md) |
 | Find my way around the folders | [Repository layout](architecture/repository-layout.md) |
 | **Working on the code** | |
+| Check the three delivered features by hand, with screenshots | [Verify the features](verify-features.md) |
 | Install, run and test locally | [Development](development.md) |
 | Open a PR and ship a change | [CONTRIBUTING](../CONTRIBUTING.md) |
 | Know when a story can start or is done | [Definition of Ready](process/definition-of-ready.md) · [Definition of Done](process/definition-of-done.md) |
