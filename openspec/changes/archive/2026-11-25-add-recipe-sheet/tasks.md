@@ -37,4 +37,4 @@ so the existing `feed` E2E tests cover them and must still pass.
 
 ## 6. Close-out
 
-- [ ] 6.1 Set REC-022 `Status: done` when every automatable scenario has a passing E2E test and the manual results are on record; sync the deltas into `openspec/specs/` (the `recipe-panel` requirements and the two `feed` requirements) and archive the change
+- [x] 6.1 Set REC-022 `Status: done` when every automatable scenario has a passing E2E test and the manual results are on record; sync the deltas into `openspec/specs/` (the `recipe-panel` requirements and the two `feed` requirements) and archive the change

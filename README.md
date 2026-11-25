@@ -9,8 +9,8 @@ cooking videos (Shorts), each with an easy written recipe.
 > carry a placeholder recipe (written from the title, not extracted: see
 > [docs/development.md](docs/development.md#placeholder-recipes-for-the-curated-shorts)),
 > and the recipe panel shows it beside the video on screens with room for it
-> (about 260 px on each side); the button and sheet for narrower screens are not
-> built. Delivery progress:
+> (about 260 px on each side); on a phone in portrait a Recipe button opens it as a
+> sheet over the video; narrow desktop windows (REC-023) are not built. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
 ## Index

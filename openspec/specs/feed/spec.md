@@ -37,8 +37,8 @@ feed.
 Each swipe or scroll gesture SHALL move the feed by exactly one video,
 forward or backward, however hard the gesture is. Gestures made over the
 video itself, or over the area beside it that the recipe panel does not cover,
-SHALL move the feed; a gesture that starts on the recipe panel scrolls only the
-recipe and SHALL NOT move the feed. Skipping a video that cannot play is not a
+SHALL move the feed; a gesture that starts on the recipe panel or on the recipe sheet scrolls only
+the recipe and SHALL NOT move the feed. Skipping a video that cannot play is not a
 gesture and SHALL NOT move the feed by more than the one slot the skipped
 video held.
 
@@ -69,9 +69,11 @@ video held.
 
 ### Requirement: Taps reach the video player
 The feed MUST NOT place any layer above the video that catches taps, so taps
-on the video reach the embedded YouTube player. The only exception is the small
-unmute icon on a tall phone screen (see `playback`), shown only while sound is
-off and placed above the player's control bar.
+on the video reach the embedded YouTube player. The exceptions are the small
+unmute icon (shown only while sound is off) and the small "Recipe" button on a tall phone screen (see
+`playback` and `recipe-panel`), placed above the player's control bar, and the
+open recipe sheet, which covers only the video's area and leaves the player's
+control zones at the top and at the bottom free.
 
 #### Scenario: Tap on the video
 - **GIVEN** a video is active
