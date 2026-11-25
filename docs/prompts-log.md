@@ -4037,3 +4037,76 @@ Merge when green
 - **Result:** REC-006 validated at 5/5 (another session then built, merged and archived it, PRs #92 to #95), REC-022 validated at 8/8, REC-023 validated at 5/5, REC-007 validated at 3/3; 11 stories still flagged `needs-human-validation`. The recipe panel group is ready for OpenSpec changes: REC-022 first, then REC-023, then REC-007. Open points kept as assumptions: the 260 px threshold, the band placement of the button and its fallback, the panel's 400 px maximum width. `docs/checklist.md` rows 9 and 10 still list REC-006, REC-007 and REC-022 as the validated ones and omit REC-022 and REC-023 from the frontend list; they are left for a separate fix.
 - **Models:** Sonnet 5.5 (main session; `estimate-story` ran in it, four times) · Sonnet 5.5, effort medium (`story-validator`, twelve runs across the four stories) · Haiku 5.5, effort low (`doc-checker`, one run on this log).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent and the choices stay with the user.
+
+## 584. Propose the change for REC-022
+
+```
+/openspec-propose REC-022
+```
+
+## 585. Merge the proposal PR when green (button answer)
+
+```
+Merge when green
+```
+
+## 586. Apply the change
+
+```
+Apply the change
+```
+
+## 587. Report the manual checks of REC-022
+
+```
+I have cheked 1 to 5 and works correctly
+```
+
+## 588. Start the AI review of PR #100
+
+```
+go
+```
+
+## 589. Fix the three review nits
+
+```
+fix them
+```
+
+## 590. Merge PR #100 when green (button answer)
+
+```
+Merge when green
+```
+
+## 591. Close out REC-022 and clean up
+
+```
+close out and house keeping
+```
+
+## 592. Log the prompts (pend-)
+
+```
+pend-
+```
+
+## 593. Choose the range to log (dialog answer)
+
+```
+REC-022 chain (Recommended)
+```
+
+### Summary (prompts 584–593)
+
+- **Goal:** take REC-022 (the Recipe button and sheet where there is no room for the recipe panel) from proposal to done: propose and apply the OpenSpec change `add-recipe-sheet`, review it, merge it, close it out and clean up.
+- **Changes:**
+  - **Code:** `src/app/feed/`: `RecipeContent`, `RecipeSheet`, `panel-room.ts` (shared query and change hook), the Recipe button in `Feed.tsx`, CSS in `Feed.module.css` and `RecipeSheet.module.css`; `--player-controls-clearance` in `src/app/globals.css`; after the AI review, focus handling and Escape for the sheet and closing it when the aspect ratio crosses 3/4.
+  - **Tests:** 23 new E2E tests in `e2e/recipe-panel/` (phone-portrait) and a unit test for the shared query; 218 unit tests pass.
+  - **Specs and docs:** change `add-recipe-sheet` synced (6 `recipe-panel` requirements added, 2 `feed` amended) and archived as `2026-11-25-add-recipe-sheet`; C4 components note, checklist row 18, README status, validation log, draft D-21, REC-022 set to `done`.
+  - **PRs:** #99 (proposal), #100 (implementation, merge `c00224b`), #101 (close-out), all merged; the production smoke check passed.
+  - **Repository:** four worktrees and five merged local branches removed.
+- **Result:** REC-022 is done. The manual checks passed on the Honor phone in portrait; the AI review (medium) found three nits, all fixed. Not checked: Escape and focus on a phone, and the safe-area fix on a notched phone. Narrow desktop windows show no recipe until REC-023.
+- **Models:** Sonnet 5.5, effort medium (main session, code review) · Haiku 5.5, effort low (`doc-checker`, two runs).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent and the choices stay with the user.
