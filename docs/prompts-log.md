@@ -3033,3 +3033,144 @@ Merge when green
 - **Result:** REC-018 is validated after five checks; PR #77 is merged with CI green. No app name was chosen (Bitebox and BiteScroll-like names were discussed; trademark and domain checks are still to do).
 - **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, five runs; `estimate-story` ran in the main session) · Haiku 5.5, effort low (`doc-checker`).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only check of this log stays on the cheap Haiku agent, and the choices stay with the user.
+
+## 431. Ask what is missing in REC-004
+
+```
+what is missing in REC-004?
+```
+
+## 432. Ask for a PR with what is missing before OpenSpec
+
+```
+Pr what is missing befor we start the Pen Spec
+```
+
+## 433. Merge PR #74 when green (button answer)
+
+```
+Merge when green
+```
+
+## 434. Explore REC-004 (button answer)
+
+```
+Explore REC-004
+```
+
+## 435. Propose REC-004 (button answer)
+
+```
+Propose REC-004
+```
+
+## 436. Merge PR #75 when green (button answer)
+
+```
+Merge when green
+```
+
+## 437. Apply the change (button answer)
+
+```
+Apply the change
+```
+
+## 438. Ask whether they must interact with the check page
+
+```
+do i have to interact? or just live it?
+```
+
+## 439. Send the first check results (two screenshots attached)
+
+```
+Chrome, FAIL: median 449 ms, max 469 ms, 1 never started
+times: 449, 436, 469, 427, 453,
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36
+(two screenshots attached: desktop Chrome FAIL, median 449 ms; Android Chrome FAIL, median 1128 ms)
+```
+
+## 440. Send the warm-up check results (two screenshots attached)
+
+```
+(no text: two screenshots of the cold vs warmed-up check page, desktop Chrome and Android Chrome)
+```
+
+## 441. Update the change (button answer)
+
+```
+Update the change
+```
+
+## 442. Implement the warm-up (button answer)
+
+```
+Implement the warm-up
+```
+
+## 443. Ask for the Vercel preview link
+
+```
+Give me the vervel preview link
+```
+
+## 444. Say the preview looks good
+
+```
+Looks good.
+```
+
+## 445. Run the AI review (button answer)
+
+```
+Run the review
+```
+
+## 446. Fix all five findings (button answer)
+
+```
+Fix all five
+```
+
+## 447. Merge PR #76 when green (button answer)
+
+```
+Merge when green
+```
+
+## 448. Start the close-out (button answer)
+
+```
+Start close-out
+```
+
+## 449. Merge PR #78 when green (button answer)
+
+```
+Merge when green
+```
+
+## 450. Run the cleanup commands
+
+```
+run those
+```
+
+## 451. Register the REC-004 chain (question dialog answer)
+
+```
+REC-004 chain (Recommended)
+```
+
+### Summary (prompts 431–451)
+
+- **Goal:** take REC-004 (the next video starts almost instantly after a swipe) from a validated story to `done`: fix what was missing before OpenSpec, explore, propose, measure on real devices, implement, review and close it out.
+- **Changes:**
+  - **Backlog and PRD:** REC-004 committed with its validation, stale `blocked-by:REC-003` cleared, re-sized L to M, technical context and estimation-note outcome added, status `done`; REC-015 got the measured numbers; PRD PERF-3 reworded; `docs/checklist.md` row 20 and story counts.
+  - **OpenSpec:** change `add-preloaded-neighbours` (proposal, `playback` delta with 2 added and 1 modified requirement, design Decisions 1–8, 15 tasks), synced into `openspec/specs/playback/spec.md` and archived as `2026-11-24-add-preloaded-neighbours`.
+  - **Code:** the warm-up of the next video in `src/lib/player/playback.ts` (muted, about one second, then paused at the start; its own pause reason), wired in `src/app/feed/Feed.tsx` and `SlideVideo.tsx`; 16 new unit tests; fake-player creation `serial`; 6 new E2E tests and one updated; C4 level 3 notes.
+  - **PRs:** #74 (REC-004 ready), #75 (proposal), #76 (implementation), #78 (close-out), all merged.
+- **Result:** the real-player measurement failed for a paused neighbour (desktop Chrome 154: 427–469 ms; Android 10, Chrome 138: 1057–1334 ms), and a muted one-second warm-up fixed it (about 270 ms desktop, 315–366 ms phone). The AI review found five points (one important: a stale player state after the warm-up), all fixed and resolved. Production smoke was green for merge `75f25c1`. The 500 ms was checked by eye on the preview, not on production and with no numbers (REC-015 takes them). An unexplained desktop stall after a long idle on the check page is recorded for that spike.
+- **Models:** Sonnet 5.5 (main session, all prompts) · Haiku 5.5, effort low (`doc-checker`: close-out files) · the code review ran in the main session at `medium` effort.
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent and the choices (warm-up over relaxing PERF-3, the merges) stay with the user.
