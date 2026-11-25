@@ -8,9 +8,9 @@ prd-goal: G2
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4, API-1
-- **Flags:** needs-human-validation
+- **Flags:** —
 - **AI estimate:** 5
-- **Estimate:** 3
+- **Estimate:** 5
 
 As a home cook, I want to open a written recipe next to the video, so that I can cook without pausing and rewinding.
 
