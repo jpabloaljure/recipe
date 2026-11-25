@@ -5,8 +5,12 @@ cooking videos (Shorts), each with an easy written recipe.
 
 > Status: **MVP in progress.** The vertical swipe feed reads its videos from
 > the database through `GET /api/feed` (newest first, shuffled within each
-> page). Production serves 24 curated Shorts from the database; recipes are
-> not built yet, so every video is title only. Delivery progress:
+> page). Production serves 24 curated Shorts from the database; 21 of them
+> carry a placeholder recipe (written from the title, not extracted: see
+> [docs/development.md](docs/development.md#placeholder-recipes-for-the-curated-shorts)),
+> and the recipe panel shows it beside the video on screens with room for it
+> (about 260 px on each side); the button and sheet for narrower screens are not
+> built. Delivery progress:
 > [docs/checklist.md](docs/checklist.md).
 
 ## Index

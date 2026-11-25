@@ -5,7 +5,7 @@ prd-goal: G2
 ---
 
 ## REC-006 · Recipe panel with servings, ingredients and steps
-- **Status:** todo
+- **Status:** done
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4, API-1
 - **Flags:** —

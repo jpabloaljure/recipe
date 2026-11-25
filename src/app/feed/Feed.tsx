@@ -26,6 +26,7 @@ import { PageRequests } from "../../lib/feed/page-requests";
 import { shuffleFeedPage } from "../../lib/feed/shuffle";
 import { type SlidePlayback, syncActive } from "../../lib/player/playback";
 import styles from "./Feed.module.css";
+import { RecipePanel } from "./RecipePanel";
 import { SlideVideo } from "./SlideVideo";
 
 /**
@@ -233,86 +234,91 @@ export function Feed() {
 
   const endMode = endSlideMode(state);
 
+  const activeItem = showSlides ? (slides[activeIndex]?.item ?? null) : null;
+
   return (
-    <div ref={scroller} className={styles.feed} data-testid="feed">
-      {state.status === "loading" && (
-        <section className={styles.status} data-testid="feed-status" aria-busy="true">
-          <p role="status" className={styles.statusText} data-testid="feed-loading">
-            Loading recipes…
-          </p>
-        </section>
-      )}
-      {state.status === "empty" && (
-        <section className={styles.status} data-testid="feed-status">
-          <p role="status" className={styles.statusText}>
-            No recipes yet
-          </p>
-        </section>
-      )}
-      {state.status === "error" && (
-        <section className={styles.status} data-testid="feed-status">
-          <p role="alert" className={styles.statusText}>
-            Oops, something went wrong
-          </p>
-          <button type="button" className={styles.retry} onClick={retryAll}>
-            Retry
-          </button>
-        </section>
-      )}
-      {showSlides &&
-        slides.map((slide, index) => (
-          <section
-            key={slide.key}
-            className={styles.slide}
-            data-testid="feed-slide"
-            data-youtube-id={slide.item.youtubeId}
-            data-active={index === activeIndex ? "true" : undefined}
-            aria-label={slide.item.title}
-          >
-            <div className={styles.frame} data-testid="feed-frame">
-              {inPlayerWindow(index, activeIndex) && (
-                <SlideVideo
-                  youtubeId={slide.item.youtubeId}
-                  title={slide.item.title}
-                  onPlayback={(playback) => registerPlayback(slide.key, playback)}
-                  onEnded={announceEnded}
-                  onSoundBlocked={soundBlocked}
-                  onUnplayable={unplayable}
-                  onPlaying={activePlaying}
-                />
-              )}
-              {index === activeIndex && !soundOn && (
-                <button
-                  type="button"
-                  className={styles.unmute}
-                  data-testid="unmute-button"
-                  aria-label="Turn sound on"
-                  onClick={() => setSoundOn(true)}
-                >
-                  <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-                    <path
-                      fill="currentColor"
-                      d="M3 9v6h4l5 5V4L7 9H3zm13.6 3 2.7-2.7-1.4-1.4L15.2 10.6l-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4L16.6 12z"
-                    />
-                  </svg>
-                </button>
-              )}
-            </div>
-          </section>
-        ))}
-      {showSlides && endMode !== null && (
-        <section className={styles.endSlide} data-testid="feed-end">
-          {endMode === "loading" ? (
+    <>
+      <div ref={scroller} className={styles.feed} data-testid="feed">
+        {state.status === "loading" && (
+          <section className={styles.status} data-testid="feed-status" aria-busy="true">
             <p role="status" className={styles.statusText} data-testid="feed-loading">
-              Loading more…
+              Loading recipes…
             </p>
-          ) : (
-            <button type="button" className={styles.retry} onClick={() => update(retryNextPage)}>
+          </section>
+        )}
+        {state.status === "empty" && (
+          <section className={styles.status} data-testid="feed-status">
+            <p role="status" className={styles.statusText}>
+              No recipes yet
+            </p>
+          </section>
+        )}
+        {state.status === "error" && (
+          <section className={styles.status} data-testid="feed-status">
+            <p role="alert" className={styles.statusText}>
+              Oops, something went wrong
+            </p>
+            <button type="button" className={styles.retry} onClick={retryAll}>
               Retry
             </button>
-          )}
-        </section>
-      )}
-    </div>
+          </section>
+        )}
+        {showSlides &&
+          slides.map((slide, index) => (
+            <section
+              key={slide.key}
+              className={styles.slide}
+              data-testid="feed-slide"
+              data-youtube-id={slide.item.youtubeId}
+              data-active={index === activeIndex ? "true" : undefined}
+              aria-label={slide.item.title}
+            >
+              <div className={styles.frame} data-testid="feed-frame">
+                {inPlayerWindow(index, activeIndex) && (
+                  <SlideVideo
+                    youtubeId={slide.item.youtubeId}
+                    title={slide.item.title}
+                    onPlayback={(playback) => registerPlayback(slide.key, playback)}
+                    onEnded={announceEnded}
+                    onSoundBlocked={soundBlocked}
+                    onUnplayable={unplayable}
+                    onPlaying={activePlaying}
+                  />
+                )}
+                {index === activeIndex && !soundOn && (
+                  <button
+                    type="button"
+                    className={styles.unmute}
+                    data-testid="unmute-button"
+                    aria-label="Turn sound on"
+                    onClick={() => setSoundOn(true)}
+                  >
+                    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+                      <path
+                        fill="currentColor"
+                        d="M3 9v6h4l5 5V4L7 9H3zm13.6 3 2.7-2.7-1.4-1.4L15.2 10.6l-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4L16.6 12z"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </section>
+          ))}
+        {showSlides && endMode !== null && (
+          <section className={styles.endSlide} data-testid="feed-end">
+            {endMode === "loading" ? (
+              <p role="status" className={styles.statusText} data-testid="feed-loading">
+                Loading more…
+              </p>
+            ) : (
+              <button type="button" className={styles.retry} onClick={() => update(retryNextPage)}>
+                Retry
+              </button>
+            )}
+          </section>
+        )}
+      </div>
+      <RecipePanel slideKey={activeKey} youtubeId={activeItem?.youtubeId ?? null} recipe={activeItem?.recipe ?? null} />
+    </>
   );
 }

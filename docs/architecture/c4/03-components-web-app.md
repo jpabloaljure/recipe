@@ -16,7 +16,7 @@ C4Component
   Container_Boundary(web, "Web app (Next.js)") {
     Component(feed, "Feed", "React", "CSS scroll-snap feed, one video per gesture, wrap-around, next page via /api/feed; light shuffle of each page once per visit (5.1, API-2)")
     Component(player, "Player controller", "React + IFrame API", "Autoplay muted, unmute, loop, pause (5.2); warms up the next video and keeps at most three players (REC-004, PERF-3, PERF-5)")
-    Component(panel, "Recipe panel", "React", "Servings, ingredients, steps, source, auto-open (5.3, PERF-4)")
+    Component(panel, "Recipe panel", "React", "Servings, ingredients, steps, source; always open beside the video where there is room (REC-006), a sheet and auto-open where not (REC-022, REC-007) (5.3, PERF-4)")
     Component(favs, "Favorites store", "localStorage", "Save, list, remove favorites (5.4)")
     Component(share, "Share", "Web Share API", "Share sheet or copy deep link (5.5)")
     Component(feedApi, "Feed route", "Route handler", "GET /api/feed: ready videos with recipes and title-only needs_recipe videos, newest first with a cursor, cacheable (API-1, API-2, PERF-6)")
@@ -39,6 +39,11 @@ C4Component
 
 - The recipe arrives with each feed item, so the panel needs no extra
   request (PERF-4).
+- Built so far (REC-006, change `add-recipe-panel`): the Recipe panel beside the
+  video where there are at least 260 px on each side. It is one panel next to
+  the feed's scroll container, shown by a CSS rule on the room beside the video,
+  and follows the active video. The "Recipe" button and the sheet (REC-022,
+  REC-023) and the auto-open (REC-007) are not built.
 - Component names are a plan; the scaffolding change may rename or merge
   them and must update this diagram (and set `Status: Current`).
 - Built so far (REC-001, change `add-vertical-swipe-feed`): the Feed and the

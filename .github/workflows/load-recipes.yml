@@ -1,0 +1,89 @@
+name: Load placeholder recipes
+
+# One-time placeholder recipes for the curated Shorts
+# (scripts/db/curated-recipes.json, written from each video's title: DUMMY data
+# until the real extraction, REC-008 and REC-010, exists). See
+# src/lib/catalog/recipes.mts and docs/development.md.
+#
+# - Manual only: start it from the Actions tab or `gh workflow run load-recipes.yml -f mode=apply`.
+#   It never runs on a push. The default mode is `dry-run`, which writes nothing.
+# - Only from `main`, so an unmerged branch cannot write to production.
+# - Uses the owner role through the direct connection (DATABASE_URL_DIRECT, set
+#   only in GitHub Actions secrets, never in Vercel): the only write credential
+#   (ADR 0007).
+# - Modes: dry-run (plan and health check, no write), apply (recipes, statuses and
+#   dish titles, one transaction per video; only videos still `needs_recipe`),
+#   revert (back to the original title and `needs_recipe`; only a recipe that is
+#   still the placeholder) and check (the read-only health check).
+# - Safe to run again: apply changes only what is still `needs_recipe`, and revert
+#   only what is still the placeholder. The run fails if a catalog rule is
+#   broken afterwards. Changes can take up to an hour to show in the feed
+#   (the 1 hour CDN cache, PERF-6).
+# - One run at a time; a later run waits, it never cancels one in progress.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: What to do
+        type: choice
+        default: dry-run
+        options:
+          - dry-run
+          - apply
+          - revert
+          - check
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-recipes-production
+  cancel-in-progress: false
+
+jobs:
+  load:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          # v5 caches automatically when package.json has "packageManager",
+          # which needs pnpm before it is installed below.
+          package-manager-cache: false
+
+      # Node 25+ ships no Corepack: install the pnpm version pinned in
+      # package.json ("packageManager") with npm, as the CI workflow does.
+      - name: Install pnpm
+        run: npm install -g "$(node -p "require('./package.json').packageManager")"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Three attempts: the first connection after the database has been idle
+      # meets Neon's cold start (ADR 0003). A recipe file that is invalid fails
+      # before any write, so a retry cannot make it worse; a run that did write
+      # is safe to repeat.
+      - name: Run
+        env:
+          DATABASE_URL_DIRECT: ${{ secrets.DATABASE_URL_DIRECT }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          case "$MODE" in
+            dry-run) flag="--dry-run" ;;
+            apply)   flag="" ;;
+            revert)  flag="--revert" ;;
+            check)   flag="--check" ;;
+            *) echo "::error::Unknown mode $MODE"; exit 1 ;;
+          esac
+          for attempt in 1 2 3; do
+            if pnpm db:load-recipes $flag; then
+              exit 0
+            fi
+            echo "::warning::Attempt $attempt failed; waiting for the database to wake up"
+            sleep 10
+          done
+          echo "::error::The run failed after 3 attempts"
+          exit 1

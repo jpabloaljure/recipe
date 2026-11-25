@@ -1,5 +1,6 @@
-import { activeFrame, catalog, openFeed, scrollToSlide, slides, videos } from "../support/feed";
+import { activeFrame, catalog, openFeed, scrollToSlide, slides, videos, videosWithRecipes } from "../support/feed";
 import { swipeNext, swipePrevious } from "../support/gestures";
+import { onlyOn } from "../support/projects";
 import { expect, test } from "../support/test";
 
 const fiveVideos = () => catalog(videos(5), 5);
@@ -40,6 +41,18 @@ test("feed › One video per gesture › Swipe that starts on the video", async 
   await openFeed(page, fiveVideos());
 
   await swipeNext(page, { target: activeFrame(page) });
+
+  await expect(slides(page).nth(1)).toHaveAttribute("data-active", "true");
+});
+
+test("feed › One video per gesture › Swipe beside the video with the panel open", async ({ page }) => {
+  onlyOn("desktop", "phone-landscape");
+  await openFeed(page, catalog(videosWithRecipes(5), 5));
+  await expect(page.getByTestId("recipe-panel")).toBeVisible();
+  const frame = (await activeFrame(page).boundingBox())!;
+
+  // The finger starts in the right gutter, beside the video, where the panel is not.
+  await swipeNext(page, { x: Math.round(frame.x + frame.width + 60) });
 
   await expect(slides(page).nth(1)).toHaveAttribute("data-active", "true");
 });

@@ -1,0 +1,91 @@
+/*
+ * The recipe panel (REC-006, change add-recipe-panel, design Decisions 1 to 3).
+ * Shown only where there is room beside the video: at least 260 px on each side,
+ * that is, width >= 56.25vh + 520px (the video is as tall as the screen and 9/16
+ * as wide). The boundary is inclusive. Below it the panel is not displayed.
+ * It floats over the left gutter, outside the feed's scroll container, and is
+ * only as big as its card, so a gesture over the rest of the gutter still moves
+ * the feed.
+ */
+.panel {
+  display: none;
+}
+
+@media (min-width: calc(56.25vh + 520px)) {
+  .panel {
+    display: block;
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    /*
+     * 16px from the screen edge, 16px from the video; at most 400px wide. The slide
+     * pads itself by the safe-area insets and centers the video in what is left, so
+     * the video's left edge moves by (left - right) / 2: taking half of both insets
+     * off the width keeps the 16px gap on a phone with a display cutout.
+     */
+    left: calc(env(safe-area-inset-left) + 16px);
+    width: min(
+      400px,
+      calc((100vw - 56.25vh) / 2 - 32px - (env(safe-area-inset-left) + env(safe-area-inset-right)) / 2)
+    );
+    max-height: calc(100dvh - 32px);
+    z-index: 1;
+    color: #f2f2f2;
+    background: #1c1c1c;
+    border: 1px solid #333;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  .panel[hidden] {
+    display: none;
+  }
+}
+
+.body {
+  box-sizing: border-box;
+  /* The panel's 1px border takes 2px of its own max-height. */
+  max-height: calc(100dvh - 34px);
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.servings {
+  margin: 0 0 12px;
+  color: #bdbdbd;
+}
+
+.heading {
+  margin: 16px 0 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #bdbdbd;
+}
+
+.heading:first-child {
+  margin-top: 0;
+}
+
+.list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.list li {
+  margin: 0 0 6px;
+}
+
+.source {
+  margin: 16px 0 0;
+  font-size: 0.8125rem;
+  color: #bdbdbd;
+}
+
+.source a {
+  color: #9ecbff;
+}

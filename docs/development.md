@@ -91,6 +91,41 @@ docker compose down -v       # stop it and delete the data: start again from emp
   `DATABASE_URL_DIRECT` secret. New videos can take up to an hour to show in the
   feed because of the CDN cache.
 
+### Placeholder recipes for the curated Shorts
+
+The curated Shorts are loaded as title-only (`needs_recipe`). Until the real
+extraction exists (REC-008, REC-010), `scripts/db/curated-recipes.json` holds
+**dummy recipes**, one per video, written from each video's title (not from its
+description or comments) for 21 of the 24 curated videos that are in the
+feed (the other 3 of the 27 in the list are `rejected` and never shown). Three
+good videos (`U-GTBW-s2RU`, `jPB1-F87ZME` and `qZ-rT0A7MgM`) are left without a
+recipe on purpose, to show the title-only state. They are
+stored with source `description`, the closest value the schema allows; the
+recipe panel's source label would be wrong for them, so replace them before
+REC-006 is shown to real users.
+
+- **`pnpm db:load-recipes`** applies the file: for each video that is still
+  `needs_recipe`, in one transaction, it writes the recipe, sets the status
+  (`ready` when the recipe is easy, PRD 6.3, else `not_easy`) and sets the
+  title to the dish name. The original title stays in `curated-shorts.json`.
+  `--dry-run` shows the plan and writes nothing; `--revert` puts the original
+  title and `needs_recipe` back, only for a recipe that is still the
+  placeholder; `--check` only runs the read-only catalog health check. A video
+  that is no longer `needs_recipe` is never touched, so running it again
+  changes nothing. It uses `DATABASE_URL_DIRECT`, so locally it writes to the
+  local database.
+- **The health check** runs at the end of every run and fails if a catalog
+  rule is broken: a `ready` or `not_easy` video without a recipe, a
+  `needs_recipe` or `rejected` one with a recipe, a wrong `ingredient_count`,
+  an incomplete recipe (EXT-5), a `ready` recipe that is not easy or a
+  `not_easy` one that is.
+- **In production** it runs as the manual workflow
+  `.github/workflows/load-recipes.yml` (Actions tab, "Load placeholder
+  recipes", mode `dry-run` by default, or
+  `gh workflow run load-recipes.yml -f mode=apply`). It runs only from `main`.
+  The real extraction skips known videos (ING-3), so these recipes stay until
+  they are reverted (draft backlog D-22).
+
 ### Reviewing a migration
 
 A migration runs on production right after the merge and cannot be edited
