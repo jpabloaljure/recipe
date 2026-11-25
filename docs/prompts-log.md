@@ -2920,3 +2920,116 @@ REC-003 chain (Recommended)
 - **Result:** REC-003 is `done` and in production (merge commit `d8241cb`, production smoke green). Real-device checks on desktop Chrome 154 and Android Chrome 138 showed that the embed's loop mode never reports an end, so the app restarts the video itself. A feature that made the button follow YouTube's own mute control, plus a volume fix, a `?debug` log and a stall watchdog, was built, then rolled back on request. The known limitation is a freeze after an unmute on a later video (D-12). The AI review found seven points: one accepted, six moved to the draft backlog, all threads resolved. The preview's black screen was an invalid `DATABASE_URL` in Vercel's Preview environment, fixed by the maintainer.
 - **Models:** Opus 5.5 (main session, prompts 357–369) · Sonnet 5.5 (main session from the `/model` switch, prompts 371–413) · Haiku 5.5, effort low (`doc-checker`, three runs: ADR 0008 and C4, the stack and README updates, and the close-out files) · the code review ran in the main session at `medium` effort.
 - **Why:** the cap keeps every step on Sonnet at medium effort at most (the first part ran on Opus 5.5 before the switch); the read-only doc checks stay on the cheap Haiku agent and the choices stay with the user.
+
+## 414. Ask for an app name
+
+```
+what will be a good name for our app/website? a name that is stiky and that works worldwide?
+```
+
+## 415. Ask whether Bitebox is safe to use
+
+```
+Bitebox sounds nice. it is save tu used as my app name? in terms of i wont fine some food page the with the same name?
+```
+
+## 416. Ask for similar names
+
+```
+some thing lik bite scroll or similar
+```
+
+## 417. Validate the next story
+
+```
+/validate-backlog
+```
+
+## 418. Choose options for REC-018 and ask for a re-validation
+
+```
+#1, #2 Do A but keep "skip a broken video" in this history. And move those splited to the draft backlog to addressed later. #6, #7 A. #6, #7 REC-003 Is already Merged so re validate this. #11, #12 A. #3, #4, #5 revalidate.
+```
+
+## 419. Choose all options A
+
+```
+All A
+```
+
+## 420. Choose all options A for the new findings
+
+```
+All A
+```
+
+## 421. Ask for the re-check
+
+```
+done
+```
+
+## 422. Choose all options A for the third check
+
+```
+All A
+```
+
+## 423. Ask for the re-check
+
+```
+done
+```
+
+## 424. Choose all options A for the fourth check
+
+```
+All A
+```
+
+## 425. Ask for the re-check
+
+```
+done
+```
+
+## 426. Approve the acceptance criteria
+
+```
+AC approved
+```
+
+## 427. Give the team estimate
+
+```
+5
+```
+
+## 428. Validate the story
+
+```
+validated
+```
+
+## 429. Ask for a PR with the backlog changes
+
+```
+Pr for backlog changes
+```
+
+## 430. Merge PR #77 when green (button answer)
+
+```
+Merge when green
+```
+
+### Summary (prompts 414–430)
+
+- **Goal:** validate REC-018 (the feed handles empty, error and unavailable states) with the `validate-backlog` flow, after re-checking it against the merged REC-003 code; and, on the side, find a name for the app.
+- **Changes:**
+  - **Backlog:** `backlog/E01-browse-feed.md`: REC-018 rewritten to 14 criteria (first-load indicator, failed and slow first page, offline, Retry, an end slide with retry and loading rows that does not wrap, the skip of a removed video, the neighbour case, 3 skips in a row, none left), Technical context with the decisions (skip rules and error codes 100/101/150, Retry keeps the visit's skip list, 10 s timeout for every page), Estimation notes, flag `blocked-by:REC-004`, AI estimate 5, team Estimate 5, `needs-human-validation` removed.
+  - **Draft backlog:** `backlog/draft-backlog-list.md`: D-19 (autoplay failing even when muted) and D-20 (other player errors).
+  - **Log and PRD:** `backlog/validation-log.md` REC-018 row set to `validated`; `docs/PRD.md` §5.1 gains the one exception to "No autoscroll" (a video that cannot play is skipped).
+- **Result:** REC-018 is validated after five checks; PR #77 is merged with CI green. No app name was chosen (Bitebox and BiteScroll-like names were discussed; trademark and domain checks are still to do).
+- **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, five runs; `estimate-story` ran in the main session) · Haiku 5.5, effort low (`doc-checker`).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only check of this log stays on the cheap Haiku agent, and the choices stay with the user.
