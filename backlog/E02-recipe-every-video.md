@@ -150,7 +150,7 @@ AI estimate (2026-11-25, after the criteria were approved): 8. Calibration: REC-
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
 - **Flags:** needs-human-validation; split-from:REC-022; blocked-by:REC-022
-- **AI estimate:** —
+- **AI estimate:** 5
 - **Estimate:** —
 
 As a home cook in a narrow desktop window or on a small phone in landscape, I want the "Recipe" button and the sheet to work where the unmute button sits beside the video, so that I can read the recipe there too.
@@ -184,6 +184,9 @@ Split from REC-022 on 2026-11-25 (its second re-check, N1 A): REC-022 had grown 
 
 ### Estimation notes
 M: the band case split out of REC-022 (15 criteria after the first check of REC-023): a button placed beside the video in a narrow gutter (a layout risk checked on a real window), two resize criteria, three about the unmute button moving between its placements and a gutter gesture rule. The AI estimate and the team Estimate come after the criteria are approved.
+
+AI estimate (2026-11-25, after the criteria were approved): 5. Calibration: REC-022 (team 8, 25 criteria) is the base this story extends: the button and the sheet already exist when this story starts, so what is left is where the button goes beside the video, how it follows the unmute button when the window changes shape, and the gutter gestures. REC-006 (team 5, 17 criteria) is the nearest in size of work, since it also has a layout switch and resize criteria; REC-004 (team 3) is the lower bound. What is here: 15 criteria, about 10 automatable (E2E on the three projects, several needing custom viewports) and 5 labelled `(assumed; manual check)` for a real window and a small landscape phone; no state logic; no `feed` amendment. Stated risk: the placement of the button beside the video, and the narrow gutter near aspect 3/4 (about 80 px at 800 px high), are assumed; if the real-window check says the button does not fit, the fallback (the button over the video's corner) becomes a real second placement and the estimate goes to 8. Size check: 5 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
+
 
 ## REC-007 · Panel opens automatically after the first play-through
 - **Status:** todo
