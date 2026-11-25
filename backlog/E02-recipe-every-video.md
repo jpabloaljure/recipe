@@ -191,7 +191,7 @@ AI estimate (2026-11-25, after the criteria were approved): 5. Calibration: REC-
 
 ## REC-007 · Panel opens automatically after the first play-through
 - **Status:** todo
-- **Labels:** module:recipe-panel, type:feature, size:S, layer:frontend
+- **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.3
 - **Flags:** needs-human-validation; blocked-by:REC-022; blocked-by:REC-023
 - **AI estimate:** 3
@@ -236,6 +236,9 @@ Note 2026-11-25 (from the REC-006 re-check #11, reopened for a short re-check): 
 S: small state machine on top of REC-003 (the `videoended` event) and REC-022 (the sheet). The meaning of "view" is decided (2026-11-24). With 11 criteria (after 2026-11-25), the screen conditions and the two dependencies the size S no longer fits 3 points: it is re-sized to M when the criteria are approved, and the estimate of 3 is re-run then.
 
 AI estimate (2026-11-25, before the reopening's rewording; re-run after the criteria are approved; 11 criteria now; its calibration text predates REC-006 team 5 and REC-022 team 8): 3. Calibration: REC-006 (team 3) and REC-004 (team 3) are the nearest frontend stories on the feed with mostly existing pieces; REC-022 (team 5) is the story whose sheet this one opens, so this one is smaller. What is here: a per-slide, per-view state in the feed (a small state machine, which Vitest can cover without a browser), the `videoended` event that REC-003 already emits, and 9 criteria at the time (10 now) whose E2E tests reuse the fake player's `emitEnded` and a viewport change for rotation. Risks that move it: it depends on REC-022's way to open and close the sheet, which does not exist yet (`(assumed)` a simple open and close call), and the interplay with rotation and a hand-opened sheet is where bugs are likely; if REC-022's sheet state is awkward to drive from outside, it goes to 5. Size check: warning, 3 does not match `size:S` (1-2); the label is not changed, and the team may want to re-size it to M. This is one voice; the team's estimate comes from your discussion, not from averaging.
+
+AI estimate (2026-11-25, after the criteria were approved; it replaces the one above): 3. Calibration: REC-004 (team 3) is the nearest in effort: a frontend story on the feed whose logic mostly exists, with a handful of E2E tests; REC-006 (team 5, 17 criteria) and REC-022 (team 8, 25 criteria) are the stories whose panel and sheet this one reacts to, so this one is smaller than both. What is here: a per-slide, per-view state in the feed (a small state machine that Vitest covers without a browser), the `videoended` event that REC-003 already emits, and 11 criteria whose E2E tests reuse the fake player's `emitEnded` and viewport changes for rotation and for a window narrowed across the panel's switch (including a band window such as 700x800). Risks that move it: it relies on the sheet's open and close calls that REC-022 records as `(assumed)`, and the interplay of the used state with rotation, resize and a hand-opened sheet is where bugs are likely; if the sheet's state is awkward to drive from outside the story goes to 5. Size check: 3 matches `size:M` (3-5), no warning (the label was re-sized from S to M at the approval of the criteria). This is one voice; the team's estimate comes from your discussion, not from averaging.
+
 
 ## REC-008 · Recipe extracted ahead of time from description or comment
 - **Status:** todo
