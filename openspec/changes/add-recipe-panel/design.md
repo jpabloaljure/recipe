@@ -59,7 +59,7 @@ not part of the formula.
 ### Decision 3: Width, margins and maximum
 
 The panel's width is the room on one side minus a 16 px margin on each side
-(244 px at exactly 260 px of room), at most 400 px, centered vertically in the
+(228 px at exactly 260 px of room), at most 400 px, centered vertically in the
 left gutter, with its own scroll when the recipe is taller than the screen.
 Alternative: a fixed width (it would overlap the video below 260 px of room).
 The 16 px and the 400 px are `(assumed)` and tuned in the manual check.
@@ -108,7 +108,7 @@ component is already in C4 level 3 for the web app; its description (it says
   after the code exists.
 - The 260 px threshold, the 16 px margin and the 400 px maximum are `(assumed)`
   and tuned on real windows and a real phone (the panel's width at exactly 260
-  px is 244 px: check that it reads well).
+  px is 228 px: check that it reads well).
 - Until REC-022 and REC-023 ship, screens without room for the panel (a phone
   in portrait, a narrow window, small phones in landscape) show no recipe at
   all. Accepted on 2026-11-25.

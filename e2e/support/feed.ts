@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import type { FeedItem, FeedPage } from "../../src/lib/feed/types";
+import type { FeedItem, FeedPage, Recipe } from "../../src/lib/feed/types";
 import { expect } from "./test";
 
 /**
@@ -19,6 +19,43 @@ export function videos(count: number): FeedItem[] {
     channelName: "Test channel",
     recipe: null,
   }));
+}
+
+/**
+ * A recipe stub (REC-006). The first step names the video it belongs to, so a
+ * test can tell which video's recipe the panel shows. A missing quantity or unit
+ * is `null`, as in the API contract.
+ */
+export function recipe(overrides: Partial<Recipe> = {}): Recipe {
+  return {
+    servings: "4",
+    ingredients: [
+      { name: "flour", quantity: "2", unit: "cups" },
+      { name: "water", quantity: "1", unit: "cup" },
+      { name: "salt", quantity: null, unit: null },
+    ],
+    steps: ["Mix the flour and the water.", "Rest the dough for ten minutes.", "Cook until golden."],
+    source: "description",
+    ...overrides,
+  };
+}
+
+/** A recipe long enough to need scrolling in the panel on every project's screen. */
+export function longRecipe(): Recipe {
+  return recipe({
+    steps: Array.from({ length: 40 }, (_, i) => `Step ${i + 1}: keep stirring and taste it before you go on.`),
+  });
+}
+
+/** Feed items `video1`, `video2`, … that each have a recipe (REC-006); `recipeOf` can change one. */
+export function videosWithRecipes(count: number, recipeOf: (index: number) => Recipe | null = () => recipe()): FeedItem[] {
+  return videos(count).map((item, index) => {
+    const base = recipeOf(index);
+    return {
+      ...item,
+      recipe: base ? { ...base, steps: [`Recipe of video ${index + 1}.`, ...base.steps.slice(1)] } : null,
+    };
+  });
 }
 
 /** Splits items into contract-shaped pages, linked by the cursors `p1`, `p2`, … */
