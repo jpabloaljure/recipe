@@ -15,15 +15,21 @@ prd-goal: G2
 As a home cook, I want to open a written recipe next to the video, so that I can cook without pausing and rewinding.
 
 ### Acceptance criteria
-- Given the screen has room for the panel beside the video (desktop, or a phone in landscape) and the active video has a recipe, when the video becomes active, then the recipe panel is open to the left of the centered video.
+- Given the screen has room for the panel beside the video (for example desktop, or a phone in landscape) and the active video has a recipe, when the video becomes active, then the recipe panel is open to the left of the centered video.
+- Given the room beside the video is exactly 260 px on each side and the active video has a recipe, when the video becomes active, then the recipe panel is open to the left of the video.
+- Given the recipe panel is open, when the video becomes active, then the video stays exactly centered and the panel does not cover it.
+- Given sound is off and the recipe panel is open, when the video becomes active, then the unmute button is visible to the right of the video and the panel does not overlap it.
 - Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then there is no "Recipe" button and no close button.
 - Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then its recipe is shown with no extra network request (PERF-4).
 - Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then the panel shows servings, ingredients with their quantities and numbered steps.
 - Given the screen has room for the panel and the active video has a recipe, when the video becomes active, then a label shows the source (description, comment or captions).
 - Given the recipe panel shows a recipe, when I select the source link, then the original YouTube video opens in a new tab.
-- Given the recipe panel is open beside the video, when the active video changes, then the panel shows the new video's recipe.
-- Given the recipe panel is open beside the video and the recipe is taller than the panel, when I scroll over it with the wheel, trackpad or touch, then only the recipe scrolls, the feed does not move, and I can reach the last step.
-- Given the recipe panel is open beside the video and the recipe is shorter than the panel, when I scroll over it with the wheel, trackpad or touch, then the feed does not move.
+- Given the recipe panel is open to the left of the video, when the active video changes, then the panel shows the new video's recipe, scrolled to the top, at the moment the new video becomes active.
+- Given the recipe panel is open to the left of the video and the recipe is taller than the panel, when I scroll over it with the wheel, trackpad or touch, then only the recipe scrolls, the feed does not move, and I can reach the last step.
+- Given the recipe panel is open to the left of the video and the recipe is shorter than the panel, when I scroll over it with the wheel, trackpad or touch, then the feed does not move.
+- Given the recipe panel is open on a phone in landscape, when I swipe vertically starting on the panel, then the active video does not change (manual check).
+- Given the screen has room for the panel, when I swipe or scroll over the area beside the video that the panel does not cover, then the feed moves by one video.
+- Given a window with no room for the panel, when I widen it until there is room for the panel, then the recipe panel opens to the left of the video, and playback and sound do not change.
 - Given the screen has room for the panel and the active video's recipe has a missing serving size or quantity, when the video becomes active, then the missing item is left out with no empty label (confirmed 2026-11-24).
 - Given the screen has room for the panel, when a `needs_recipe` video becomes active, then the panel area is empty and the video stays centered.
 
@@ -31,7 +37,7 @@ As a home cook, I want to open a written recipe next to the video, so that I can
 `needs_recipe` videos are in the feed with their title only (decided 2026-11-17, `backlog/README.md` Decided 4; PRD 5.3, PERF-4).
 
 Decisions 2026-11-24 (validation, first check 16 findings, re-check N1 to N8, "All A"):
-- **Split by behavior (N5 A):** this story keeps the panel and its wide-screen layout; the "Recipe" button and the sheet on tall screens moved to REC-022 (`split-from:REC-006`, `blocked-by:REC-006`). REC-006 does not need REC-022, so it has no `blocked-by`. REC-006 alone does not cover a phone in portrait.
+- **Split by behavior (N5 A):** this story keeps the panel and its wide-screen layout; the "Recipe" button and the sheet on tall screens moved to REC-022 (`split-from:REC-006`, `blocked-by:REC-006`). REC-006 does not need REC-022, so it has no `blocked-by`. REC-006 alone does not cover a phone in portrait, nor a narrow window with less than room for the panel: until REC-022 ships, those screens have no recipe at all (accepted, 2026-11-25).
 - **Layout by space, not device (revised 2026-11-25, see below):** with room for the panel (desktop, phone in landscape) the recipe panel is always open beside the centered video, with no "Recipe" button and no close button, and it follows the active video. Any other screen is REC-022. The first version of this decision reused the unmute button's switch with no new threshold; the explore of 2026-11-25 reversed that part.
 - **Scrolling:** scrolling over the panel never moves the feed, also when the recipe is short or at its end.
 - **Label and link:** the link opens in a new tab and the app tab's video pauses by the hidden-tab rule (`playback` spec). Label wording: "Recipe from the description / top comment / captions" (confirmed 2026-11-24).
@@ -47,13 +53,23 @@ Decisions 2026-11-25 (explore of REC-006 against the code, "All three", reopened
 - **One panel, outside the feed:** a single panel that is a sibling of the feed's scroll container, not one per slide, so a wheel or touch over it cannot move the feed's scroll-snap container; it changes its content when the active video changes. A swipe that starts on the panel's area does not move the feed (a manual check on a landscape phone).
 - **Seeing it:** production has only title-only videos until REC-008, so the E2E tests use stubbed recipes and the manual check uses a preview or a local database seeded with recipes (`scripts/db/seed.mts` supports them).
 
+Decisions 2026-11-25 (re-check of the reopening, 15 findings, "all A"):
+- **Boundary and resize (#1, #2 A):** the threshold is inclusive (260 px per side counts); E2E tests it with custom viewports, 260 px with the panel and 255 px without (the other side is REC-022). A window widened across the threshold shows the panel with no change to playback or sound; the narrower side is REC-022's rotation and resize criteria.
+- **Layout (#3, #4 A):** the video stays centered and uncovered; the panel's width is the room beside the video minus a 16 px margin on each side `(assumed)`; the unmute button stays visible to the right of the video.
+- **Gestures (#5, #6 A):** a wheel or swipe over the panel only scrolls the recipe (the swipe on a real landscape phone is a manual check, E2E rule 13). Over the rest of the screen, including the left gutter of a title-only video and the right gutter, a gesture moves the feed as today.
+- **Content swap (#7 A):** the panel's content changes at the moment the new video becomes active (the same moment as `data-active`), scrolls to the top, and clears for a `needs_recipe` video.
+- **Stale text (#8 A):** cleaned in this pass; "(for example desktop...)" because the screens with room depend on the 260 px, not the device.
+- **Spec deltas (#10 A):** REC-006's change amends the `feed` requirements "One video per gesture" (the panel is an exception) and "Centered video on wide screens" (the panel beside it); REC-022 amends "Taps reach the video player".
+- **Related stories (#11, #12 A):** REC-007 and the PRD move to "where the sheet is used" (auto-open also covers a narrow window), and REC-022's wording follows "no room for the panel"; REC-007 is reopened for a short re-check.
+- **Notes (#13, #14, #15 A):** the right gutter is reserved for the unmute button; the reversal of "no new threshold" is logged as Decided 6 in `backlog/README.md`; the panel's focus order and the source link's accessible name are added to draft D-21.
+
 ### Estimation notes
-M: one component with the wide-screen layout. After the 2026-11-24 split the story is the panel, its content and the wide-screen behavior (11 criteria); the tall-screen button and sheet are REC-022.
+M: one component with the wide-screen layout. After the 2026-11-24 split the story is the panel, its content and the wide-screen behavior; the tall-screen button and sheet are REC-022. After the reopening of 2026-11-25 it has 17 criteria, its own 260 px switch, one panel outside the feed's scroll container, and stubbed recipes for the E2E tests; the estimates of 3 predate that and are re-run after the criteria are approved.
 Data already arrives with the feed, so no loading states are needed.
 
-AI estimate (2026-11-24): 3. Calibration: REC-004 (team 3, AI 3) is the nearest in effort: a frontend story on the feed whose logic mostly exists, with a handful of E2E tests. REC-018 (team 5) and REC-003 (team 5) are the upper bound: both carry real state logic (error states, the player controller), which this story does not. What is here is one presentational component (servings, ingredients, steps, a source label and link), a layout switch that already exists (the unmute button's, `(assumed)` reusable as a CSS rule), 11 criteria that each need a short E2E test on the three projects, and recipe-bearing stub data for those tests (the production fixture has `recipe: null` everywhere). Risks that move it: keeping the video exactly centered with the panel beside it, and containing wheel, trackpad and touch scrolling over the panel inside the feed's scroll-snap container (REC-001 showed that gestures near the feed can misbehave on a real device); if either fights the existing feed CSS it goes to 5. I have no information about the panel's visual design (typography, spacing), which is `(assumed)` to be plain. Size check: 3 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
+AI estimate (2026-11-24): 3. Calibration: REC-004 (team 3, AI 3) is the nearest in effort: a frontend story on the feed whose logic mostly exists, with a handful of E2E tests. REC-018 (team 5) and REC-003 (team 5) are the upper bound: both carry real state logic (error states, the player controller), which this story does not. What is here is one presentational component (servings, ingredients, steps, a source label and link), a layout switch (at the time of this estimate `(assumed)` to reuse the unmute button's; since 2026-11-25 the panel has its own 260 px switch), 11 criteria (17 now) that each need a short E2E test on the three projects, and recipe-bearing stub data for those tests (the production fixture has `recipe: null` everywhere). Risks that move it: keeping the video exactly centered with the panel beside it, and containing wheel, trackpad and touch scrolling over the panel inside the feed's scroll-snap container (REC-001 showed that gestures near the feed can misbehave on a real device); if either fights the existing feed CSS it goes to 5. I have no information about the panel's visual design (typography, spacing), which is `(assumed)` to be plain. Size check: 3 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
-## REC-022 · Recipe button and sheet on tall screens
+## REC-022 · Recipe button and sheet when there is no room for the panel
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
@@ -107,7 +123,7 @@ AI estimate (2026-11-24): 5. Calibration: REC-006 (AI 3, team 3) is the base thi
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:S, layer:frontend
 - **PRD:** 5.3
-- **Flags:** blocked-by:REC-022
+- **Flags:** needs-human-validation; blocked-by:REC-022
 - **AI estimate:** 3
 - **Estimate:** 3
 
@@ -119,7 +135,7 @@ As a home cook, I want the recipe to appear by itself once I've watched the vide
 - Given the screen is tall and I swiped away from a video and came back to it (a new view), when it reaches the end of its first loop, then the sheet opens automatically again.
 - Given the screen is tall and a video is playing, when the sheet opens automatically, then the video keeps playing.
 - Given the screen is tall and a `needs_recipe` video is playing, when it reaches the end and starts its first repeat, then no sheet opens.
-- Given the screen has room beside the video, so the recipe panel is always open, when a video reaches the end and starts its first repeat, then nothing changes and the panel stays open.
+- Given the screen has room for the panel beside the video, so the recipe panel is always open, when a video reaches the end and starts its first repeat, then nothing changes and the panel stays open.
 - Given the screen is tall and I opened the sheet with the "Recipe" button and it is still open, when the video reaches its first end, then the sheet stays open.
 - Given the screen is tall and I opened and closed the sheet by hand earlier in this view, when the video reaches its first end, then the sheet does not open.
 - Given a phone in landscape showed the panel at the video's first end and I turned it to portrait, when the video reaches its next end, then the sheet does not open.
@@ -133,6 +149,8 @@ Decisions 2026-11-24 (validation, first check 12 findings, "All A"):
 - **At most once per view (#3, #4, #9 A):** the auto-open happens at most once per view and counts as used when the panel was already shown at the first end (a wide screen, or a sheet opened with the button). Closing by hand never makes it reopen, and opening the sheet by hand earlier in the view skips the auto-open. Rotation keeps the view's state; REC-022 still closes the sheet and shows the button when the phone turns to portrait. The auto-open applies only to the video that ended.
 - **The count (#6, #7, #10 A):** it lives in the feed, per view and per YouTube ID, in memory, and uses the `videoended` event of the `playback` spec (every end, including each loop, with the video ID). Only an end of the active video counts; events of other videos, or late events after a swipe, are ignored. The first end counts however the first play went: a pause with the player's own control or a seek to the end that produces an end event counts, and a hidden tab produces no event, so the count does not advance. A video without a recipe never opens the sheet; only `needs_recipe` has none, because a `ready` video always has one (EXT-5).
 - **Related:** REC-003 (the `videoended` event), REC-006 (the always-open panel), REC-022 (the sheet, its close button and the rotation).
+
+Note 2026-11-25 (from the REC-006 re-check #11, reopened for a short re-check): "tall screen" in this story now means no room for the panel, REC-006's 260 px per side switch (`(assumed)` value), not the unmute button's aspect switch. The auto-open therefore also covers a narrow window where the recipe uses the button and the sheet. The criteria keep their wording; the re-check confirms them.
 
 ### Estimation notes
 S: small state machine on top of REC-003 (the `videoended` event) and REC-022 (the sheet). The meaning of "view" is decided (2026-11-24). With 9 criteria and the screen conditions the size S is re-checked at the estimate.
