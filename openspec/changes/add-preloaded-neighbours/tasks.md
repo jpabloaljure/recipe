@@ -20,20 +20,20 @@ are named `playback › <Requirement> › <Scenario>` and live in `e2e/playback/
 
 ## 4. Warm-up logic (Vitest, no browser)
 
-- [ ] 4.1 In `src/lib/player/playback.ts` add the warm-up to the controller (design Decisions 6 and 7): a `warmUp()` that plays muted, waits for `playing` plus about one second, then pauses and seeks to 0, gives up after 4 s, runs once per player and never while the tab is hidden, with its own pause reason `"warmup"`; verify `pnpm typecheck` passes
-- [ ] 4.2 Add tests in `playback.test.ts`: the warm-up plays muted and then pauses at 0; it gives up after 4 s without `playing`; it runs once; it does not run while hidden; a `playing` or `ended` event during it is not reported to the app; a warm-up pause is not a user pause; becoming active during it cancels it and runs the normal start; leaving the window cancels it and pauses; verify `pnpm test` passes
-- [ ] 4.3 Update the REC-003 test "at most one player is asked to play" so it excludes a warm-up (design Decision 8); verify `pnpm test` passes
+- [x] 4.1 In `src/lib/player/playback.ts` add the warm-up to the controller (design Decisions 6 and 7): a `warmUp()` that plays muted, waits for `playing` plus about one second, then pauses and seeks to 0, gives up after 4 s, runs once per player and never while the tab is hidden, with its own pause reason `"warmup"`; verify `pnpm typecheck` passes
+- [x] 4.2 Add tests in `playback.test.ts`: the warm-up plays muted and then pauses at 0; it gives up after 4 s without `playing`; it runs once; it does not run while hidden; a `playing` or `ended` event during it is not reported to the app; a warm-up pause is not a user pause; becoming active during it cancels it and runs the normal start; leaving the window cancels it and pauses; verify `pnpm test` passes
+- [x] 4.3 Update the REC-003 test "at most one player is asked to play" so it excludes a warm-up (design Decision 8); verify `pnpm test` passes (the existing test never calls `warmUp()`, so it needed no change; the warm-up groups in `playback.test.ts` cover the separation)
 
 ## 5. Feed wiring and E2E tests of the warm-up
 
-- [ ] 5.1 In `src/app/feed/Feed.tsx` ask the next slide's controller to warm up once its player is ready and the active slide is playing; verify the E2E test for "Only the active video plays › The next video is warmed up" passes on the three projects
-- [ ] 5.2 Update the E2E test "Only the active video plays › Neighbour videos are idle" to wait (`expect.poll`) until the neighbours are paused (design Decision 8); verify it passes on the three projects
-- [ ] 5.3 Add the E2E test for "Only the active video plays › No warm-up in a hidden tab" with `hideTab`; verify it passes
-- [ ] 5.4 Verify the existing `e2e/playback/` and `e2e/feed/` tests still pass with `pnpm test:e2e`
+- [x] 5.1 In `src/app/feed/Feed.tsx` ask the next slide's controller to warm up once its player is ready and the active slide is playing; verify the E2E test for "Only the active video plays › The next video is warmed up" passes on the three projects
+- [x] 5.2 Update the E2E test "Only the active video plays › Neighbour videos are idle" to wait (`expect.poll`) until the neighbours are paused (design Decision 8); verify it passes on the three projects
+- [x] 5.3 Add the E2E test for "Only the active video plays › No warm-up in a hidden tab" with `hideTab`; verify it passes
+- [x] 5.4 Verify the existing `e2e/playback/` and `e2e/feed/` tests still pass with `pnpm test:e2e`
 
 ## 6. Manual checks in the real app (human)
 
-- [ ] 6.1 "The next video starts within 500 ms (manual)": on desktop Chrome and a real mid-range Android phone, on the Vercel preview, swipe through at least ten videos, also after leaving a video playing for 30 s or more, and record how long each takes to play; if it is not under 500 ms on the phone, or the desktop stall after a long idle shows up, stop and decide (relax PERF-3, design Decision 1); record the result in the PR and in REC-015's launch check
+- [ ] 6.1 "The next video starts within 500 ms (manual)": on desktop Chrome and a real mid-range Android phone, on the Vercel preview, swipe through at least ten videos, also after leaving a video playing for 30 s or more, and record how long each takes to play; if it is not under 500 ms on the phone, or the desktop stall after a long idle shows up, stop and decide (relax PERF-3, design Decision 1); record the result in the PR and in REC-015's launch check (there is no on-screen timer in the app: judge the start by eye on the phone, and with the desktop DevTools Performance panel if a number is needed; an `?debug` log like D-12's would give numbers and is not part of this change)
 - [ ] 6.2 On the phone, flick through at least ten videos and confirm one video per gesture, no more than three players, and no sound from a warm-up; record the result in the PR
 
 ## 7. Close-out

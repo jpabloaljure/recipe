@@ -100,8 +100,16 @@ export function Feed() {
 
   const slides = buildSlides(state);
   const activeKey = slides[activeIndex]?.key ?? null;
-  const latest = useRef({ activeKey, soundOn });
-  latest.current = { activeKey, soundOn };
+  const nextKey = slides[activeIndex + 1]?.key ?? null;
+  const latest = useRef({ activeKey, nextKey, soundOn });
+  latest.current = { activeKey, nextKey, soundOn };
+
+  // REC-004: once the active video plays, the next one is warmed up (muted, out of sight, about a second).
+  const warmUpNext = useCallback(() => {
+    const { activeKey: active, nextKey: next } = latest.current;
+    if (active === null || next === null) return;
+    if (controllers.current.get(active)?.isPlaying()) controllers.current.get(next)?.warmUp();
+  }, []);
 
   // The active slide and the sound state reach every player; the others stop first.
   useEffect(() => {
@@ -126,7 +134,8 @@ export function Feed() {
     controllers.current.set(key, playback);
     playback.setTabVisible(document.visibilityState === "visible");
     syncActive(controllers.current, latest.current.activeKey, latest.current.soundOn);
-  }, []);
+    warmUpNext();
+  }, [warmUpNext]);
 
   // REC-007 listens to this: every end of a video, including each loop.
   const announceEnded = useCallback((youtubeId: string) => {
@@ -155,6 +164,7 @@ export function Feed() {
                 onPlayback={(playback) => registerPlayback(slide.key, playback)}
                 onEnded={announceEnded}
                 onSoundBlocked={soundBlocked}
+                onPlaying={warmUpNext}
               />
             )}
             {index === activeIndex && !soundOn && (

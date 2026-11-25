@@ -14,12 +14,21 @@ import type { PlayerHandle, PlayerState, Timers, TimerHandle } from "./types";
  * - The controller remembers why it paused. A pause it did not cause is the
  *   home cook's, and it survives hiding and showing the tab.
  * - Every end is reported, then the video restarts (seek mode, Decision 5).
+ * - The next video is warmed up (REC-004, add-preloaded-neighbours Decisions 6
+ *   and 7): muted and out of sight it plays for about a second so its data is
+ *   loaded, then pauses at 0. Its `playing` and `ended` events are not the
+ *   app's business, and its pause is not the home cook's.
  */
 
 /** Time the browser gets to refuse an unmute, once the video is playing, before it counts as allowed. */
 export const BLOCKED_AUTOPLAY_WINDOW_MS = 800;
 
-type PauseReason = "swipe" | "hidden" | "user";
+/** How long a warm-up plays, once the video is playing. */
+export const WARMUP_PLAY_MS = 1000;
+/** A warm-up that has not reached `playing` by then is given up, with no error. */
+export const WARMUP_GIVE_UP_MS = 4000;
+
+type PauseReason = "swipe" | "hidden" | "user" | "warmup";
 
 export type SlidePlaybackDeps = {
   youtubeId: string;
@@ -29,6 +38,8 @@ export type SlidePlaybackDeps = {
   onEnded: (youtubeId: string) => void;
   /** Called when unmuted autoplay did not start and the video was muted instead. */
   onSoundBlocked: () => void;
+  /** Called each time the active video reports `playing` (the feed then warms up the next one). */
+  onPlaying?: () => void;
   blockedWindowMs?: number;
 };
 
@@ -44,6 +55,12 @@ export class SlidePlayback {
   private blockedTimer: TimerHandle | null = null;
   /** Sound is on but the video has not played yet: unmute once it does. */
   private unmuteWhenPlaying = false;
+  /** The feed wants this video warmed up; it happens once the player is ready. */
+  private warmRequested = false;
+  private warming = false;
+  private warmed = false;
+  private warmPlaying = false;
+  private warmTimer: TimerHandle | null = null;
 
   constructor(deps: SlidePlaybackDeps) {
     this.deps = deps;
@@ -54,6 +71,23 @@ export class SlidePlayback {
     this.ready = true;
     this.deps.player.mute();
     if (this.active) this.start();
+    else if (this.warmRequested) this.beginWarmUp();
+  }
+
+  /** True while this is the active video and it is playing. */
+  isPlaying(): boolean {
+    return this.active && this.state === "playing";
+  }
+
+  /**
+   * Warms this video up (once): it plays muted for about a second, then pauses
+   * at the start. Does nothing for the active video, after a warm-up, or while
+   * the tab is hidden (it is not retried: the video then starts cold).
+   */
+  warmUp(): void {
+    if (this.active || this.warmed || this.warming) return;
+    this.warmRequested = true;
+    if (this.ready) this.beginWarmUp();
   }
 
   /**
@@ -63,6 +97,7 @@ export class SlidePlayback {
   setActive(active: boolean, soundOn: boolean): void {
     const wasActive = this.active;
     const soundWas = this.soundOn;
+    if (active && this.warming) this.cancelWarmUp();
     this.active = active;
     this.soundOn = soundOn;
     if (!this.ready) return;
@@ -73,6 +108,7 @@ export class SlidePlayback {
 
   setTabVisible(visible: boolean): void {
     this.tabVisible = visible;
+    if (!visible && this.warming) this.finishWarmUp();
     if (!this.ready || !this.active) return;
     if (!visible) {
       // Nothing to pause when the video is already paused (its reason stays).
@@ -91,7 +127,15 @@ export class SlidePlayback {
   /** A state the player reported. Neighbours are ignored: they never play or end. */
   handleState(next: PlayerState): void {
     this.state = next;
+    if (this.warming) {
+      if (next === "playing" && !this.warmPlaying) {
+        this.warmPlaying = true; // the play time starts at the first `playing`, not at each later one
+        this.armWarmTimer(WARMUP_PLAY_MS, () => this.finishWarmUp());
+      }
+      return;
+    }
     if (!this.active) return;
+    if (next === "playing") this.deps.onPlaying?.();
     if (next === "playing" || next === "buffering") {
       if (next === "playing" && this.pauseReason === "user") this.pauseReason = null;
       if (next === "playing" && this.unmuteWhenPlaying) {
@@ -113,6 +157,49 @@ export class SlidePlayback {
 
   dispose(): void {
     this.clearBlockedTimer();
+    this.clearWarmTimer();
+  }
+
+  private beginWarmUp(): void {
+    this.warmRequested = false;
+    if (!this.tabVisible) return;
+    this.warming = true;
+    this.warmPlaying = false;
+    this.deps.player.mute();
+    this.deps.player.play();
+    this.armWarmTimer(WARMUP_GIVE_UP_MS, () => this.finishWarmUp());
+  }
+
+  /** Warm-up over (played long enough, gave up, or the tab was hidden): paused at the start. */
+  private finishWarmUp(): void {
+    this.clearWarmTimer();
+    this.warming = false;
+    this.warmed = true;
+    this.pauseReason = "warmup";
+    this.deps.player.pause();
+    this.deps.player.seekTo(0);
+  }
+
+  /** The video became the active one mid-warm-up: the normal start takes over, from the beginning. */
+  private cancelWarmUp(): void {
+    this.clearWarmTimer();
+    this.warming = false;
+    this.warmed = true;
+    this.hasPlayed = true; // so `start()` seeks to 0
+  }
+
+  private armWarmTimer(ms: number, callback: () => void): void {
+    this.clearWarmTimer();
+    this.warmTimer = this.deps.timers.set(() => {
+      this.warmTimer = null;
+      callback();
+    }, ms);
+  }
+
+  private clearWarmTimer(): void {
+    if (this.warmTimer === null) return;
+    this.deps.timers.clear(this.warmTimer);
+    this.warmTimer = null;
   }
 
   private start(): void {
@@ -135,6 +222,9 @@ export class SlidePlayback {
     player.mute();
     player.play();
     this.hasPlayed = true;
+    // A player that is already playing (a warm-up cancelled by the swipe) reports no new
+    // `playing`, so handle it here: ask for sound and tell the feed.
+    if (this.state === "playing") this.handleState("playing");
   }
 
   private stop(): void {
