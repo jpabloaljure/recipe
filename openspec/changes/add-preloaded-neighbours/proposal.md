@@ -7,7 +7,7 @@ PERF-5 caps the live players at three (previous, current, next). REC-003
 already gives every mounted slide its own paused, muted player, and the feed
 already mounts only the active slide and its two neighbours, so most of this
 behavior exists but nothing proves it, and the 500 ms start has never been
-measured on a real player. REC-004 is validated (`Flags: —`, `Estimate: 3`,
+measured on a real player (measured now: see What Changes). REC-004 is validated (`Flags: —`, `Estimate: 3`,
 checked 2026-11-24) and REC-003, which it depended on, is done.
 
 ## What Changes
@@ -18,17 +18,25 @@ checked 2026-11-24) and REC-003, which it depended on, is done.
   neighbour.
 - Add a manual scenario for the 500 ms start (E2E rule 13: performance
   targets stay manual).
-- Measure, before anything else, how fast a paused, never-started neighbour
-  starts on the real YouTube player (desktop Chrome and a real Android phone).
-  The result decides whether code changes are needed at all.
-- Add E2E tests for the two automatable scenarios, with a small addition to
-  the fake player so a test can tell whether a player is the same instance
-  before and after a swipe.
-- No production code change is planned unless the measurement fails (see
-  design.md, Open questions).
+- Measured on the real player (2026-11-24): a paused, never-started neighbour
+  takes 427-469 ms to start on desktop Chrome and 1057-1334 ms on a mid-range
+  Android phone, so PERF-3 is not met by pausing alone. A neighbour that played
+  muted for one second and was then paused starts in 270 ms on desktop and
+  315-366 ms on the phone (design.md).
+- The next video (and only it) is therefore warmed up: its player plays muted
+  and out of sight for about one second right after it becomes the neighbour,
+  then is paused at the start again. This changes "Only the active video
+  plays".
+- Add E2E tests for the automatable scenarios, with a small addition to the
+  fake player so a test can tell whether a player is the same instance before
+  and after a swipe.
+- Add the warm-up to the player controller and wire it in the feed.
 
 This change implements **REC-004** only. REC-004 is not flagged
 `needs-human-validation` (checked 2026-11-24: `Flags: —`, `Estimate: 3`).
+
+Data cost: the warm-up loads about a third of one Short earlier, once per
+swipe.
 
 Out of scope (owned by other stories): player errors, slow or offline loads
 (REC-018); the real-device performance run across the whole feed (REC-015);
@@ -44,4 +52,5 @@ None.
 
 ### Modified Capabilities
 - `playback`: adds "Few players stay alive" and "The next video starts from
-  its ready player".
+  its ready player", and modifies "Only the active video plays" to allow the
+  muted warm-up of the next video.

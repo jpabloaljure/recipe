@@ -1,4 +1,5 @@
 import { catalog, openFeed, slides, videos } from "./feed";
+import { livePlayers } from "./player";
 import { expect, test } from "./test";
 
 // Self-tests of the network guard in e2e/support/test.ts and the feed stub in e2e/support/feed.ts.
@@ -68,4 +69,24 @@ test("network guard › IFrame Player API › serves a fake player the tests can
 
   expect(result).toEqual({ ready: true, states: [1], muted: true, id: "abc123" });
   expect(blockedRequests).toEqual([]);
+});
+
+test("network guard › IFrame Player API › gives each fake player its own creation serial", async ({ page }) => {
+  await page.setContent(
+    `<iframe id="a" src="https://www.youtube-nocookie.com/embed/aaa?enablejsapi=1"></iframe>
+     <iframe id="b" src="https://www.youtube-nocookie.com/embed/bbb?enablejsapi=1"></iframe>
+     <script src="https://www.youtube.com/iframe_api"></script>`,
+  );
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { YT?: { Player?: unknown } }).YT?.Player)).toBe("function");
+
+  await page.evaluate(() => {
+    const w = window as unknown as { YT: { Player: new (el: Element, o: unknown) => unknown } };
+    new w.YT.Player(document.getElementById("a") as Element, {});
+    new w.YT.Player(document.getElementById("b") as Element, {});
+  });
+
+  const first = await livePlayers(page);
+  expect(first.map((p) => [p.youtubeId, p.serial])).toEqual([["aaa", 0], ["bbb", 1]]);
+  // Reading again returns the same serials: a player keeps its serial for its whole life.
+  expect((await livePlayers(page)).map((p) => p.serial)).toEqual([0, 1]);
 });

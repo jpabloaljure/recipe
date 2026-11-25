@@ -30,3 +30,30 @@ gesture on a mid-range phone (PERF-3).
 - **GIVEN** I am on a video on a real mid-range phone
 - **WHEN** I swipe to the next video
 - **THEN** it is playing within 500 ms of the end of the gesture
+
+## MODIFIED Requirements
+
+### Requirement: Only the active video plays
+Only the active video SHALL play for the home cook. The videos next to it SHALL
+be muted and paused, with one exception: the next video MAY play muted, out of
+sight, for about one second right after it becomes the neighbour, to load its
+data (the warm-up), and SHALL then be paused at the start again. A warm-up
+SHALL NOT make a sound, SHALL NOT report the video as ended and SHALL NOT run
+while the tab is hidden.
+
+#### Scenario: Neighbour videos are idle
+- **GIVEN** a video is active and playing and its next video has finished its warm-up
+- **WHEN** I look at the videos before and after it
+- **THEN** they are paused
+- **AND** they are muted
+
+#### Scenario: The next video is warmed up
+- **GIVEN** a video has just become active
+- **WHEN** the player of its next video is ready
+- **THEN** that video plays muted for about one second
+- **AND** it is then paused at the start again
+
+#### Scenario: No warm-up in a hidden tab
+- **GIVEN** the tab is hidden
+- **WHEN** the player of the next video is ready
+- **THEN** that video is not played

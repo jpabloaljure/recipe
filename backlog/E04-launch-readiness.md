@@ -20,7 +20,7 @@ As a home cook, I want the app to feel instant on my everyday phone, so that I k
 - Given the measurements, when the spike ends, then the results are recorded with device, network and pass/fail for each target.
 
 ### Technical context
-—
+Input from REC-004 (2026-11-24, change `add-preloaded-neighbours`): the PERF-3 start was measured on a throwaway page on a real Android 10 phone (Chrome 138, Wi-Fi) and desktop Chrome 154. A paused, never-started neighbour took 1057-1334 ms on the phone (427-469 ms on desktop); after the muted one-second warm-up that REC-004 adds it took 315-366 ms (about 270 ms on desktop). In the real app the owner checked the preview by eye on 2026-11-24 ("looks good", no numbers). This spike takes the real numbers in the app, also after a video has played for 30 s or more, and checks the desktop case where players stopped starting on the throwaway page after a long idle.
 
 ### Estimation notes
 Spike, timebox 6 h. Minimum output: recorded PERF-2/PERF-3 measurements with pass/fail.
