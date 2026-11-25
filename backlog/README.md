@@ -12,7 +12,7 @@ the product at a high level; full conventions live in `AGENTS.md`.
 | E03 Save and share without an account | `E03-save-and-share.md` | G3 |
 | E04 Launch readiness | `E04-launch-readiness.md` | §8 |
 
-Next free story ID: **REC-022**.
+Next free story ID: **REC-024**.
 
 Ideas found during validation that are outside the MVP are parked in
 [draft-backlog-list.md](draft-backlog-list.md) (not stories yet).
