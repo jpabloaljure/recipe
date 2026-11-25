@@ -201,24 +201,59 @@ Depends on the open decision about seed channels and queries.
 - **Status:** todo
 - **Labels:** module:feed, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 6.4, 9 (videos removed after ingestion)
-- **Flags:** needs-human-validation; split-from:REC-001
-- **AI estimate:** —
-- **Estimate:** —
+- **Flags:** split-from:REC-001; blocked-by:REC-004
+- **AI estimate:** 5
+- **Estimate:** 5
 
 As a home cook, I want the feed to tell me when there is nothing to show or something failed, and to skip broken videos, so that I am never stuck on a blank or broken screen.
 
 ### Acceptance criteria
-- Given there are no videos in the feed (`ready` or `needs_recipe`), when the feed loads, then an empty-feed message is shown.
-- Given the feed request fails, when the feed loads, then an "Oops, something went wrong" message is shown.
-- Given I am offline, when the feed loads, then an "Oops, something went wrong" message is shown.
-- Given the active video was removed or is no longer embeddable, when it fails to load in the player, then the next video loads automatically.
+- Given there are no videos in the feed (`ready` or `needs_recipe`), when the feed loads, then a "No recipes yet" message is shown.
+- Given the first page is still loading, when the feed loads, then a loading indicator is shown until the page arrives.
+- Given the first page request fails, when the feed loads, then an "Oops, something went wrong" message and a Retry button are shown.
+- Given the first page request does not answer within 10 seconds, when the feed loads, then the same "Oops, something went wrong" message and Retry button are shown.
+- Given I am offline, when the feed loads, then the same "Oops, something went wrong" message and Retry button are shown.
+- Given the "Oops, something went wrong" message is shown, when I tap Retry, then the feed requests the first page again and shows the loading indicator.
+- Given I am on the last loaded video and the request for the next page failed, when I reach the end of the list, then an end slide with a retry row is shown and the video above stays.
+- Given the end slide with the retry row is shown, when I tap the retry row, then the feed requests the page again and the end slide shows a loading indicator.
+- Given I am on the last loaded video and the next page is still loading, when I reach the end of the list, then an end slide with a loading indicator is shown until the page arrives.
+- Given the end slide is shown, when I swipe past it, then the feed stays on the end slide and does not wrap.
+- Given the active video was removed or is no longer embeddable, when it fails to load in the player, then it is removed from the list and the next video takes its place.
+- Given the next video was removed or is no longer embeddable, when its player reports the error, then it is removed from the list before I reach it.
+- Given three videos in a row failed to load, when the third one fails, then the "Oops, something went wrong" message and a Retry button are shown.
+- Given every loaded video failed to load and no next page exists, when the last one fails, then the "Oops, something went wrong" message and a Retry button are shown.
 
 ### Technical context
-Split from REC-001 during its validation (findings #4 and #6). Also owns a next-page request that fails mid-visit (from REC-002 validation, #18, 2026-11-16); the user-facing behavior is still to be decided when this story is validated. Also owns reaching the end of the loaded list while the next page is still loading (from REC-002 validation, #31). Relies on the YouTube IFrame Player error event to detect removed videos; a periodic availability check that removes them from the catalog is out of the MVP (`draft-backlog-list.md` D-5).
+Split from REC-001 during its validation (findings #4 and #6). Also owns a next-page request that fails mid-visit (from REC-002 validation, #18, 2026-11-16) and reaching the end of the loaded list while the next page is still loading (from REC-002 validation, #31): both are criteria above, as the end slide with its retry and loading rows (decisions 2026-11-24). Relies on the YouTube IFrame Player error event to detect removed videos; a periodic availability check that removes them from the catalog is out of the MVP (`draft-backlog-list.md` D-5).
+
+Decisions 2026-11-24 (validation):
+- "Skip a broken video" stays in this story. Autoplay failing even when muted and every other player error (a failed or slow neighbour, the YouTube script failing to load) moved to `draft-backlog-list.md` D-19 and D-20, to be handled later.
+- One "Oops, something went wrong" message with a Retry button; the empty feed has its own "No recipes yet" message. A request that does not answer within 10 seconds counts as failed `(assumed)`; the value is tuned in the manual check. Offline and server errors share the message. Going offline mid-visit is the next-page failure case: a small retry row at the end of the list, not a full-screen error. The wording is the story's proposal until the team changes it.
+- The skip is per visit only: the broken video is dropped from this visit's list and returns on the next visit, because the periodic check is out of the MVP (D-5). A manual check on a real removed or private video is a task of the change (E2E rule 13). A deep-linked video (REC-014) or one with the recipe panel open (REC-007) that fails gets the same skip; REC-014 may refine it.
+
+Decisions 2026-11-24 (re-check against the merged REC-003 code, "All A"):
+- **Skip vs "No autoscroll" (#5 A):** the skip removes the broken slide from the list, so the next video takes its place. It is the one exception to "No autoscroll", already promised by PRD §9. The change adds a delta to the feed spec (the "No autoscroll" and "One video per gesture" requirements) and PRD 5.1 gets one line.
+- **Which errors skip (#3, #4 A):** YouTube player error codes 100, 101 and 150 (removed, private, embedding off) skip the video. Any other code does nothing (D-20). Code 153 (referrer) is a bug, not a skip. The video is dropped by its YouTube ID from every cycle copy of the visit list. A skip after I have swiped away is silent. After 3 skips in a row, or when none remain, the "Oops, something went wrong" message and Retry are shown. The codes are confirmed in the manual check on real videos.
+- **Neighbours (#9 A):** any mounted player (active or neighbour) that reports one of those codes is handled the same way, so a known-broken video never becomes the active one. The story is `blocked-by:REC-004`: both touch the player window and `SlideVideo`.
+- **Client and test work (#8, #10 A):** counted here: a first-page load state, a 10-second request timeout, `onError` in the player adapter and in the fake (`emitError(code)`), and `stubFeed` options for empty, 5xx, slow and offline. The 10-second rule is a Vitest test with an injected timer (E2E rule 1); E2E checks only the messages. Retry is ignored while a request is running.
+- **First load, retries, silent retry (N1, N2, N4 A):** the first load shows the same loading indicator as the end of the list. A second failed Retry shows the same message again. The silent retry two slides before the end stays; its row shows only when I reach the end.
+- **The end rows (N5 A):** the retry and loading rows are an ordinary snap slide at the end of the list with the message. A gesture past it does nothing, and the feed does not wrap while the next page is unknown. The change adds a feed spec delta for this.
+- **Deep link and panel (#11, #12 A):** not part of REC-018's done; REC-014 and REC-007 reference this skip in their own criteria.
+
+Decisions 2026-11-24 (second re-check, "All A"):
+- **Scenarios (N-A, N-B A):** the criteria now say the skipped video is removed and the next takes its place, add the neighbour case and the end slide that does not wrap. The silent skip after a swipe and "other codes do nothing" stay unit-test detail.
+- **Timeout (N-C A):** the 10-second rule applies to next-page requests too; a timed-out request is a failed one, so the retry row shows. Vitest with the injected timer, no extra criterion.
+- **Counter (N-D A):** a video that becomes active and plays resets the "3 in a row" count. A failing neighbour counts only when it would become the active video.
+- **All skipped (N-E A):** "Oops, something went wrong" and Retry, the same as a failed load; Retry asks for a fresh first page.
+- **Retry keeps the skip list (third check, #2 A):** Retry on the "Oops" message keeps this visit's skipped YouTube IDs, so known-broken videos are dropped again at once; if nothing remains, "Oops" shows again. "None remain" has its own criterion (#1 A). If every loaded video failed but a next page exists (fourth check, N-H A), the feed requests that page as normal; "Oops" shows only after 3 skips in a row or when nothing remains and no next page exists. Unit-test detail, no criterion.
+- **Dependencies (N-F A):** no `blocked-by` beyond REC-004; the stub feed route is enough to build and test this story (the real endpoint is REC-002's).
 
 ### Estimation notes
-M: three simple messages, plus skipping a video on a player error.
+M: four states (no recipes, "Oops" with Retry, and the end slide's retry and loading rows), plus skipping a video on a player error.
 The player error event's timing and reliability is the main unknown.
+Re-checked 2026-11-24: also a first-page load state, a 10-second timeout for first and next pages, an error callback in the adapter and the fake (`emitError`), new stub options, the end slide that does not wrap, removing a video from every cycle copy (active and neighbour), the 3-in-a-row counter and the all-skipped path. 14 criteria, several needing both unit and E2E tests. Still M.
+
+AI estimate (2026-11-24): 5. Calibration: REC-003 (team 5) is the nearest comparable: it also touches the player adapter, `SlideVideo`, the fake player and E2E helpers, with a similar number of criteria; REC-004 (team 3) is smaller. REC-018 is mostly small UI states and unit-testable rules, but spreads across `Feed.tsx` (first-page state, timeouts, end slide), the adapter (`onError`), the fake (`emitError`), `stubFeed` options and the cycle list (drop by ID). Risks that would move it to 8: YouTube's error codes or timing behaving differently from the docs on real videos (manual check, assumed reliable), and REC-004's player-window change landing in a shape that makes dropping neighbours harder than assumed. Size check: 5 matches `size:M`. This is one voice for the team's discussion, not the deciding vote.
 
 ## REC-019 · Database schema and migration for the video catalog
 - **Status:** done
