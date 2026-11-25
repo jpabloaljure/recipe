@@ -3174,3 +3174,122 @@ REC-004 chain (Recommended)
 - **Result:** the real-player measurement failed for a paused neighbour (desktop Chrome 154: 427–469 ms; Android 10, Chrome 138: 1057–1334 ms), and a muted one-second warm-up fixed it (about 270 ms desktop, 315–366 ms phone). The AI review found five points (one important: a stale player state after the warm-up), all fixed and resolved. Production smoke was green for merge `75f25c1`. The 500 ms was checked by eye on the preview, not on production and with no numbers (REC-015 takes them). An unexplained desktop stall after a long idle on the check page is recorded for that spike.
 - **Models:** Sonnet 5.5 (main session, all prompts) · Haiku 5.5, effort low (`doc-checker`: close-out files) · the code review ran in the main session at `medium` effort.
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent and the choices (warm-up over relaxing PERF-3, the merges) stay with the user.
+
+## 452. Start backlog validation (slash command)
+
+```
+/validate-backlog
+```
+
+## 453. Ask what UI is missing
+
+```
+no but to cover all the UI that we have to give what is missing?
+```
+
+## 454. Validate REC-006 (slash command)
+
+```
+/validate-backlog REC-006
+```
+
+## 455. Choose the REC-006 options with additions
+
+```
+#1, #2, #7, #8 A but in adition, the button should be for mobile and desktop/landskape on top of the unmute button even when thisone is hided. #3. B. with a black background with transparency that let see the video slightly behind the recipe and just leave the video controls zone free from the pad on top and on the bottom. #5 A. But for desktop/landskape the panel is always open and there is no button. when on landskape we switch to vertical the panel is close. and the button is shown.  Rest Chose A
+```
+
+## 456. Choose All A for the re-check findings
+
+```
+All A
+```
+
+## 457. Choose All A for REC-006 and REC-022
+
+```
+REC-006 All A, REC-022 ALL A
+```
+
+## 458. Approve the REC-006 criteria and answer N9 and N10
+
+```
+AC approved, N9 A, N10 A
+```
+
+## 459. Give the team estimate for REC-006 (button answer)
+
+```
+3
+```
+
+## 460. Validate REC-006 (button answer)
+
+```
+Validated
+```
+
+## 461. Open the PR first (button answer)
+
+```
+Open the PR first
+```
+
+## 462. Merge PR #83 when green (button answer)
+
+```
+Merge when green
+```
+
+## 463. Take REC-022 next (button answer)
+
+```
+REC-022
+```
+
+## 464. Approve the REC-022 criteria (button answer)
+
+```
+AC approved
+```
+
+## 465. Give the team estimate for REC-022 (button answer)
+
+```
+5
+```
+
+## 466. Validate REC-022 (button answer)
+
+```
+Validated
+```
+
+## 467. Open the PR (button answer)
+
+```
+Open the PR
+```
+
+## 468. Merge PR #84 when green (button answer)
+
+```
+Merge when green
+```
+
+## 469. Register the backlog validation chain (question dialog answer)
+
+```
+Backlog validation REC-006 and REC-022
+```
+
+### Summary (prompts 452–469)
+
+- **Goal:** validate the recipe panel stories with the `validate-backlog` flow (REC-006, then REC-022), after checking which UI the backlog still lacked.
+- **Changes:**
+  - **Backlog:** `backlog/E02-recipe-every-video.md`: REC-006 rewritten (11 criteria) and split by behavior; REC-022 created (16 criteria); `backlog/validation-log.md` rows for both; draft D-21 (keyboard and screen-reader support for the panel and sheet).
+  - **PRD and checklist:** `docs/PRD.md` 5.1 and 5.3 (the layout follows the space beside the video; the panel is always open on wide screens, a button and a sheet on tall ones); `docs/checklist.md` story counts and row 18.
+  - **PRs:** #83 and #84, both merged.
+- **Result:** REC-006 is validated (estimates 3/3) as the wide-screen panel, and the new REC-022 (estimates 5/5, `split-from:REC-006`, `blocked-by:REC-006`) holds the Recipe button above the unmute button and the translucent sheet that leaves the player's control zones free. A first check of REC-005 (12 findings) was shown but not answered, so it stays flagged and unlogged. A comparison of the PRD's UI with the 21 stories found six gaps (Favorites entry point and navigation, placement of the action buttons, the panel on a landscape phone, the Favorites list for removed videos, browser back behavior, app identity), none handled yet. REC-007 is still to be revisited (it will get `blocked-by:REC-022`). 10 stories are validated and 12 remain flagged.
+- **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, six runs: REC-005 and five for REC-006 and REC-022; `estimate-story` ran in the main session) · Haiku 5.5, effort low (`doc-checker`: this log).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent, and the choices (layout, the split, the estimates, the merges) stay with the user.
