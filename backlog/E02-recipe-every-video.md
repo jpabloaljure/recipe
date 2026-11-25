@@ -96,25 +96,37 @@ AI estimate (2026-11-24): 5. Calibration: REC-006 (AI 3, team 3) is the base thi
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:S, layer:frontend
 - **PRD:** 5.3
-- **Flags:** needs-human-validation; (assumed) a "view" ends when I swipe away; coming back to the same video counts as a new view
-- **AI estimate:** —
-- **Estimate:** —
+- **Flags:** blocked-by:REC-022
+- **AI estimate:** 3
+- **Estimate:** 3
 
 As a home cook, I want the recipe to appear by itself once I've watched the video, so that I don't have to look for it.
 
 ### Acceptance criteria
-- Given a video is playing for the first time in this view, when it reaches the end and starts its first repeat, then the recipe panel opens automatically.
-- Given the panel opened automatically and I closed it, when the video loops again, then the panel does not reopen.
-- Given I swiped away from a video and come back to it, when it reaches the end of its first loop, then the panel opens automatically again.
-- Given a video is playing, when the recipe panel opens automatically, then the video keeps playing.
-- Given a `needs_recipe` video is playing, when it reaches the end and starts its first repeat, then no recipe panel opens.
+- Given the screen is tall and a video with a recipe is playing for the first time in this view, when it reaches the end and starts its first repeat, then the recipe sheet opens automatically.
+- Given the screen is tall and the sheet opened automatically and I closed it, when the video loops again, then the sheet does not reopen.
+- Given the screen is tall and I swiped away from a video and came back to it (a new view), when it reaches the end of its first loop, then the sheet opens automatically again.
+- Given the screen is tall and a video is playing, when the sheet opens automatically, then the video keeps playing.
+- Given the screen is tall and a `needs_recipe` video is playing, when it reaches the end and starts its first repeat, then no sheet opens.
+- Given the screen has room beside the video, so the recipe panel is always open, when a video reaches the end and starts its first repeat, then nothing changes and the panel stays open.
+- Given the screen is tall and I opened the sheet with the "Recipe" button and it is still open, when the video reaches its first end, then the sheet stays open.
+- Given the screen is tall and I opened and closed the sheet by hand earlier in this view, when the video reaches its first end, then the sheet does not open.
+- Given a phone in landscape showed the panel at the video's first end and I turned it to portrait, when the video reaches its next end, then the sheet does not open.
 
 ### Technical context
 A `needs_recipe` video has no recipe panel (decided 2026-11-17, `backlog/README.md` Decided 4; PRD 5.3).
 
+Decisions 2026-11-24 (validation, first check 12 findings, "All A"):
+- **Tall screens only (#1, #2, #12 A):** with room beside the video the panel is always open (REC-006), so there is no auto-open there. On a tall screen the auto-open opens REC-022's sheet, so the story is `blocked-by:REC-022` (REC-006 is not needed). PRD 5.3 already says so.
+- **What a view is (#5, #8 A):** a view starts when a video becomes the active one and ends when I swipe away; coming back is a new view (consistent with REC-003, which plays it from the beginning). The state is per tab and in memory only, like the sound state: a reload resets it. A view belongs to a slide (cycle plus YouTube ID, as the feed keys its slides), so a later cycle's slide of the same video is a new view, and an end event counts only for the slide that is active (re-check #13 A, 2026-11-25). The used state resets when the view ends, however the sheet was opened (#14 A).
+- **At most once per view (#3, #4, #9 A):** the auto-open happens at most once per view and counts as used when the panel was already shown at the first end (a wide screen, or a sheet opened with the button). Closing by hand never makes it reopen, and opening the sheet by hand earlier in the view skips the auto-open. Rotation keeps the view's state; REC-022 still closes the sheet and shows the button when the phone turns to portrait. The auto-open applies only to the video that ended.
+- **The count (#6, #7, #10 A):** it lives in the feed, per view and per YouTube ID, in memory, and uses the `videoended` event of the `playback` spec (every end, including each loop, with the video ID). Only an end of the active video counts; events of other videos, or late events after a swipe, are ignored. The first end counts however the first play went: a pause with the player's own control or a seek to the end that produces an end event counts, and a hidden tab produces no event, so the count does not advance. A video without a recipe never opens the sheet; only `needs_recipe` has none, because a `ready` video always has one (EXT-5).
+- **Related:** REC-003 (the `videoended` event), REC-006 (the always-open panel), REC-022 (the sheet, its close button and the rotation).
+
 ### Estimation notes
-S: small state machine on top of REC-003 and REC-006.
-The only uncertainty is the meaning of "view", flagged as assumed.
+S: small state machine on top of REC-003 (the `videoended` event) and REC-022 (the sheet). The meaning of "view" is decided (2026-11-24). With 9 criteria and the screen conditions the size S is re-checked at the estimate.
+
+AI estimate (2026-11-25): 3. Calibration: REC-006 (team 3) and REC-004 (team 3) are the nearest frontend stories on the feed with mostly existing pieces; REC-022 (team 5) is the story whose sheet this one opens, so this one is smaller. What is here: a per-slide, per-view state in the feed (a small state machine, which Vitest can cover without a browser), the `videoended` event that REC-003 already emits, and 9 criteria whose E2E tests reuse the fake player's `emitEnded` and a viewport change for rotation. Risks that move it: it depends on REC-022's way to open and close the sheet, which does not exist yet (`(assumed)` a simple open and close call), and the interplay with rotation and a hand-opened sheet is where bugs are likely; if REC-022's sheet state is awkward to drive from outside, it goes to 5. Size check: warning, 3 does not match `size:S` (1-2); the label is not changed, and the team may want to re-size it to M. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-008 · Recipe extracted ahead of time from description or comment
 - **Status:** todo
