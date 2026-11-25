@@ -3474,3 +3474,62 @@ Merge when green
 - **Result:** REC-018 is `done`. Three AI review runs: the first found five issues and the second three (eight in all, every one fixed and resolved), and the third, after the last fix, found none. CI green on every PR and the production smoke run for #82 green. The owner checked it on the production site: all five manual checks OK, with no IDs, codes or timings recorded. A video that never loads and autoplay refused when muted stay in drafts D-19 and D-20. Prompt 493 (black video frames after going offline mid-visit) is a video that never loads, which falls under D-20's failed or slow videos; D-20 does not name offline, and a "No connection" notice was suggested but not decided.
 - **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, two runs; `code-review` at medium effort, three runs in the main session) · Haiku 5.5, effort low (`doc-checker`: the change's artifacts, then the archive close-out files, then this log).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent and the choices stay with the user.
+
+## 498. Validate REC-007 (slash command)
+
+```
+/validate-backlog rec-007
+```
+
+## 499. Choose All A for the first check (button answer)
+
+```
+All A
+```
+
+## 500. Choose All A for the re-check (button answer)
+
+```
+All A
+```
+
+## 501. Approve the REC-007 criteria (button answer)
+
+```
+AC approved
+```
+
+## 502. Give the team estimate for REC-007 (button answer)
+
+```
+3
+```
+
+## 503. Validate REC-007 (button answer)
+
+```
+Validated
+```
+
+## 504. Open the PR (button answer)
+
+```
+Open the PR
+```
+
+## 505. Merge PR #88 when green (button answer)
+
+```
+Merge when green
+```
+
+### Summary (prompts 498–505)
+
+- **Goal:** validate REC-007 (the recipe panel opens by itself after the first play-through) with the `validate-backlog` flow, after the REC-006 and REC-022 split.
+- **Changes:**
+  - **Backlog:** `backlog/E02-recipe-every-video.md`: REC-007 rewritten (9 criteria, all on tall screens, `blocked-by:REC-022`, the assumed note on "view" removed), with the Technical context and estimation notes updated; `backlog/validation-log.md` row.
+  - **Checklist:** `docs/checklist.md` story counts (11 still flagged).
+  - **PR:** #88, merged.
+- **Result:** REC-007 is validated (estimates 3/3, size warning: 3 points against `size:S`, label unchanged). Decisions: auto-open applies only on tall screens (with room beside the video the panel is always open, so nothing changes); a view belongs to a slide (cycle plus YouTube ID) and ends on swipe-away, per tab and in memory; the auto-open happens at most once per view and counts as used when the panel was already shown, never reopens after a manual close, and is skipped after a manual open; the count uses the `videoended` event of the active slide. 11 stories are validated and 11 remain flagged. REC-005's first check is still paused and unlogged.
+- **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, two runs; `estimate-story` ran in the main session) · Haiku 5.5, effort low (`doc-checker`: this log).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent, and the choices (tall screens only, the once-per-view rules, the estimate, the merge) stay with the user.
