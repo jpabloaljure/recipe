@@ -32,7 +32,7 @@ timeout. See proposal.md for why.
 
 1. **The feed state gains a status, the skipped IDs and a skip counter.**
    `FeedState` adds `status` (`loading`, `empty`, `error`, `ready`), `skipped`
-   (a set of YouTube IDs) and `skipsInARow`. `buildSlides` drops skipped IDs and
+   (a set of YouTube IDs) and `skipsInARow`. The count starts over when a video plays or when a gesture moves to another video (a video that never played and was swiped away must not count towards the next skips). `buildSlides` drops skipped IDs and
    `appendPage` ignores them, so no later page or Retry puts a dropped video
    back. A dropped video is removed by ID, so it leaves every repeat of the list.
    Alternative: remove by slide key only; rejected because the repeats would
@@ -77,14 +77,16 @@ timeout. See proposal.md for why.
 
 6. **Dropping a slide keeps the watched video on screen.** Slides repeat per
    cycle and the scroll position is a pixel offset, so dropping a slide above
-   the active one would show a different video. On every skip the feed finds the
-   new index of the active video's key and sets `scrollTop` with no animation,
-   only when that index changed, and the feed element sets
-   `overflow-anchor: none` so the browser does not adjust too. When the active
-   video itself is dropped, its slot is taken by the next video at the same
-   `scrollTop`, so nothing scrolls. Alternative: rely on the browser's scroll
-   anchoring; rejected because it is not reliable when the anchor node is the one
-   removed.
+   the active one could show a different video. On every skip the feed finds the
+   new index of the active video's key and updates its active index at once;
+   Chromium's scroll-snap keeps the snapped slide through the layout change
+   (checked: the E2E test passes without any `scrollTop` assignment), and
+   `overflow-anchor: none` on the feed keeps the browser's scroll anchoring from
+   adjusting too. When the active video itself is dropped, its slot is taken by
+   the next video at the same position, so nothing scrolls. Alternatives: an
+   explicit `scrollTop` assignment (built first, then removed because no test
+   needs it) and relying on scroll anchoring (not reliable when the anchor node
+   is the one removed).
 
 7. **Retry after skips starts over.** Retry on the "Oops" message shown after
    skips clears `skipped`, `visit` and the cursor, and requests the first page;
@@ -115,8 +117,8 @@ IFrame Player API is already ADR 0008.
   frame), and the criterion is revised.
 - **A repeated "Oops" after Retry can look like nothing happened** → accepted:
   the first page is cached for up to an hour (PERF-6).
-- **Setting `scrollTop` after a removal can fight the scroll-snap** → it is
-  applied only when the active index changed, with no animation; the second
-  cycle E2E scenario guards it.
+- **The browser's own re-snap after a removal is what keeps the watched video
+  in place** → the second-cycle E2E scenario guards it (four videos, so the
+  list length does not divide the shift).
 - **A slow request that is aborted could still arrive** → the abort cancels the
   fetch; a late page for a cursor that already failed is ignored.

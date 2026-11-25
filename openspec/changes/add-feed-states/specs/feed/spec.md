@@ -110,8 +110,8 @@ position of the list is dropped, also when I am in a later repeat of the list.
 ### Requirement: Repeated skips end in the error message
 After 3 videos in a row were dropped, or when no video is left and no next page
 exists, the feed SHALL show the "Oops, something went wrong" message with a
-Retry button. A video that becomes active and plays ends the count of videos
-dropped in a row. Retry after such a message SHALL forget the videos dropped in
+Retry button. A video that becomes active and plays, or a gesture that moves to another
+video, ends the count of videos dropped in a row. Retry after such a message SHALL forget the videos dropped in
 this visit and request the first page again.
 
 #### Scenario: Three in a row

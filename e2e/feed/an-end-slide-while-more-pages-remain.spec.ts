@@ -42,7 +42,7 @@ test("feed › An end slide while more pages remain › Retry the next page", as
   await endSlide(page).getByRole("button", { name: "Retry" }).click();
 
   await expect(endSlide(page).getByTestId("feed-loading")).toBeVisible();
-  expect(requested.length).toBe(before + 1);
+  await expect.poll(() => requested.length).toBe(before + 1);
   releaseHeld(behavior);
 });
 

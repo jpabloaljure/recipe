@@ -59,7 +59,7 @@ test("feed › The first page shows its state › Retry the first page", async (
   await statusView(page).getByRole("button", { name: "Retry" }).click();
 
   await expect(statusView(page).getByTestId("feed-loading")).toBeVisible();
-  expect(requested).toEqual([null, null]);
+  await expect.poll(() => requested).toEqual([null, null]);
   releaseHeld(behavior);
 });
 
@@ -72,10 +72,14 @@ test("feed › The first page shows its state › Retry is ignored while a reque
   await expect(retry).toBeVisible();
   behavior.failures.first = "hold";
 
-  await retry.dblclick();
+  // Two clicks in one tick, before React has replaced the button: only the first may start a request.
+  await retry.evaluate((button) => {
+    (button as HTMLButtonElement).click();
+    (button as HTMLButtonElement).click();
+  });
 
   await expect(statusView(page).getByTestId("feed-loading")).toBeVisible();
   releaseHeld(behavior);
   await expect(slides(page).first()).toBeAttached();
-  expect(requested).toEqual([null, null]);
+  await expect.poll(() => requested).toEqual([null, null]);
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   activeIndexFrom,
   appendPage,
@@ -58,8 +58,24 @@ export function Feed() {
   // What event handlers read: updated at once, so two events in one tick see each other's change.
   const current = useRef({ state, activeIndex });
   current.current = { state, activeIndex };
-  // Set by a skip: the slide index to scroll to (without animation) once the list has changed.
-  const pendingScroll = useRef<number | null>(null);
+
+  // Every state change goes through here, so `current` already holds it when the next event arrives.
+  const update = useCallback((change: (previous: FeedState) => FeedState) => {
+    const next = change(current.current.state);
+    if (next === current.current.state) return;
+    current.current = { ...current.current, state: next };
+    setState(next);
+  }, []);
+
+  // A gesture that lands on another video ends the count of videos skipped in a row (a skip alone does not).
+  const moveTo = useCallback(
+    (index: number) => {
+      if (index !== current.current.activeIndex) update(videoPlayed);
+      current.current = { ...current.current, activeIndex: index };
+      setActiveIndex(index);
+    },
+    [update],
+  );
 
   const load = useCallback(
     (cursor: string | null) => {
@@ -71,16 +87,16 @@ export function Feed() {
           if (generation.current !== mine) return;
           // Shuffle here, once per arrival, not inside the updater (REC-002, API-2).
           const shuffled = shuffleFeedPage(page);
-          setState((previous) => appendPage(previous, shuffled));
+          update((previous) => appendPage(previous, shuffled));
         })
         .catch(() => {
           if (generation.current !== mine) return;
           // The cursor is freed so the silent retry or the retry row can ask again.
           requests.current.fail(cursor);
-          setState(pageFailed);
+          update(pageFailed);
         });
     },
-    [source],
+    [source, update],
   );
 
   // First page on mount.
@@ -93,13 +109,13 @@ export function Feed() {
 
   // Coming back to a video near the end retries a failed page without a tap.
   useEffect(() => {
-    setState((previous) => silentRetry(previous, activeIndex));
-  }, [activeIndex]);
+    update((previous) => silentRetry(previous, activeIndex));
+  }, [activeIndex, update]);
 
   // After the catalog ends, keep more slides ahead so the feed wraps to the first video.
   useEffect(() => {
-    setState((previous) => ensureCycles(previous, activeIndex));
-  }, [activeIndex, state.catalogEnded, state.visit.length]);
+    update((previous) => ensureCycles(previous, activeIndex));
+  }, [activeIndex, state.catalogEnded, state.visit.length, update]);
 
   // Active slide from the settled scroll position: on `scrollend`, on any
   // `scroll` event that lands on a slide boundary (`scrollend` can fire before
@@ -108,31 +124,22 @@ export function Feed() {
   useEffect(() => {
     const element = scroller.current;
     if (!element) return;
-    const update = () => setActiveIndex(activeIndexFrom(element.scrollTop, element.clientHeight));
+    const settle = () => moveTo(activeIndexFrom(element.scrollTop, element.clientHeight));
     const onScroll = () => {
       const settled = settledIndexFrom(element.scrollTop, element.clientHeight);
-      if (settled !== null) setActiveIndex(settled);
+      if (settled !== null) moveTo(settled);
     };
-    update();
-    element.addEventListener("scrollend", update);
+    settle();
+    element.addEventListener("scrollend", settle);
     element.addEventListener("scroll", onScroll, { passive: true });
-    const resize = new ResizeObserver(update);
+    const resize = new ResizeObserver(settle);
     resize.observe(element);
     return () => {
-      element.removeEventListener("scrollend", update);
+      element.removeEventListener("scrollend", settle);
       element.removeEventListener("scroll", onScroll);
       resize.disconnect();
     };
-  }, []);
-
-  // A skip moved slides above the watched video: put the scroll position back on it, with no animation.
-  useLayoutEffect(() => {
-    const target = pendingScroll.current;
-    const element = scroller.current;
-    if (target === null || !element) return;
-    pendingScroll.current = null;
-    element.scrollTop = target * element.clientHeight;
-  });
+  }, [moveTo]);
 
   const slides = buildSlides(state);
   const showSlides = state.status === "ready";
@@ -150,9 +157,9 @@ export function Feed() {
 
   // The active video plays: the count of videos skipped in a row starts over, and the next video is warmed up.
   const activePlaying = useCallback(() => {
-    setState(videoPlayed);
+    update(videoPlayed);
     warmUpNext();
-  }, [warmUpNext]);
+  }, [update, warmUpNext]);
 
   // The active slide and the sound state reach every player; the others stop first.
   useEffect(() => {
@@ -200,9 +207,9 @@ export function Feed() {
     if (after === before) return;
     const slidesAfter = buildSlides(after);
     // The active video's own slot goes to the next video; otherwise follow the watched slide's key.
+    // The browser's scroll-snap keeps the snapped slide through the change (checked in Chromium).
     const watched = wasActive ? -1 : slideIndexOfKey(slidesAfter, slidesBefore[index]?.key ?? null);
     const target = watched >= 0 ? watched : Math.min(index, slidesAfter.length);
-    if (target !== index) pendingScroll.current = target;
     current.current = { state: after, activeIndex: target };
     setState(after);
     setActiveIndex(target);
@@ -297,7 +304,7 @@ export function Feed() {
               Loading more…
             </p>
           ) : (
-            <button type="button" className={styles.retry} onClick={() => setState(retryNextPage)}>
+            <button type="button" className={styles.retry} onClick={() => update(retryNextPage)}>
               Retry
             </button>
           )}
