@@ -137,7 +137,7 @@ Autoplay rules are checked manually on Chrome for Android and desktop.
 AI estimate (2026-11-23): 5. Calibration: REC-001 (team 5) is the nearest slice: a frontend feed with a stubbed source and E2E tests. REC-003 has no server side, but 10 criteria, each needing a stubbed-player E2E test, and it replaces the plain embed with the player's script API (autoplay, mute state, ended events, visibility handling), which REC-001 did not need. Risks that move it: the stubbed player in `e2e/support/` has to fake the player API (state changes, mute, blocked autoplay), which is new work (assumed: no stub exists yet); and whether the loop mode reports each end is `(inferred)`, where fallback B adds code and a possible gap. It would go to 8 if the player stub turns out to be large. Size check: 5 matches `size:M`, no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-004 · Instant transition to the next video
-- **Status:** in-progress
+- **Status:** done
 - **Labels:** module:playback, type:feature, size:M, layer:frontend
 - **PRD:** PERF-3, PERF-5
 - **Flags:** —
@@ -173,6 +173,8 @@ L: tight latency target combined with a hard cap on live players.
 Highest technical risk in E01; validated on device by REC-015.
 
 AI estimate (2026-11-23): 3. Calibration: REC-003 (team 5, AI 5) is the nearest story and builds the part REC-004 used to own: one player per mounted iframe, paused and muted, the fake `iframe_api` and the `livePlayers` helper. What is left here is two E2E tests (AC2: the swiped-to player was already ready; AC3: at most three live players after a swipe, using `livePlayers`), a manual 500 ms measurement on a real mid-range phone, and a first task that measures a paused neighbour's start time on the real player. Risks that move it: if that measurement shows a paused, never-started neighbour does not start within 500 ms, the story needs real preloading work (for example loading the neighbour's data through the player API) and could be 5 or 8 (this is the open risk, `(inferred)` from how embeds buffer); and the story waits on REC-003's code, so its estimate assumes REC-003's player, fake and helper land as designed (assumed). Size check: warning, 3 does not match `size:L` (8); the label is not changed. The L label was set before REC-003's change took over per-slide players, so the team may want to re-size it to M. This is one voice; the team's estimate comes from your discussion, not from averaging.
+
+Outcome (2026-11-24): the label was re-set to M. The open risk happened: a paused neighbour started in 1057-1334 ms on the phone, so the story also needed the warm-up (controller logic, wiring, unit and E2E tests), which is more than the 3 points estimated (the "5 or 8" case above). The estimates are kept as validated.
 
 ## REC-005 · Daily discovery of new candidate videos
 - **Status:** todo
