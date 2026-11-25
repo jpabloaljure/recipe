@@ -51,9 +51,9 @@ AI estimate (2026-11-24): 3. Calibration: REC-004 (team 3, AI 3) is the nearest 
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
-- **Flags:** split-from:REC-006; needs-human-validation; blocked-by:REC-006
-- **AI estimate:** —
-- **Estimate:** —
+- **Flags:** split-from:REC-006; blocked-by:REC-006
+- **AI estimate:** 5
+- **Estimate:** 5
 
 As a home cook on my phone in portrait, I want to open the recipe from a button that does not cover the video's controls, so that I can read it while the video keeps playing.
 
@@ -89,6 +89,8 @@ Split from REC-006 on 2026-11-24 (its validation, N5 A). Decisions from that val
 
 ### Estimation notes
 M: a button placed relative to another control, a translucent sheet with free control zones (a layout risk tuned on a real phone), a feed spec amendment and the rotation change. Split from REC-006 by behavior.
+
+AI estimate (2026-11-24): 5. Calibration: REC-006 (AI 3, team 3) is the base this story reuses (the panel and its content); REC-003 (team 5, AI 5) is the nearest for the hard part, because its unmute button placement needed several rounds of calibration on a real Android phone and desktop Chrome, and this story places a second button relative to that one. REC-018 (team 5) has a similar count of criteria (16 here), though with more state logic. What is here: a button positioned above another control, a translucent sheet with free control zones for the player, 14 automatable criteria with E2E tests on the three projects, two manual checks, the rotation in both directions, and the `feed` spec amendment (a layer over the video that catches taps outside the free zones). Risks that move it: the placement and the free-zone sizes can only be settled on a real phone (REC-003 needed repeated passes, `(inferred)` from its history); and a swipe that starts in a free zone must move the feed while a swipe on the sheet must not (the same scroll-snap gesture area that REC-001 found sensitive); if either fights the existing feed it could go to 8. I have no information about the sheet's visual design, `(assumed)` plain. Size check: 5 matches `size:M` (3-5), no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-007 · Panel opens automatically after the first play-through
 - **Status:** todo
