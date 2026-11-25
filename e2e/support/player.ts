@@ -27,6 +27,7 @@ type FakePlayer = {
   calls: string[];
   destroyed: boolean;
   _set(state: number): void;
+  _error(code: number): void;
 };
 type FakeApi = { players: FakePlayer[]; blockUnmutedAutoplay: boolean; stateName(code: number): string };
 
@@ -54,6 +55,11 @@ export async function livePlayers(page: Page): Promise<FakePlayerInfo[]> {
 export async function playerOf(page: Page, youtubeId: string): Promise<FakePlayerInfo | null> {
   const found = await page.evaluate(liveInfo, youtubeId);
   return found[0] ?? null;
+}
+
+/** Waits until the app has created the player of this video. */
+export async function expectPlayerExists(page: Page, youtubeId: string): Promise<void> {
+  await expect.poll(async () => (await playerOf(page, youtubeId)) !== null).toBe(true);
 }
 
 /** Waits until the player exists and shows `state` and `muted`. */
@@ -99,6 +105,39 @@ export async function emitUserPause(page: Page, youtubeId: string): Promise<void
     const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
     fake.players.find((p) => !p.destroyed && p.youtubeId === id)?._set(2);
   }, youtubeId);
+}
+
+/** The player of one video reports a YouTube error code (100: removed or private; 101, 150: embedding off). */
+export async function emitError(page: Page, youtubeId: string, code: number): Promise<void> {
+  await page.evaluate(
+    ({ id, errorCode }) => {
+      const fake = (window as unknown as { __youTubeFake: FakeApi }).__youTubeFake;
+      fake.players.find((p) => !p.destroyed && p.youtubeId === id)?._error(errorCode);
+    },
+    { id: youtubeId, errorCode: code },
+  );
+}
+
+/**
+ * Before the feed opens: the players of these videos report the given error code
+ * as soon as they are created, as a real player does for a removed video.
+ * Call it before `page.goto`.
+ */
+export async function failVideos(page: Page, codes: Record<string, number>): Promise<void> {
+  await page.addInitScript((failing) => {
+    (window as unknown as { __youTubeFailing: Record<string, number> }).__youTubeFailing = failing;
+  }, codes);
+}
+
+/**
+ * Before the feed opens: the players of these videos report the error code when
+ * they are asked to play, so a video fails only once it becomes the active one.
+ * Call it before `page.goto`.
+ */
+export async function failVideosOnPlay(page: Page, codes: Record<string, number>): Promise<void> {
+  await page.addInitScript((failing) => {
+    (window as unknown as { __youTubeFailOnPlay: Record<string, number> }).__youTubeFailOnPlay = failing;
+  }, codes);
 }
 
 /** From now on the browser refuses sound: unmuting a playing video pauses it. */
