@@ -56,7 +56,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 
 ### 5.3 Recipe panel
 - With room for the panel the panel is always open and has no button. Without it, the panel is opened from a "Recipe" button (above the unmute button's place) and closed with its close button; the sheet is semi-transparent over the video and leaves the player's top and bottom controls free.
-- **Where the sheet is used, it opens automatically when the video ends for the first time** (at the start of its first repeat). This happens once per video per view. If the user closes the panel, it does not reopen on later loops.
+- **Where the sheet is used, it opens automatically when the video ends for the first time** (at the start of its first repeat). This happens once per video per view, and it is used up when the panel or the sheet is already shown at that first end or was opened or closed by hand earlier in the view. If the user closes the sheet, it does not reopen on later loops.
 - Contents (MVP):
   - **Servings**
   - **Ingredients** (with quantities)
