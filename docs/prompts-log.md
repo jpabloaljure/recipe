@@ -3293,3 +3293,184 @@ Backlog validation REC-006 and REC-022
 - **Result:** REC-006 is validated (estimates 3/3) as the wide-screen panel, and the new REC-022 (estimates 5/5, `split-from:REC-006`, `blocked-by:REC-006`) holds the Recipe button above the unmute button and the translucent sheet that leaves the player's control zones free. A first check of REC-005 (12 findings) was shown but not answered, so it stays flagged and unlogged. A comparison of the PRD's UI with the 21 stories found six gaps (Favorites entry point and navigation, placement of the action buttons, the panel on a landscape phone, the Favorites list for removed videos, browser back behavior, app identity), none handled yet. REC-007 is still to be revisited (it will get `blocked-by:REC-022`). 10 stories are validated and 12 remain flagged.
 - **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, six runs: REC-005 and five for REC-006 and REC-022; `estimate-story` ran in the main session) · Haiku 5.5, effort low (`doc-checker`: this log).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc check stays on the cheap Haiku agent, and the choices (layout, the split, the estimates, the merges) stay with the user.
+
+## 470. Explore REC-018 against the code
+
+```
+/openspec-explore REC-018
+```
+
+## 471. Ask for the three solutions in short
+
+```
+in short what wil be your 3 solutuons for the 3 threads?
+```
+
+## 472. Ask whether new test data is needed
+
+```
+do we need test data or the loaded videos wee already have in database are enogh?
+```
+
+## 473. Take the three solutions
+
+```
+i will go with your 3 options on the threads
+```
+
+## 474. Approve the story edits (answer to a yes/no question)
+
+```
+yes
+```
+
+## 475. Re-check the story (button answer)
+
+```
+Re-check
+```
+
+## 476. Choose the options for the reopening findings
+
+```
+#3 B, the rest A
+```
+
+## 477. Ask for the re-check
+
+```
+done
+```
+
+## 478. Approve the acceptance criteria
+
+```
+A approved
+```
+
+## 479. Validate the story
+
+```
+validated
+```
+
+## 480. Merge PR #81
+
+```
+merge
+```
+
+## 481. Propose the change for REC-018
+
+```
+/openspec-propose REC-018
+```
+
+## 482. Apply the change
+
+```
+/openspec-apply-change
+```
+
+## 483. Run the AI review (button answer)
+
+```
+Run AI review
+```
+
+## 484. Fix all five findings (button answer)
+
+```
+Fix all five
+```
+
+## 485. Ask whether a new review is needed
+
+```
+do we need a new pr review after the fixes?
+```
+
+## 486. Run it
+
+```
+yes
+```
+
+## 487. Fix one finding and review again
+
+```
+yes second and review again
+```
+
+## 488. Ask whether anything is left to fix
+
+```
+is there anything yo fix yet?
+```
+
+## 489. Fix the two nits and update the PR
+
+```
+fix the 2 and update the pr 82
+```
+
+## 490. Merge PR #82
+
+```
+Merge
+```
+
+## 491. Ask for the manual check steps
+
+```
+what are my steps for the manual checks?
+```
+
+## 492. Ask what happens offline
+
+```
+what should happen if i disconnect internet?
+```
+
+## 493. Report black screens
+
+```
+im only seeing black seeing black screens no the desire mesages or buttons.
+```
+
+## 494. Ask whether changing the video ID is a good test
+
+```
+im just ading an _ after the videos youtube ID is that a good test?
+```
+
+## 495. Report the manual tests
+
+```
+3 tests passed
+```
+
+## 496. Confirm the manual check answers
+
+```
+1,2,3,4,5 ok
+```
+
+## 497. Merge PR #86 when green (button answer)
+
+```
+Merge when green
+```
+
+### Summary (prompts 470–497)
+
+- **Goal:** take REC-018 (feed states and skipped videos) from a validated story to `done`: explore it against the code, re-validate it, plan and build the OpenSpec change `add-feed-states`, review and merge it, run the manual checks, and archive the change.
+- **Changes:**
+  - **Backlog:** `backlog/E01-browse-feed.md`: REC-018 reopened and re-validated (16 criteria; Retry after skips starts over; the watched video stays on screen; no `blocked-by` since REC-004 is done), then set to `done`; `docs/checklist.md` rows 9, 13 and 21.
+  - **OpenSpec:** change `add-feed-states` (proposal, `feed` and `playback` deltas, design, 23 tasks), synced into `openspec/specs/` and archived to `openspec/changes/archive/2026-11-24-add-feed-states/`.
+  - **Code:** `src/app/feed/Feed.tsx` (status view, end slide, skipping, one `update` function for state changes), `src/lib/feed/feed-state.ts` (status, skipped IDs, skip count, gesture reset), `src/lib/feed/http-source.ts` (10-second timeout), `src/lib/player/youtube-player.ts` (player errors 100, 101, 150), and the CSS.
+  - **Tests:** 191 unit tests; six new E2E files plus `no-autoscroll.spec.ts`; error, failure and stub support on the fake player and the stubbed feed.
+  - **PRs:** #81 (story update), #82 (implementation), #86 (archive), all merged.
+- **Result:** REC-018 is `done`. Three AI review runs: the first found five issues and the second three (eight in all, every one fixed and resolved), and the third, after the last fix, found none. CI green on every PR and the production smoke run for #82 green. The owner checked it on the production site: all five manual checks OK, with no IDs, codes or timings recorded. A video that never loads and autoplay refused when muted stay in drafts D-19 and D-20. Prompt 493 (black video frames after going offline mid-visit) is a video that never loads, which falls under D-20's failed or slow videos; D-20 does not name offline, and a "No connection" notice was suggested but not decided.
+- **Models:** Sonnet 5.5 (main session) · Sonnet 5.5, effort medium (`story-validator`, two runs; `code-review` at medium effort, three runs in the main session) · Haiku 5.5, effort low (`doc-checker`: the change's artifacts, then the archive close-out files, then this log).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent and the choices stay with the user.
