@@ -25,6 +25,7 @@ cooking videos (Shorts), each with an easy written recipe.
 5. [User stories](#5-user-stories)
 6. [Work tickets](#6-work-tickets)
 7. [Pull requests](#7-pull-requests)
+8. [Estado final del MVP](#8-estado-final-del-mvp)
 
 **More documentation:** [how this project is built with AI](docs/ai-workflow.md)
 · [documentation map](docs/README.md)
@@ -108,7 +109,9 @@ Setup details, the database, E2E tests and testing a deployed site:
 Two paths: a **request path** (browser → Vercel CDN → Next.js API → Postgres,
 with cached feed responses) and a **batch path** (a daily GitHub Actions job
 that finds videos, extracts recipes with an LLM and writes to Postgres). The
-LLM is never called while a user is browsing.
+LLM is never called while a user is browsing. The request path is built; the
+batch path is the plan (REC-005, REC-008): today a manual workflow loads a
+curated list of Shorts and placeholder recipes.
 
 Diagrams (C4 model, Mermaid): [docs/architecture/](docs/architecture/README.md)
 · Reasons, benefits and trade-offs: [ADRs](docs/adr/README.md).
@@ -271,3 +274,9 @@ Tickets are backlog stories with a `layer:` label (no separate tracker; see
 - [#100 REC-022: Recipe button and sheet](https://github.com/jpabloaljure/recipe/pull/100):
   the recipe on a phone in portrait, with 23 new E2E tests and an AI review
   whose three findings were fixed before merge.
+
+---
+
+## 8. Estado final del MVP
+
+Hasta ahora lograste que el MVP funcione de punta a punta en producción: una persona abre la app y desliza por 24 Shorts de cocina reales que salen de Postgres en Neon, ve cada video arrancar solo y en silencio y le activa el sonido con un toque, y lee la receta junto al video, en un panel donde hay espacio o desde un botón «Receta» que abre una hoja sobre el video en el celular en vertical. Además quedó montada la infraestructura (despliegue en Vercel, migraciones, CI con tests unitarios, de base de datos y end-to-end, y verificación automática tras cada despliegue), la documentación final con guía de verificación y capturas. Para cumplir el MVP completo faltan principalmente la extracción real de recetas con un LLM (hoy las 21 recetas son de relleno escritas a partir del título, y falta elegir el proveedor), el descubrimiento diario de videos nuevos para ampliar el catálogo hasta unas 50 recetas, favoritos y compartir con enlaces directos a una receta, la apertura automática del panel tras el primer video, la versión del botón para ventanas de escritorio estrechas, y las pruebas de rendimiento y precisión en un celular real.
