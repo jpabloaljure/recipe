@@ -46,7 +46,7 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 ### 5.1 Feed
 - Vertical, full-screen feed with one video at a time (Shorts style).
 - **No autoscroll.** The user scrolls or swipes to move to the next or previous video. The one exception: a video that cannot be played (removed, private or not embeddable) is skipped, and the next video takes its place.
-- The layout follows the space beside the video. With room beside it (desktop, or a phone in landscape) the vertical video is centered and the recipe panel is always open beside it. On a tall screen (a phone in portrait) the panel is a sheet that opens from a "Recipe" button.
+- The layout follows the space beside the video. With room for the panel beside it (about 260 px on each side: desktop, or a larger phone in landscape) the vertical video is centered and the recipe panel is always open to its left. Without that room (a phone in portrait, or a narrow window) the panel is a sheet that opens from a "Recipe" button.
 
 ### 5.2 Playback
 - **Autoplay** when a video becomes the active one in the feed.
@@ -55,8 +55,8 @@ Short cooking videos are fun to watch but hard to cook from. The recipe is fast,
 - Videos that scroll out of view are paused.
 
 ### 5.3 Recipe panel
-- With room beside the video the panel is always open and has no button. On a tall screen it is opened from a "Recipe" button (above the unmute button's place) and closed with its close button; the sheet is semi-transparent over the video and leaves the player's top and bottom controls free.
-- **On a tall screen it opens automatically when the video ends for the first time** (at the start of its first repeat). This happens once per video per view. If the user closes the panel, it does not reopen on later loops.
+- With room for the panel the panel is always open and has no button. Without it, the panel is opened from a "Recipe" button (above the unmute button's place) and closed with its close button; the sheet is semi-transparent over the video and leaves the player's top and bottom controls free.
+- **Where the sheet is used, it opens automatically when the video ends for the first time** (at the start of its first repeat). This happens once per video per view. If the user closes the panel, it does not reopen on later loops.
 - Contents (MVP):
   - **Servings**
   - **Ingredients** (with quantities)
