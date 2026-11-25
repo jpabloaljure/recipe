@@ -145,6 +145,12 @@ A `needs_recipe` video has no recipe panel (PRD §5.3, PERF-4).
 
 ## Notes
 
+- **Placeholder recipes.** The 21 curated Shorts that have one carry a dummy
+  recipe written from their title (`scripts/db/curated-recipes.json`, loaded
+  once), with source `description` and the dish name as `title`. They are not
+  extracted from the video, they stay until reverted, and real extraction
+  never replaces them (ING-3 skips known videos). See
+  [development.md](../development.md#placeholder-recipes-for-the-curated-shorts).
 - **Enforced by the database.** A unique `youtube_id`; the required fields
   (a duration, embeddable flag and language unless the video is `rejected`);
   the status and source values; the recipe columns and lists; and Rules 2 and 4
