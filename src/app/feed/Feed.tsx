@@ -210,23 +210,22 @@ export function Feed() {
     // The browser's scroll-snap keeps the snapped slide through the change (checked in Chromium).
     const watched = wasActive ? -1 : slideIndexOfKey(slidesAfter, slidesBefore[index]?.key ?? null);
     const target = watched >= 0 ? watched : Math.min(index, slidesAfter.length);
-    current.current = { state: after, activeIndex: target };
-    setState(after);
+    update(() => after);
+    current.current = { ...current.current, activeIndex: target };
     setActiveIndex(target);
-  }, []);
+  }, [update]);
 
   // Retry on the error view: start over, as on a first load.
   const retryAll = useCallback(() => {
     if (current.current.state.status !== "error") return; // a second tap while the first runs
     generation.current += 1;
     requests.current = new PageRequests();
-    const fresh = restart();
-    current.current = { state: fresh, activeIndex: 0 };
-    setState(fresh);
+    update(restart);
+    current.current = { ...current.current, activeIndex: 0 };
     setActiveIndex(0);
     if (scroller.current) scroller.current.scrollTop = 0;
     load(null);
-  }, [load]);
+  }, [load, update]);
 
   const endMode = endSlideMode(state);
 
