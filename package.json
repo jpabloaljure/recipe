@@ -15,6 +15,7 @@
     "db:setup": "node scripts/db/setup-roles.mts",
     "db:seed": "node scripts/db/seed.mts",
     "db:load-curated": "node scripts/db/load-curated.mts",
+    "db:load-recipes": "node scripts/db/load-recipes.mts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },
