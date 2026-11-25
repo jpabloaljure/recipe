@@ -193,7 +193,7 @@ AI estimate (2026-11-25, after the criteria were approved): 5. Calibration: REC-
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.3
-- **Flags:** needs-human-validation; blocked-by:REC-022; blocked-by:REC-023
+- **Flags:** blocked-by:REC-022; blocked-by:REC-023
 - **AI estimate:** 3
 - **Estimate:** 3
 
