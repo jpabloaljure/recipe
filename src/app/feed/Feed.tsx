@@ -318,7 +318,7 @@ export function Feed() {
           </section>
         )}
       </div>
-      <RecipePanel youtubeId={activeItem?.youtubeId ?? null} recipe={activeItem?.recipe ?? null} />
+      <RecipePanel slideKey={activeKey} youtubeId={activeItem?.youtubeId ?? null} recipe={activeItem?.recipe ?? null} />
     </>
   );
 }

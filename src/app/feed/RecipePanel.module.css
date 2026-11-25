@@ -17,9 +17,17 @@
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    /* 16px from the screen edge, 16px from the video; at most 400px wide. */
+    /*
+     * 16px from the screen edge, 16px from the video; at most 400px wide. The slide
+     * pads itself by the safe-area insets and centers the video in what is left, so
+     * the video's left edge moves by (left - right) / 2: taking half of both insets
+     * off the width keeps the 16px gap on a phone with a display cutout.
+     */
     left: calc(env(safe-area-inset-left) + 16px);
-    width: min(400px, calc((100vw - 56.25vh) / 2 - 32px));
+    width: min(
+      400px,
+      calc((100vw - 56.25vh) / 2 - 32px - (env(safe-area-inset-left) + env(safe-area-inset-right)) / 2)
+    );
     max-height: calc(100dvh - 32px);
     z-index: 1;
     color: #f2f2f2;
@@ -36,7 +44,8 @@
 
 .body {
   box-sizing: border-box;
-  max-height: calc(100dvh - 32px);
+  /* The panel's 1px border takes 2px of its own max-height. */
+  max-height: calc(100dvh - 34px);
   padding: 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
