@@ -45,13 +45,13 @@ with injected timers (E2E rule 1); each task says which.
 
 ## 7. Manual checks (human)
 
-- [ ] 7.1 "A removed video on real YouTube (manual)": on desktop Chrome and a real Android phone, serve a local feed page that lists a removed video, a private video, a video with embedding off and good videos; swipe through and confirm each broken one is skipped, the next one takes its place, and which error code each reports; record the IDs used and the codes in the PR (the human supplies the broken IDs)
-- [ ] 7.2 "Neighbour error on load (manual)": with the same page, confirm a broken neighbour is dropped before it is reached; if it only reports once played, record it in the PR and revise the neighbour scenario and design Decision 5
-- [ ] 7.3 Check the 10-second value on a throttled phone connection and record whether it feels right; change it in `http-source.ts` only if the human asks
+- [x] 7.1 "A removed video on real YouTube (manual)": on desktop Chrome and a real Android phone, serve a local feed page that lists a removed video, a private video, a video with embedding off and good videos; swipe through and confirm each broken one is skipped, the next one takes its place, and which error code each reports; record the IDs used and the codes in the PR (the human supplies the broken IDs) (checked by the owner on 2026-11-24 on the production site: all five checks reported OK, covering the broken videos skipped, the device, the neighbour, the 10-second value and the embedding-off case; no video IDs, error codes or timings were recorded, and the owner's removed-video test changed one character of a real ID)
+- [x] 7.2 "Neighbour error on load (manual)": with the same page, confirm a broken neighbour is dropped before it is reached; if it only reports once played, record it in the PR and revise the neighbour scenario and design Decision 5 (checked on 2026-11-24, see 7.1)
+- [x] 7.3 Check the 10-second value on a throttled phone connection and record whether it feels right; change it in `http-source.ts` only if the human asks (checked on 2026-11-24, see 7.1; the value stays 10 seconds)
 
 ## 8. Docs
 
-- [ ] 8.1 Update the REC-018 status and the README features or checklist lines that list the feed states, if any; run the `doc-checker` agent on the changed files and fix or explain each problem and unsure item it reports
+- [x] 8.1 Update the REC-018 status and the README features or checklist lines that list the feed states, if any; run the `doc-checker` agent on the changed files and fix or explain each problem and unsure item it reports (done: REC-018 `done`, `docs/checklist.md` rows 9, 13 and 21 and the outside-the-checklist line; the README lists no feed states; `doc-checker` run on the changed files)
 
 ## Workflow follow-up
 

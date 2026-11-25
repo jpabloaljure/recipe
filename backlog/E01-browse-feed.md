@@ -200,7 +200,7 @@ L: YouTube API quota (search calls are expensive) shapes the whole job.
 Depends on the open decision about seed channels and queries.
 
 ## REC-018 · Feed handles empty, error and unavailable states
-- **Status:** in-progress
+- **Status:** done
 - **Labels:** module:feed, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 6.4, 9 (videos removed after ingestion)
 - **Flags:** split-from:REC-001
@@ -236,7 +236,7 @@ Decisions 2026-11-24 (validation):
 - The skip is per visit only: the broken video is dropped from this visit's list and returns on the next visit, because the periodic check is out of the MVP (D-5). A manual check on a real removed or private video is a task of the change (E2E rule 13). A deep-linked video (REC-014) or one with the recipe panel open (REC-007) that fails gets the same skip; REC-014 may refine it.
 
 Decisions 2026-11-24 (re-check against the merged REC-003 code, "All A"):
-- **Skip vs "No autoscroll" (#5 A):** the skip removes the broken slide from the list, so the next video takes its place. It is the one exception to "No autoscroll", already promised by PRD §9. The change adds a delta to the feed spec (the "No autoscroll" and "One video per gesture" requirements) and PRD 5.1 gets one line.
+- **Skip vs "No autoscroll" (#5 A):** the skip removes the broken slide from the list, so the next video takes its place. It is the one exception to "No autoscroll", already promised by PRD §9. The change adds a delta to the feed spec (the "No autoscroll" and "One video per gesture" requirements); PRD 5.1 got its one line in PR 77.
 - **Which errors skip (#3, #4 A):** YouTube player error codes 100, 101 and 150 (removed, private, embedding off) skip the video. Any other code does nothing (D-20). Code 153 (referrer) is a bug, not a skip. The video is dropped by its YouTube ID from every cycle copy of the visit list. A skip after I have swiped away is silent. After 3 skips in a row, or when none remain, the "Oops, something went wrong" message and Retry are shown. The codes are confirmed in the manual check on real videos.
 - **Neighbours (#9 A):** any mounted player (active or neighbour) that reports one of those codes is handled the same way, so a known-broken video never becomes the active one. REC-004 (the player window and `SlideVideo`) is done and merged, so there is no `blocked-by`.
 - **Client and test work (#8, #10 A):** counted here: a first-page load state, a 10-second request timeout, `onError` in the player adapter and in the fake (`emitError(code)`), and `stubFeed` options for empty, 5xx, slow and offline. The 10-second rule is a Vitest test with an injected timer (E2E rule 1); E2E checks only the messages. Retry is ignored while a request is running.
@@ -245,7 +245,7 @@ Decisions 2026-11-24 (re-check against the merged REC-003 code, "All A"):
 - **Deep link and panel (#11, #12 A):** not part of REC-018's done; REC-014 and REC-007 reference this skip in their own criteria.
 
 Decisions 2026-11-24 (explore of REC-018 against the code after REC-004; the three threads, solutions accepted):
-- **Removing a slide keeps the active video in place:** slides repeat per cycle and the scroll position is a pixel offset, so removing a slide above the active one would show a different video. On every skip the feed finds the new index of the active video's key and sets `scrollTop` to it with no animation, only when that index changed; `overflow-anchor: none` on the feed keeps the browser from adjusting too. The E2E test includes a skip while in the second cycle.
+- **Removing a slide keeps the active video in place:** slides repeat per cycle and the scroll position is a pixel offset, so removing a slide above the active one could show a different video. On every skip the feed finds the new index of the active video's key and updates its active index at once; Chromium's scroll-snap keeps the snapped slide through the change (an explicit `scrollTop` step was built and then removed because no test needs it), and `overflow-anchor: none` on the feed keeps the browser from adjusting too. The E2E test includes a skip while in the second cycle, with four videos.
 - **Two components:** a centered status view for loading, "No recipes yet" and "Oops, something went wrong" (the feed renders no slides while it shows), and the end slide (an ordinary snap slide, only while the catalog is open) for the retry and loading rows.
 - **Neighbour errors:** assumed to fire when the player loads, not only when it plays; confirmed in the manual check. The neighbour criterion stays as written until then.
 - **After a successful Retry following skips (re-check #5, #6 A):** the feed replaces the list and the cursor with the new first page and starts at its first video, as on a first load. A repeated "Oops" is accepted: the first page is cached for up to an hour and can return the same broken videos.
