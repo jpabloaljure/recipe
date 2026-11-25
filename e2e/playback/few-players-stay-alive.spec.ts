@@ -13,6 +13,8 @@ test("playback › Few players stay alive › Swipe through the feed", async ({ 
   // Settled on slide 3 again: its own player and its two neighbours', and no more.
   await expect(page.getByTestId("feed-slide").nth(3)).toHaveAttribute("data-active", "true");
   await expect.poll(async () => (await livePlayers(page)).length).toBe(3);
+  // Settled: it stays at three or fewer, never more.
+  expect((await livePlayers(page)).length).toBeLessThanOrEqual(3);
 });
 
 test("playback › Few players stay alive › First video", async ({ page }) => {

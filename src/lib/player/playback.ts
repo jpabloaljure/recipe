@@ -85,7 +85,7 @@ export class SlidePlayback {
    * the tab is hidden (it is not retried: the video then starts cold).
    */
   warmUp(): void {
-    if (this.active || this.warmed || this.warming) return;
+    if (this.active || this.warmed || this.warming || this.hasPlayed) return; // a video that has played has its data
     this.warmRequested = true;
     if (this.ready) this.beginWarmUp();
   }
@@ -176,6 +176,8 @@ export class SlidePlayback {
     this.warming = false;
     this.warmed = true;
     this.pauseReason = "warmup";
+    // Set now: the player's paused event arrives later, and a swipe in between must not see "playing".
+    this.state = "paused";
     this.deps.player.pause();
     this.deps.player.seekTo(0);
   }

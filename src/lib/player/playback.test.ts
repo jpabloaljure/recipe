@@ -484,6 +484,23 @@ describe("warm-up of the next video", () => {
     expect(since(player, () => playback.setActive(true, true))).toEqual(["seekTo(0)", "mute", "play", "unMute"]);
   });
 
+  it("does not ask for sound right after a finished warm-up, before the player reports paused", () => {
+    const { player, timers, playback } = setup();
+    playback.markReady();
+    playback.warmUp();
+    playback.handleState("playing");
+    timers.fire(); // warm-up over: pause sent, the player's paused event has not arrived yet
+    expect(since(player, () => playback.setActive(true, true))).toEqual(["mute", "play"]);
+  });
+
+  it("does not warm up a video that has already played", () => {
+    const { player, playback } = setup();
+    playback.markReady();
+    playback.setActive(true, false);
+    playback.setActive(false, false);
+    expect(since(player, () => playback.warmUp())).toEqual([]);
+  });
+
   it("is cancelled when the controller is disposed", () => {
     const { timers, playback } = setup();
     playback.markReady();
