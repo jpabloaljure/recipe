@@ -80,9 +80,9 @@ AI estimate (2026-11-25, after the reopening): 5. Calibration: REC-018 (team 5, 
 - **Status:** todo
 - **Labels:** module:recipe-panel, type:feature, size:M, layer:frontend
 - **PRD:** 5.1, 5.3, PERF-4
-- **Flags:** needs-human-validation; split-from:REC-006; blocked-by:REC-006
+- **Flags:** split-from:REC-006; blocked-by:REC-006
 - **AI estimate:** 8
-- **Estimate:** 5
+- **Estimate:** 8
 
 As a home cook whose screen has no room beside the video (a phone in portrait), I want to open the recipe from a button that does not cover the video's controls, so that I can read it while the video keeps playing.
 
