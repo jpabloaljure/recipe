@@ -29,6 +29,7 @@ export const FAKE_IFRAME_API = `
     this.state = STATE.UNSTARTED;
     this.calls = [];
     this.destroyed = false;
+    this.serial = fake.players.length; // creation order; a player keeps it for its whole life
     fake.players.push(this);
     var self = this;
     Promise.resolve().then(function () {

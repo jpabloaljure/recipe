@@ -137,7 +137,7 @@ Autoplay rules are checked manually on Chrome for Android and desktop.
 AI estimate (2026-11-23): 5. Calibration: REC-001 (team 5) is the nearest slice: a frontend feed with a stubbed source and E2E tests. REC-003 has no server side, but 10 criteria, each needing a stubbed-player E2E test, and it replaces the plain embed with the player's script API (autoplay, mute state, ended events, visibility handling), which REC-001 did not need. Risks that move it: the stubbed player in `e2e/support/` has to fake the player API (state changes, mute, blocked autoplay), which is new work (assumed: no stub exists yet); and whether the loop mode reports each end is `(inferred)`, where fallback B adds code and a possible gap. It would go to 8 if the player stub turns out to be large. Size check: 5 matches `size:M`, no warning. This is one voice; the team's estimate comes from your discussion, not from averaging.
 
 ## REC-004 · Instant transition to the next video
-- **Status:** todo
+- **Status:** in-progress
 - **Labels:** module:playback, type:feature, size:M, layer:frontend
 - **PRD:** PERF-3, PERF-5
 - **Flags:** —

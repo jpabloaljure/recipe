@@ -12,6 +12,8 @@ import { expect } from "./test";
 
 export type FakePlayerInfo = {
   youtubeId: string;
+  /** Creation order of the player: equal serials mean the same player instance. */
+  serial: number;
   state: string;
   muted: boolean;
   calls: string[];
@@ -19,6 +21,7 @@ export type FakePlayerInfo = {
 
 type FakePlayer = {
   youtubeId: string | null;
+  serial: number;
   state: number;
   muted: boolean;
   calls: string[];
@@ -35,6 +38,7 @@ function liveInfo(youtubeId: string | null) {
     .filter((p) => !p.destroyed && (youtubeId === null || p.youtubeId === youtubeId))
     .map((p) => ({
       youtubeId: p.youtubeId as string,
+      serial: p.serial,
       state: fake.stateName(p.state),
       muted: p.muted,
       calls: [...p.calls],
