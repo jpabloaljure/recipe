@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { activeFrame, catalog, openFeed, videos } from "../support/feed";
+import { activeFrame, catalog, openFeed, videos, videosWithRecipes } from "../support/feed";
 import { onlyOn } from "../support/projects";
 import { expect, test } from "../support/test";
 
@@ -27,4 +27,15 @@ test("feed › Centered video on wide screens › Phone in landscape", async ({ 
   await openFeed(page, catalog(videos(3), 3));
 
   await expectCenteredFullHeight(page);
+});
+
+test("feed › Centered video on wide screens › With the recipe panel", async ({ page }) => {
+  onlyOn("desktop", "phone-landscape");
+
+  await openFeed(page, catalog(videosWithRecipes(3), 3));
+
+  await expectCenteredFullHeight(page);
+  const frame = (await activeFrame(page).boundingBox())!;
+  const panel = (await page.getByTestId("recipe-panel").boundingBox())!;
+  expect(panel.x + panel.width).toBeLessThanOrEqual(frame.x);
 });

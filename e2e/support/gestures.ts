@@ -25,6 +25,8 @@ import type { CDPSession, Locator, Page } from "@playwright/test";
 export type GestureOptions = {
   /** Element the finger starts on. Defaults to the whole viewport. */
   target?: Locator;
+  /** The finger's x position, in px; defaults to the middle of the target. */
+  x?: number;
   /** `normal` is a slow drag; `hard` is a fast flick. */
   strength?: "normal" | "hard";
 };
@@ -60,7 +62,7 @@ async function swipe(page: Page, direction: 1 | -1, options: GestureOptions): Pr
   const box = area ?? { x: 0, y: 0, width: viewport.width, height: viewport.height };
 
   // The finger starts near the far edge of the target and stays on screen.
-  const x = Math.round(box.x + box.width / 2);
+  const x = options.x ?? Math.round(box.x + box.width / 2);
   const startY = box.y + box.height * (direction === 1 ? 0.85 : 0.15);
   const deltaY = -direction * DISTANCE * viewport.height;
 
