@@ -33,9 +33,15 @@ export const FAKE_IFRAME_API = `
     fake.players.push(this);
     var self = this;
     Promise.resolve().then(function () {
-      if (!self.destroyed && self.events.onReady) self.events.onReady({ target: self });
+      if (self.destroyed) return;
+      var code = (window.__youTubeFailing || {})[self.youtubeId];
+      if (code) self._error(code); // a video set up to fail reports its error as soon as it exists
+      else if (self.events.onReady) self.events.onReady({ target: self });
     });
   }
+  Player.prototype._error = function (code) {
+    if (!this.destroyed && this.events.onError) this.events.onError({ data: code, target: this });
+  };
   Player.prototype._set = function (state) {
     if (this.destroyed || this.state === state) return;
     this.state = state;
@@ -43,6 +49,8 @@ export const FAKE_IFRAME_API = `
   };
   Player.prototype.playVideo = function () {
     this.calls.push("play");
+    var onPlay = (window.__youTubeFailOnPlay || {})[this.youtubeId];
+    if (onPlay) { this._error(onPlay); return; } // this video reports its error when asked to play
     if (fake.blockUnmutedAutoplay && !this.muted) return; // an unmuted start is refused: nothing starts
     this._set(STATE.PLAYING);
   };

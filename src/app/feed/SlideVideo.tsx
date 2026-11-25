@@ -19,6 +19,8 @@ type Props = {
   onPlayback: (playback: SlidePlayback | null) => void;
   onEnded: (youtubeId: string) => void;
   onSoundBlocked: () => void;
+  /** The video was removed or cannot be embedded (REC-018): the feed drops it. */
+  onUnplayable: (youtubeId: string) => void;
   /** The active video is playing: the feed warms up the next one. */
   onPlaying: () => void;
 };
@@ -28,11 +30,11 @@ type Props = {
  * iframe; the player is attached to it when it mounts and lives as long as the
  * iframe does (add-autoplay-playback design Decisions 2 and 3).
  */
-export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlocked, onPlaying }: Props) {
+export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlocked, onUnplayable, onPlaying }: Props) {
   const iframe = useRef<HTMLIFrameElement>(null);
   // The latest callbacks, so the player is created once and not on every render.
-  const callbacks = useRef({ onPlayback, onEnded, onSoundBlocked, onPlaying });
-  callbacks.current = { onPlayback, onEnded, onSoundBlocked, onPlaying };
+  const callbacks = useRef({ onPlayback, onEnded, onSoundBlocked, onUnplayable, onPlaying });
+  callbacks.current = { onPlayback, onEnded, onSoundBlocked, onUnplayable, onPlaying };
 
   useEffect(() => {
     const element = iframe.current;
@@ -47,6 +49,7 @@ export function SlideVideo({ youtubeId, title, onPlayback, onEnded, onSoundBlock
         const attached = attachPlayer(api, element, {
           onReady: () => playback?.markReady(),
           onState: (state) => playback?.handleState(state),
+          onUnplayable: () => callbacks.current.onUnplayable(youtubeId),
         });
         playback = new SlidePlayback({
           youtubeId,
