@@ -25,7 +25,7 @@ cooking videos (Shorts), each with an easy written recipe.
 5. [User stories](#5-user-stories)
 6. [Work tickets](#6-work-tickets)
 7. [Pull requests](#7-pull-requests)
-8. [Estado final del MVP](#8-estado-final-del-mvp)
+8. [MVP final status](#8-mvp-final-status)
 
 **More documentation:** [how this project is built with AI](docs/ai-workflow.md)
 · [documentation map](docs/README.md)
@@ -277,6 +277,19 @@ Tickets are backlog stories with a `layer:` label (no separate tracker; see
 
 ---
 
-## 8. Estado final del MVP
+## 8. MVP final status
 
-Hasta ahora lograste que el MVP funcione de punta a punta en producción: una persona abre la app y desliza por 24 Shorts de cocina reales que salen de Postgres en Neon, ve cada video arrancar solo y en silencio y le activa el sonido con un toque, y lee la receta junto al video, en un panel donde hay espacio o desde un botón «Receta» que abre una hoja sobre el video en el celular en vertical. Además quedó montada la infraestructura (despliegue en Vercel, migraciones, CI con tests unitarios, de base de datos y end-to-end, y verificación automática tras cada despliegue), la documentación final con guía de verificación y capturas. Para cumplir el MVP completo faltan principalmente la extracción real de recetas con un LLM (hoy las 21 recetas son de relleno escritas a partir del título, y falta elegir el proveedor), el descubrimiento diario de videos nuevos para ampliar el catálogo hasta unas 50 recetas, favoritos y compartir con enlaces directos a una receta, la apertura automática del panel tras el primer video, la versión del botón para ventanas de escritorio estrechas, y las pruebas de rendimiento y precisión en un celular real.
+The MVP now works end to end in production: a person opens the app and swipes
+through 24 real cooking Shorts that come from Postgres on Neon, sees each video
+start by itself and muted, turns the sound on with one tap, and reads the recipe
+next to the video, in a panel where there is room or from a "Recipe" button that
+opens a sheet over the video on a phone in portrait. The infrastructure is also
+in place (deployment on Vercel, migrations, CI with unit, database and
+end-to-end tests, and an automatic check after each deploy), as is the final
+documentation with a verification guide and screenshots. To complete the full
+MVP, what mainly remains is the real recipe extraction with an LLM (today the 21
+recipes are placeholders written from the titles, and the provider is still to be
+chosen), the daily discovery of new videos to grow the catalog to about 50
+recipes, favorites and sharing with direct links to a recipe, the panel opening
+by itself after the first video, the button version for narrow desktop windows,
+and the performance and accuracy checks on a real phone.
