@@ -3635,3 +3635,105 @@ Seed recipes chain (Recommended)
 - **Result:** an exploration that started from a YouTube API plan ended as a direct PR with no schema change: the owner chose dummy recipes from the titles, no API, no scraping. The production dry run (run 45695757052) and apply (run 45696200039) passed: 21 recipes written, 0 failed, the catalog is 21 `ready`, 3 `needs_recipe` and 3 `rejected`, the health check passed, and the production feed API already returns the recipes. A recipe panel mockup was shown. Known caveat: the recipes carry source `description`, which will be wrong on the recipe panel (REC-006) until they are replaced (D-22 and `--revert`).
 - **Models:** Sonnet 5.5 (main session; web searches ran in the main session) · Haiku 5.5, effort low (`doc-checker`, two runs: the new docs and this log).
 - **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent, and the product choices (dummy recipes, the dish in the title, the three blank videos, the production runs) stay with the user.
+
+## 521. Explore REC-006 (slash command)
+
+```
+/openspec-explore REC-006
+```
+
+## 522. Re-validate REC-006 (button answer)
+
+```
+Re-validate REC-006
+```
+
+## 523. Give the team estimate for REC-006 (button answer)
+
+```
+5
+```
+
+## 524. Validate REC-006 and fix the stale note (button answer)
+
+```
+Validated, A
+```
+
+## 525. Propose REC-006 (slash command)
+
+```
+/openspec-propose REC-006
+```
+
+## 526. Merge PR #92 when green (button answer)
+
+```
+Merge when green
+```
+
+## 527. Apply the change (button answer)
+
+```
+Apply the change
+```
+
+## 528. Report the manual checks as done
+
+```
+What is left for you (tasks 5.1 to 5.3) done
+```
+
+## 529. Merge PR #93 when green (button answer)
+
+```
+Merge when green
+```
+
+## 530. Run the AI review first
+
+```
+Run the AI review first
+```
+
+## 531. Give the manual-check record and ask for the fixes
+
+```
+Manual-check record:phone was honor on landskape and on desktop chrom with phone simulations on devtools.  Fix all 3
+```
+
+## 532. Merge PR #94 when green (button answer)
+
+```
+Merge when green
+```
+
+## 533. Start the close-out (button answer)
+
+```
+Start close-out
+```
+
+## 534. Merge PR #95 when green (button answer)
+
+```
+Merge when green
+```
+
+## 535. Register the REC-006 chain (question dialog answer)
+
+```
+REC-006 chain (Recommended)
+```
+
+### Summary (prompts 521–535)
+
+- **Goal:** take REC-006 (the recipe panel beside the video) from a reopened story to `done`: explore it against the code, re-validate it, propose and apply the OpenSpec change, review it, fix the findings and close it out.
+- **Changes:**
+  - **OpenSpec:** change `add-recipe-panel` (proposal, a new `recipe-panel` capability with 6 requirements, two amended `feed` requirements, design with 7 decisions, 16 tasks), synced into `openspec/specs/` and archived as `2026-11-25-add-recipe-panel`.
+  - **Code:** `src/app/feed/RecipePanel.tsx` and its CSS module (one panel next to the feed's scroll container, shown by `@media (min-width: calc(56.25vh + 520px))`, width that respects the safe-area insets, scroll reset keyed by slide), `src/lib/feed/recipe-text.ts`, the wiring in `Feed.tsx`; 5 unit tests; E2E tests for every automatable scenario (the 260 px and 255 px boundary at 970x800 and 960x800) with recipe stubs and a swipe `x` option in the E2E helpers.
+  - **Docs and backlog:** C4 level 3 description, README status, checklist row 18, REC-006 `done`, validation-log note, the "Seeing it" note (production has placeholder recipes); the unmerged backlog commits of the REC-006, REC-007, REC-022 and REC-023 reopening landed on `main` with the proposal.
+  - **PRs:** #92 (proposal), #93 (implementation), #94 (review fixes), #95 (close-out), all merged.
+- **Result:** the panel is live in production beside the video where there are at least 260 px per side, showing the 21 placeholder recipes. The AI review of the merged PR found 5 points (one important: the panel could overlap the video on a phone with a display cutout); 4 were fixed and the left-gutter swipe test was skipped. The manual checks were reported done on a real Honor phone in landscape and on desktop Chrome with DevTools phone simulations. Not checked: the safe-area fix on a phone with a cutout, and the owner's look at the production URL. Until REC-022, REC-023 and REC-007 ship, a phone in portrait or a narrow window shows no recipe.
+- **Models:** Sonnet 5.5 (main session; the code review ran in it at `medium` effort; the re-validation used the owner's words, with no `story-validator` run) · Haiku 5.5, effort low (`doc-checker`, three runs: the C4 and change docs, the close-out files, and this log).
+- **Why:** the cap keeps every step on Sonnet at medium effort at most; the read-only doc checks stay on the cheap Haiku agent, and the choices (the estimate, the merges, skipping the review first, which findings to fix) stay with the user.
